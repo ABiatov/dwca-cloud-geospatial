@@ -1,0 +1,22 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local environment
+.env
+.env.*
+!.env.example
+.envrc
+
+# OS and editor metadata
+.DS_Store
+.idea/
+.vscode/
+.codex/
+
+# Local data, database volumes, and generated artifacts
+test_dwca/
+data/
+examples/
+*.log
