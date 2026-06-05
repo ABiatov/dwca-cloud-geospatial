@@ -2,7 +2,7 @@
 
 Status: Accepted baseline for MVP
 
-Last updated: 2026-06-04
+Last updated: 2026-06-05
 
 ## Purpose
 
@@ -20,11 +20,11 @@ output/
   metadata/
     source.json
     processing.json
-  data/
+  data/                         # when GeoParquet is selected
     occurrences.parquet
   exports/
     occurrences.fgb
-  reports/
+  reports/                      # when one or more records are rejected
     rejected_records.csv
 ```
 
@@ -33,13 +33,21 @@ MVP files:
 - `manifest.json`: top-level discovery document for tools and the viewer.
 - `metadata/source.json`: source archive, DwC-A, GBIF and OBIS provenance when available.
 - `metadata/processing.json`: converter version, configuration, counts, warnings and validation summary.
-- `data/occurrences.parquet`: primary GeoParquet occurrence table.
-- `exports/occurrences.fgb`: FlatGeobuf export for GIS exchange and simple viewer loading.
-- `reports/rejected_records.csv`: rejected or skipped records with reason codes and source context.
+- `exports/occurrences.fgb`: default FlatGeobuf output for GIS exchange and simple viewer loading.
+- `data/occurrences.parquet`: GeoParquet occurrence table when GeoParquet output is explicitly selected.
+- `reports/rejected_records.csv`: rejected or skipped records with reason codes and source context, written only when at least one record is rejected or skipped.
 
 Deferred MVP+ files:
 
 - `tiles/occurrences.pmtiles`: future optimized tiled map output.
+
+## Format Selection
+
+When the user does not choose an explicit conversion format, the MVP converter should write FlatGeobuf output by default.
+
+GeoParquet remains an MVP-supported output format for analytical workflows, but it should be generated only when the user explicitly selects it or when a documented command/config option requests a full multi-format bundle.
+
+Generated files must be listed in `manifest.files`. Files not generated for a conversion must not be listed there.
 
 ## Versioning
 
@@ -120,7 +128,7 @@ Required `layers[]` fields:
 | `record_count` | integer | Number of records in the layer. |
 | `bounds` | array or null | `[west, south, east, north]` in lon/lat order. |
 
-Minimal example:
+Example with FlatGeobuf and GeoParquet selected, and rejected records present:
 
 ```json
 {
@@ -155,6 +163,14 @@ Minimal example:
       "record_count": null
     },
     {
+      "path": "metadata/processing.json",
+      "role": "metadata",
+      "media_type": "application/json",
+      "bytes": null,
+      "sha256": null,
+      "record_count": null
+    },
+    {
       "path": "data/occurrences.parquet",
       "role": "geoparquet",
       "media_type": "application/vnd.apache.parquet",
@@ -169,6 +185,14 @@ Minimal example:
       "bytes": null,
       "sha256": null,
       "record_count": 1000
+    },
+    {
+      "path": "reports/rejected_records.csv",
+      "role": "report",
+      "media_type": "text/csv",
+      "bytes": null,
+      "sha256": null,
+      "record_count": 200
     }
   ],
   "layers": [
@@ -198,9 +222,11 @@ Minimal example:
     ],
     "filter_fields": [
       "scientific_name",
+      "kingdom",
       "event_year",
       "basis_of_record",
-      "has_quality_flags"
+      "iucnRedListCategory",
+      "quality_flags"
     ]
   },
   "counts": {
@@ -290,6 +316,8 @@ Required `counts` fields:
 | `geoparquet_records` | integer |
 | `flatgeobuf_records` | integer |
 
+For formats not generated in a conversion, the corresponding output count should be `0`.
+
 Recommended `validation` fields:
 
 | Field | Type | Description |
@@ -301,7 +329,7 @@ Recommended `validation` fields:
 
 ## `data/occurrences.parquet`
 
-`occurrences.parquet` is the primary analytical occurrence output. It must be valid Parquet with GeoParquet metadata.
+`occurrences.parquet` is the analytical occurrence output when GeoParquet is selected. It must be valid Parquet with GeoParquet metadata.
 
 Geometry:
 
@@ -339,11 +367,11 @@ Required normalized fields:
 | `dataset_name` | string or null | Darwin Core `datasetName` or source metadata. |
 | `dataset_key` | string or null | GBIF dataset key, OBIS dataset id or source dataset key when available. |
 | `publisher` | string or null | Source publisher when available. |
-| `quality_flags` | list<string> or string | Quality flags assigned by the converter. |
+| `quality_flags` | string or null | Quality flags assigned by the converter as `\|`-delimited tokens. Null when no flags are present. |
 | `has_quality_flags` | boolean | True when `quality_flags` is not empty. |
 | `geometry` | geometry | GeoParquet point geometry. |
 
-Implementation may store `quality_flags` as a repeated string field or as a delimiter-separated string if writer support is limited. The chosen representation must be documented in `metadata/processing.json`.
+`quality_flags` values must use stable lowercase snake_case flag codes. Flag codes must not contain the `|` delimiter. Viewers and downstream consumers must split `quality_flags` on `|` and perform exact token matching, not substring matching.
 
 Recommended optional source-preservation fields:
 
@@ -360,13 +388,13 @@ Recommended optional source-preservation fields:
 | `raw_decimal_latitude` | string or null | Original latitude string. |
 | `raw_event_date` | string or null | Original event date string. |
 
-Rows in `occurrences.parquet` should contain records accepted for geospatial output. Records rejected for missing or invalid coordinates belong in `reports/rejected_records.csv`.
+Rows in `occurrences.parquet` should contain records accepted for geospatial output. Records rejected for missing or invalid coordinates belong in `reports/rejected_records.csv` when any rejected records exist.
 
 ## `exports/occurrences.fgb`
 
 `occurrences.fgb` is the FlatGeobuf representation of accepted occurrence points.
 
-It should contain the same accepted records as `data/occurrences.parquet` unless `metadata/processing.json` documents a deliberate export filter.
+When both FlatGeobuf and GeoParquet are generated, FlatGeobuf should contain the same accepted records as `data/occurrences.parquet` unless `metadata/processing.json` documents a deliberate export filter.
 
 Required behavior:
 
@@ -375,12 +403,15 @@ Required behavior:
 - CRS assumption: `OGC:CRS84`.
 - Include all required viewer display fields.
 - Include stable source identifiers so viewer-selected features can be traced back to source rows.
+- Write a spatial index by default.
+- Emit a large dataset warning before indexed writes that may require substantial memory.
+- Store `quality_flags` using the same nullable `|`-delimited string representation as GeoParquet.
 
 The static viewer should prefer `exports/occurrences.fgb` for MVP map display.
 
 ## `reports/rejected_records.csv`
 
-`rejected_records.csv` records source rows skipped or rejected by the converter.
+`rejected_records.csv` records source rows skipped or rejected by the converter. The file should be written only when at least one source row is skipped or rejected. If no records are rejected, the file should be absent and omitted from `manifest.files`.
 
 Required columns:
 
@@ -458,16 +489,14 @@ The viewer must support filters for these fields when present:
 
 | Field | Filter type |
 | --- | --- |
-| `scientific_name` | text search |
+| `scientific_name` | text contains search |
 | `kingdom` | categorical |
-| `iucnRedListCategory` | categorical |
 | `event_year` | numeric range or discrete values |
 | `basis_of_record` | categorical |
-| `country_code` | categorical |
-| `dataset_name` | categorical |
-| `has_quality_flags` | boolean |
+| `iucnRedListCategory` | categorical |
+| `quality_flags` | show/hide records with flags; exact token matching when filtering by flag code is added |
 
-The viewer must handle missing optional fields gracefully. Missing DOI, citation, GBIF or OBIS metadata should be shown as absent, not as errors.
+The viewer must omit absent generated-bundle fields from the filter UI without error. Missing DOI, citation, GBIF or OBIS metadata should be shown as absent, not as errors.
 
 ## Validation Rules
 
@@ -477,13 +506,14 @@ Bundle validation should check:
 - Every `manifest.files[].path` exists.
 - Checksums match when `sha256` is present.
 - `metadata/source.json` and `metadata/processing.json` exist and parse as JSON.
-- `data/occurrences.parquet` opens as Parquet and has GeoParquet metadata.
-- GeoParquet geometry column is `geometry`.
-- Geometry CRS and coordinate order are documented.
+- `data/occurrences.parquet` opens as Parquet and has GeoParquet metadata when declared in `manifest.files`.
+- GeoParquet geometry column is `geometry` when GeoParquet is generated.
+- Geometry CRS and coordinate order are documented for every generated geospatial output.
 - `exports/occurrences.fgb` exists when declared in `manifest.layers`.
-- Row counts reconcile across manifest, processing metadata, GeoParquet, FlatGeobuf and rejected report.
+- Row counts reconcile across manifest, processing metadata, generated geospatial outputs and rejected report when present.
 - `reports/rejected_records.csv` has the required columns when rejected records exist.
 - Viewer-required fields are either present in the data or omitted from `manifest.viewer.display_fields` and `manifest.viewer.filter_fields`.
+- `quality_flags` is nullable string data when present, uses `|` as its delimiter, and does not contain flag codes with the delimiter.
 
 ## Compatibility Notes
 

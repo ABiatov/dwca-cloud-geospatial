@@ -16,6 +16,8 @@ This repository is at the initial prototype stage. The first goal is to prove a 
 
 APIs, file layouts and command-line interfaces should be treated as experimental until the first tagged release.
 
+The accepted MVP development plan is documented in [docs/development_plan.md](docs/development_plan.md).
+
 ## Planned Outputs
 
 - GeoParquet for analytical workflows.
