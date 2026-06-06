@@ -34,11 +34,13 @@ Use FlatGeobuf when the project needs:
 
 ## Candidate Output Role
 
-In an output bundle:
+Candidate or future output roles:
 
 - GeoParquet can be the analytical table.
-- FlatGeobuf can be an optional exchange or viewer data layer.
-- PMTiles can be the optimized map tile layer for larger browser maps.
+- FlatGeobuf can be an exchange or viewer data layer.
+- PMTiles can be the optimized map tile layer for larger browser maps in MVP+.
+
+Accepted MVP override: FlatGeobuf is the default viewer/exchange output, not optional, unless the user explicitly selects a different documented output mode.
 
 ## Resolved By Accepted Docs
 

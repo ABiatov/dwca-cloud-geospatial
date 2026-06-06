@@ -27,7 +27,7 @@ Confirm that generated files are internally consistent, readable by expected too
 4. Check Parquet and GeoParquet files open.
 5. Validate GeoParquet metadata and geometry data.
 6. Confirm row counts match conversion reports.
-7. Confirm extension relationship keys can join to core keys.
+7. If raw core or extension table exports are generated, confirm extension relationship keys can join to core keys.
 8. Validate FlatGeobuf or PMTiles files if present.
 9. Check viewer manifest paths, bounds, layers, and field names.
 10. Write a validation report with errors, warnings, and tool versions.
@@ -44,4 +44,3 @@ Confirm that generated files are internally consistent, readable by expected too
 - `../topics/validation_and_quality.md`
 - `../topics/geoparquet_output.md`
 - `../topics/pmtiles_viewer.md`
-

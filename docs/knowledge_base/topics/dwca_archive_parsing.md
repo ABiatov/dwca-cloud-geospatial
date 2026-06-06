@@ -32,7 +32,8 @@ Parse Darwin Core Archive inputs from the archive descriptor, not from hard-code
 Preferred internal model:
 
 - Keep full term URIs in schema metadata.
-- Expose short names such as `decimalLatitude`, `decimalLongitude`, `scientificName` as output column names when unambiguous.
+- Expose short names such as `decimalLatitude`, `decimalLongitude`, `scientificName` only in internal parser/source schema metadata or future raw table exports when unambiguous.
+- MVP normalized occurrence outputs must use the accepted snake_case project field names from `docs/output_format.md`, not Darwin Core camelCase source terms.
 - Use deterministic fallback names such as `_field_{index}` when a field has no term.
 - Keep reserved project columns separate from source Darwin Core fields.
 

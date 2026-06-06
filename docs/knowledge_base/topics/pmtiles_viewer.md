@@ -15,12 +15,14 @@ sources:
 
 ## Use In This Project
 
-PMTiles is the likely viewer-optimized map output. The static MapLibre viewer should consume generated files and a manifest from static hosting without requiring a permanent backend.
+Accepted MVP override: the first static viewer should load `exports/occurrences.fgb`. PMTiles is an intended MVP+ viewer-optimized map output, not an MVP requirement.
+
+The static MapLibre viewer should consume generated files and a manifest from static hosting without requiring a permanent backend.
 
 ## Viewer Contract Principles
 
 - Load data from a manifest JSON rather than hard-coded filenames.
-- Support static files only: PMTiles, FlatGeobuf, GeoParquet metadata, diagnostics, and style/config JSON.
+- Support static files only: FlatGeobuf for MVP, PMTiles for MVP+, GeoParquet metadata, diagnostics, and style/config JSON.
 - Avoid hidden network calls except declared basemap or static package assets.
 - Keep the viewer read-only.
 - Make generated viewer-facing structures documented and stable enough for static publishing.

@@ -127,7 +127,7 @@ Accepted filters:
 - `kingdom`: select/dropdown when the field is present.
 - `event_year`: min/max controls or a list of available years.
 - `basis_of_record`: select/dropdown.
-- `iucnRedListCategory`: select/dropdown when the field is present.
+- `iucn_red_list_category`: select/dropdown when the field is present.
 - `quality_flags`: show/hide records with quality flags when the field is present.
 
 Fields absent from the generated bundle must be omitted from the viewer UI without error.
@@ -266,7 +266,7 @@ Deliverables:
 - FlatGeobuf point layer display.
 - Dataset provenance panel.
 - Feature details panel for viewer-required fields.
-- MVP browser-side filters for `scientific_name`, `kingdom`, `event_year`, `basis_of_record`, `iucnRedListCategory` and `quality_flags` where those fields are present.
+- MVP browser-side filters for `scientific_name`, `kingdom`, `event_year`, `basis_of_record`, `iucn_red_list_category` and `quality_flags` where those fields are present.
 
 Acceptance criteria:
 

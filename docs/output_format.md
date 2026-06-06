@@ -70,6 +70,34 @@ Initial MVP versions:
 
 Before the first tagged release, these versions may change. After the first tagged release, breaking changes require a new schema version and migration notes.
 
+## Canonical Occurrence Schema And Projections
+
+The normalized occurrence schema is the canonical project-level representation for accepted geospatial occurrence records. It is independent of any single file format and is versioned by `occurrence_schema_version`.
+
+The canonical schema uses stable snake_case field names. Darwin Core source terms, GBIF fields, OBIS fields and enrichment fields should be mapped into these project field names through `metadata/processing.json.field_mapping`; generated output columns should not mix source camelCase terms into the normalized schema. For example, the normalized field is `iucn_red_list_category`, even when the source term or enrichment provider uses a different spelling.
+
+The canonical schema includes these field groups:
+
+| Field group | Purpose | Examples |
+| --- | --- | --- |
+| Source identity and provenance | Trace each accepted output record back to the source archive row. | `source_record_id`, `source_file`, `source_row_number`, `source_data_row_number`, `occurrence_id` |
+| Taxonomy and identification | Provide the names and ranks needed for display, filtering and analysis when present. | `scientific_name`, `verbatim_scientific_name`, `kingdom`, `phylum`, `class`, `order`, `family`, `genus`, `taxon_id`, `taxon_rank`, `identified_by` |
+| Record semantics | Preserve common occurrence attributes useful for filtering and interpretation. | `basis_of_record`, `degree_of_establishment`, `event_date`, `event_year`, `recorded_by` |
+| Location and geometry inputs | Preserve parsed coordinates and relevant location context. | `decimal_longitude`, `decimal_latitude`, `coordinate_uncertainty_in_meters`, `geodetic_datum`, `country_code`, `locality` |
+| Dataset, rights and provenance metadata | Carry dataset identity, publisher and rights fields onto records where useful. | `dataset_name`, `dataset_key`, `publisher`, `license`, `rights_holder`, `references` |
+| Quality and derived fields | Expose converter decisions and derived convenience values. | `quality_flags`, `has_quality_flags`, `iucn_red_list_category` |
+| Optional source-preservation fields | Keep selected raw/source identifiers and verbatim values without exporting full raw tables. | `catalog_number`, `collection_code`, `institution_code`, `record_number`, `organism_id`, `gbif_id`, `obis_id`, `raw_decimal_longitude`, `raw_decimal_latitude`, `raw_event_date` |
+
+MVP outputs are projections of the canonical occurrence schema:
+
+| Output | Projection role | Required relationship to canonical schema |
+| --- | --- | --- |
+| `data/occurrences.parquet` | Analytical GeoParquet projection. | Should carry the broad normalized field set needed for analysis, provenance and GeoParquet geometry metadata. |
+| `exports/occurrences.fgb` | Compact viewer and exchange projection. | May omit analytical-only fields, but must include stable provenance fields, point geometry, viewer display fields, accepted filter fields, parsed coordinates and `quality_flags`. |
+| Future `tiles/occurrences.pmtiles` | MVP+ tiled visualization projection. | Should derive from the same accepted records and default to the FlatGeobuf compact field set unless a later accepted decision defines a smaller tile attribute profile. |
+
+When both GeoParquet and FlatGeobuf are generated, they must represent the same accepted occurrence record set unless `metadata/processing.json` documents a deliberate export filter. Rejected, skipped, missing-coordinate or invalid-coordinate rows are not part of the accepted occurrence projections; they belong in `reports/rejected_records.csv` and processing metadata.
+
 ## `manifest.json`
 
 `manifest.json` is the bundle entry point. Tools and viewers should start here and discover all other files from it.
@@ -225,7 +253,7 @@ Example with FlatGeobuf and GeoParquet selected, and rejected records present:
       "kingdom",
       "event_year",
       "basis_of_record",
-      "iucnRedListCategory",
+      "iucn_red_list_category",
       "quality_flags"
     ]
   },
@@ -352,7 +380,7 @@ Geometry:
 - CRS: `OGC:CRS84` for unambiguous lon/lat order.
 - Source coordinates must be preserved in separate numeric columns.
 
-Required normalized fields:
+Required GeoParquet projection fields:
 
 | Field | Type | Source or meaning |
 | --- | --- | --- |
@@ -365,7 +393,7 @@ Required normalized fields:
 | `kingdom` | string or null | Darwin Core `kingdom`. |
 | `taxon_id` | string or null | Darwin Core `taxonID`. |
 | `basis_of_record` | string or null | Darwin Core `basisOfRecord`. |
-| `iucnRedListCategory` | string or null | IUCN Red List category when present in source data or accepted enrichment. |
+| `iucn_red_list_category` | string or null | IUCN Red List category when present in source data or accepted enrichment. |
 | `event_date` | string or null | Darwin Core `eventDate`, normalized where possible. |
 | `event_year` | integer or null | Year derived from `eventDate` or `year`. |
 | `decimal_longitude` | double | Parsed longitude. |
@@ -422,7 +450,7 @@ Required behavior:
 - Emit a large dataset warning before indexed writes that may require substantial memory.
 - Store `quality_flags` using the same nullable `|`-delimited string representation as GeoParquet.
 
-Required FlatGeobuf columns:
+Required FlatGeobuf projection columns:
 
 | Column | Type | Source or meaning |
 | --- | --- | --- |
@@ -442,7 +470,7 @@ Required FlatGeobuf columns:
 | `taxon_rank` | string or null | Darwin Core `taxonRank`. |
 | `basis_of_record` | string or null | Darwin Core `basisOfRecord`. |
 | `degree_of_establishment` | string or null | Darwin Core `degreeOfEstablishment`. |
-| `iucnRedListCategory` | string or null | IUCN Red List category when present in source data or accepted enrichment. |
+| `iucn_red_list_category` | string or null | IUCN Red List category when present in source data or accepted enrichment. |
 | `event_date` | string or null | Darwin Core `eventDate`, normalized where possible. |
 | `event_year` | integer or null | Year derived from `eventDate` or `year`. |
 | `decimal_longitude` | double | Parsed longitude. |
@@ -535,7 +563,7 @@ The viewer must be able to show these feature fields in popups or a details pane
 | `family` |
 | `genus` |
 | `taxon_rank` |
-| `iucnRedListCategory` |
+| `iucn_red_list_category` |
 | `event_date` |
 | `event_year` |
 | `basis_of_record` |
@@ -564,7 +592,7 @@ The viewer must support filters for these fields when present:
 | `kingdom` | categorical |
 | `event_year` | numeric range or discrete values |
 | `basis_of_record` | categorical |
-| `iucnRedListCategory` | categorical |
+| `iucn_red_list_category` | categorical |
 | `quality_flags` | show/hide records with flags; exact token matching when filtering by flag code is added |
 
 The viewer must omit absent generated-bundle fields from the filter UI without error. Missing DOI, citation, GBIF or OBIS metadata should be shown as absent, not as errors.
@@ -579,6 +607,8 @@ Bundle validation should check:
 - `metadata/source.json` and `metadata/processing.json` exist and parse as JSON.
 - `data/occurrences.parquet` opens as Parquet and has GeoParquet metadata when declared in `manifest.files`.
 - GeoParquet geometry column is `geometry` when GeoParquet is generated.
+- Generated occurrence fields use the normalized snake_case project field names documented by the canonical occurrence schema and do not expose source camelCase terms as normalized output columns.
+- Required projection columns are present for each generated occurrence output format.
 - Geometry CRS and coordinate order are documented for every generated geospatial output.
 - `exports/occurrences.fgb` exists when declared in `manifest.layers`.
 - Row counts reconcile across manifest, processing metadata, generated geospatial outputs and rejected report when present.

@@ -1,6 +1,6 @@
 # DwC-A to Cloud-Optimized Geospatial Formats
 
-Convert Darwin Core Archive (DwC-A) biodiversity datasets into cloud-friendly geospatial formats such as GeoParquet, FlatGeobuf and PMTiles, with a lightweight MapLibre viewer for static publishing and reuse.
+Convert Darwin Core Archive (DwC-A) biodiversity datasets into cloud-friendly geospatial formats, starting with GeoParquet and FlatGeobuf and later PMTiles, with a lightweight MapLibre viewer for static publishing and reuse.
 
 This project is an early standalone component of the [Biodiversity Viewer Serverless](https://github.com/ABiatov/biodiversity-viewer-serverless) roadmap.
 
@@ -18,13 +18,16 @@ APIs, file layouts and command-line interfaces should be treated as experimental
 
 The accepted MVP development plan is documented in [docs/development_plan.md](docs/development_plan.md).
 
-## Planned Outputs
+## MVP Outputs
 
 - GeoParquet for analytical workflows.
 - FlatGeobuf for lightweight geospatial exchange.
-- PMTiles for tiled map visualization.
 - Metadata describing source files, processing parameters and generated outputs.
 - A minimal static MapLibre viewer.
+
+## MVP+ Planned Outputs
+
+- PMTiles for tiled map visualization after the GeoParquet/FlatGeobuf converter and thin viewer are reliable.
 
 ## Why This Exists
 
