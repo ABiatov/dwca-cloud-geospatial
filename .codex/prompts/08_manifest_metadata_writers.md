@@ -1,0 +1,60 @@
+# Prompt 08: Manifest And Metadata Writers
+
+## Required Skills
+
+- `data-package-spec`: bundle layout, manifest, source metadata, processing metadata, provenance and counts.
+- `geospatial-pipeline`: conversion result integration with output writers.
+- `planning-artifact-curator`: session log and prompt maintenance.
+
+## Context To Read First
+
+- `README.md`
+- `.codex/AGENTS.md`
+- `docs/development_plan.md`
+- `docs/output_format.md`
+- Prompts `01` through `07`
+- Latest session logs for prompts `01` through `07`
+- Current parser, normalization, quality, FlatGeobuf and GeoParquet writer APIs.
+
+## Goal
+
+Generate the static output bundle metadata files: `manifest.json`, `metadata/source.json`, `metadata/processing.json`, and conditional `reports/rejected_records.csv`.
+
+## Tasks
+
+- Implement output directory layout exactly as documented.
+- Write `manifest.json` with schema versions, id, title, timestamps, generator, source summary, files inventory, layers, viewer defaults and counts.
+- Write `metadata/source.json` from archive, DwC-A, EML, dataset, rights, GBIF and OBIS provenance when available.
+- Write `metadata/processing.json` with effective configuration, field mapping, quality rules, counts, type conversion failures, warnings and validation summary placeholder.
+- Write `reports/rejected_records.csv` only when at least one record is rejected or skipped.
+- Omit files not generated from `manifest.files`.
+- Include file size and checksum where practical.
+- Add tests for FlatGeobuf-only default bundle and explicit GeoParquet bundle inventory.
+
+## Constraints
+
+- Missing GBIF/OBIS values must be null, not invented.
+- `reports/rejected_records.csv` must be absent when no records are rejected.
+- Do not implement full bundle validation here beyond local writer consistency checks; Prompt 09 owns validator behavior.
+
+## Acceptance Criteria
+
+- Generated bundle layout matches `docs/output_format.md`.
+- Manifest file inventory reconciles with generated files.
+- Counts reconcile across conversion result and metadata.
+- Conditional rejected report behavior is tested.
+- Viewer fields include only fields supported by the generated projection.
+
+## Required Session Log
+
+Write `session_logs/YYYY-MM-DD_08_manifest_metadata_writers.md` with:
+
+- Metadata writer APIs.
+- File inventory/count behavior.
+- Any source metadata limitations.
+- Verification commands and results.
+- `Prompt Updates`: list later prompt files changed, or `None`.
+
+## Prompt Maintenance
+
+Update prompts `09` through `14` if manifest shape, metadata paths, count fields, report columns or writer APIs changed.

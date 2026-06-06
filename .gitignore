@@ -13,7 +13,7 @@ env/
 .DS_Store
 .idea/
 .vscode/
-.codex/
+# .codex/
 
 # Local data, database volumes, and generated artifacts
 test_dwca/
