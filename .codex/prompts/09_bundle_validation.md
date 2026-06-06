@@ -12,6 +12,7 @@
 - `.codex/AGENTS.md`
 - `docs/development_plan.md`
 - `docs/output_format.md`
+- `docs/developer_setup.md`
 - Prompts `01` through `08`
 - Latest session logs for prompts `01` through `08`
 - Current bundle writer implementation and tests.
@@ -23,6 +24,8 @@ Implement validation for generated output bundles.
 ## Tasks
 
 - Validate that `manifest.json`, `metadata/source.json` and `metadata/processing.json` exist and parse.
+- Reuse existing fixture roots from Prompt 01, including
+  `tests/fixtures/output_bundles/` for valid and invalid bundle fixtures.
 - Validate supported schema versions.
 - Validate every `manifest.files[].path` exists.
 - Validate checksums when `sha256` is present.
@@ -55,6 +58,8 @@ Write `session_logs/YYYY-MM-DD_09_bundle_validation.md` with:
 - Checks implemented and dependency-dependent checks.
 - Failure cases tested.
 - Verification commands and results.
+- Confirmation that verification used the documented `.venv/` workflow or a
+  documented equivalent.
 - `Prompt Updates`: list later prompt files changed, or `None`.
 
 ## Prompt Maintenance

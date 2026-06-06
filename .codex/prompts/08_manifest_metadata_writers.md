@@ -12,6 +12,7 @@
 - `.codex/AGENTS.md`
 - `docs/development_plan.md`
 - `docs/output_format.md`
+- `docs/developer_setup.md`
 - Prompts `01` through `07`
 - Latest session logs for prompts `01` through `07`
 - Current parser, normalization, quality, FlatGeobuf and GeoParquet writer APIs.
@@ -23,6 +24,8 @@ Generate the static output bundle metadata files: `manifest.json`, `metadata/sou
 ## Tasks
 
 - Implement output directory layout exactly as documented.
+- Reuse existing fixture roots from Prompt 01, including
+  `tests/fixtures/output_bundles/` for sample bundle fixtures.
 - Write `manifest.json` with schema versions, id, title, timestamps, generator, source summary, files inventory, layers, viewer defaults and counts.
 - Write `metadata/source.json` from archive, DwC-A, EML, dataset, rights, GBIF and OBIS provenance when available.
 - Write `metadata/processing.json` with effective configuration, field mapping, quality rules, counts, type conversion failures, warnings and validation summary placeholder.
@@ -53,6 +56,8 @@ Write `session_logs/YYYY-MM-DD_08_manifest_metadata_writers.md` with:
 - File inventory/count behavior.
 - Any source metadata limitations.
 - Verification commands and results.
+- Confirmation that verification used the documented `.venv/` workflow or a
+  documented equivalent.
 - `Prompt Updates`: list later prompt files changed, or `None`.
 
 ## Prompt Maintenance

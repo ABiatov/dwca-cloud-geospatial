@@ -14,6 +14,7 @@
 - `.codex/AGENTS.md`
 - `docs/development_plan.md`
 - `docs/output_format.md`
+- `docs/developer_setup.md`
 - `docs/dwca_parser.md` if it exists.
 - `docs/converter.md` if it exists.
 - `docs/viewer_contract.md` if it exists.
@@ -29,7 +30,8 @@ Make the MVP understandable, repeatable and ready for external review.
 ## Tasks
 
 - Run or refresh an end-to-end sample conversion note using local DwC-A examples.
-- Update README with current installation, CLI, GUI and viewer usage.
+- Update README and `docs/developer_setup.md` with current `.venv/`
+  installation, CLI, GUI and viewer usage.
 - Complete or update `docs/dwca_parser.md`, `docs/converter.md`, `docs/viewer_contract.md` and `docs/deployment.md`.
 - Confirm `docs/output_format.md` matches implemented bundle behavior.
 - Add regression tests for parser behavior, normalization, output writing and bundle validation where gaps remain.
@@ -57,6 +59,8 @@ Write `session_logs/YYYY-MM-DD_14_demo_docs_hardening.md` with:
 - Final files updated.
 - End-to-end demo commands and results.
 - Test and validation evidence.
+- Confirmation that verification used the documented `.venv/` workflow or a
+  documented equivalent.
 - Known remaining limitations.
 - Suggested next MVP+ prompts or ADRs.
 - `Prompt Updates`: list prompt files changed, or `None`.

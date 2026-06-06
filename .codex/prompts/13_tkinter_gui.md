@@ -12,6 +12,7 @@
 - `.codex/AGENTS.md`
 - `docs/development_plan.md`
 - `docs/output_format.md`
+- `docs/developer_setup.md`
 - `docs/converter.md` if it exists.
 - `docs/viewer_contract.md` if it exists.
 - Prompts `01` through `12`
@@ -53,6 +54,8 @@ Write `session_logs/YYYY-MM-DD_13_tkinter_gui.md` with:
 - GUI entry point and behavior summary.
 - Core API reuse evidence.
 - Verification commands and results.
+- Confirmation that verification used the documented `.venv/` workflow or a
+  documented equivalent.
 - Any manual testing limitations.
 - `Prompt Updates`: list later prompt files changed, or `None`.
 

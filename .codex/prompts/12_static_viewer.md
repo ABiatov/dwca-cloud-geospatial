@@ -12,6 +12,7 @@
 - `.codex/AGENTS.md`
 - `docs/development_plan.md`
 - `docs/output_format.md`
+- `docs/developer_setup.md`
 - `docs/viewer_contract.md`
 - `docs/converter.md` if it exists.
 - Prompts `01` through `11`
@@ -25,6 +26,8 @@ Implement the minimal static MapLibre viewer for generated MVP bundles.
 ## Tasks
 
 - Add static viewer files in the project location established by current docs or Prompt 11.
+- Reuse existing `tests/fixtures/output_bundles/` fixtures for static viewer
+  smoke inputs where practical.
 - Load a generated bundle from `manifest.json`.
 - Read `metadata/source.json` and `metadata/processing.json`.
 - Display `exports/occurrences.fgb` as a point layer.
@@ -58,6 +61,8 @@ Write `session_logs/YYYY-MM-DD_12_static_viewer.md` with:
 - Data loading and filter behavior.
 - Manual or automated smoke evidence.
 - Known browser/static-hosting limitations.
+- Confirmation that verification used the documented `.venv/` workflow or a
+  documented equivalent when Python tests are run.
 - `Prompt Updates`: list later prompt files changed, or `None`.
 
 ## Prompt Maintenance

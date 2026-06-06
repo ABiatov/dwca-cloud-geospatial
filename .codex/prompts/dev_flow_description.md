@@ -1,6 +1,6 @@
 # MVP Development Prompt Flow
 
-Status: Draft prompt sequence for MVP implementation
+Status: Active prompt sequence for MVP implementation
 
 Purpose: this directory contains ordered prompts for building the DwC-A to cloud-optimized geospatial MVP. Each prompt is intended to be run as a separate implementation session. Prompts are numbered because later prompts must explicitly read the artifacts produced by earlier prompts.
 
@@ -10,6 +10,7 @@ Purpose: this directory contains ordered prompts for building the DwC-A to cloud
 - Use the skills named in the prompt. If a skill file is unavailable, record that in the session log and continue with the best local fallback.
 - Keep the MVP file-based: local DwC-A archive in, static output bundle out. Do not add required databases, permanent APIs, schedulers, cloud runtimes, live GBIF/OBIS downloads, taxonomy matching, PMTiles, or packaged desktop binaries unless a later accepted decision changes scope.
 - Preserve provenance from source archive rows through parser, normalization, outputs, metadata, CLI, GUI and viewer.
+- For Python development and verification, prefer the in-repository `.venv/` documented in `docs/developer_setup.md`; do not install project development dependencies into Conda `base` or the system Python unless intentionally using a separate disposable environment.
 - After implementation, run the narrowest useful verification commands available in the repository.
 - Write a session log under `session_logs/` at the end of every prompt. Include decisions, files changed, verification evidence, open questions, and required follow-up edits.
 - If implementation creates, renames, removes, or materially changes artifacts expected by later prompts, update the later `.codex/prompts/*.md` files in the same session so the flow remains accurate.

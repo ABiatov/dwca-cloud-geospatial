@@ -18,6 +18,32 @@ APIs, file layouts and command-line interfaces should be treated as experimental
 
 The accepted MVP development plan is documented in [docs/development_plan.md](docs/development_plan.md).
 
+## Developer Quick Start
+
+For development, prefer an in-repository virtual environment at `.venv/`.
+Do not install project development dependencies into Conda `base` or the
+system Python unless you are intentionally managing a separate throwaway
+environment.
+
+Use an explicit repository path in local commands:
+
+```bash
+export REPO="/Users/Alevtina/Documents/GitHub/dwca-cloud-geospatial"
+python -m venv "${REPO}/.venv"
+source "${REPO}/.venv/bin/activate"
+python -m pip install --upgrade pip
+python -m pip install -e "${REPO}[dev]"
+python -m pytest "${REPO}/tests"
+dwca-cloud-geospatial --help
+```
+
+The Python import package is `dwca_cloud_geospatial`; the console command is
+`dwca-cloud-geospatial`. The initial CLI is an `argparse` stub for the planned
+`inspect`, `convert` and `validate` workflows. Converter behavior is deferred
+to later MVP milestones.
+
+More setup details are documented in [docs/developer_setup.md](docs/developer_setup.md).
+
 ## MVP Outputs
 
 - GeoParquet for analytical workflows.

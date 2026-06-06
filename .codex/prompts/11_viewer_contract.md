@@ -12,6 +12,7 @@
 - `.codex/AGENTS.md`
 - `docs/development_plan.md`
 - `docs/output_format.md`
+- `docs/developer_setup.md`
 - `docs/converter.md` if it exists.
 - Prompts `01` through `10`
 - Latest session logs for prompts `01` through `10`
@@ -32,7 +33,8 @@ Create `docs/viewer_contract.md` as the accepted contract for the minimal static
 - Specify behavior when optional fields or metadata are absent.
 - Specify no-backend/static-hosting constraints.
 - Specify no live GBIF/OBIS API dependency.
-- Add any needed viewer-specific acceptance tests or contract fixtures if the project pattern supports them.
+- Add any needed viewer-specific acceptance tests or contract fixtures under
+  the existing `tests/fixtures/` roots if the project pattern supports them.
 
 ## Constraints
 
@@ -55,6 +57,8 @@ Write `session_logs/YYYY-MM-DD_11_viewer_contract.md` with:
 - Any output contract adjustments.
 - Open implementation risks for Prompt 12.
 - Verification commands and results.
+- Confirmation that verification used the documented `.venv/` workflow or a
+  documented equivalent when Python tests are run.
 - `Prompt Updates`: list later prompt files changed, or `None`.
 
 ## Prompt Maintenance

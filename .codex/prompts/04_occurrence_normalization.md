@@ -12,6 +12,7 @@
 - `.codex/AGENTS.md`
 - `docs/development_plan.md`
 - `docs/output_format.md`
+- `docs/developer_setup.md`
 - `docs/dwca_parser.md` if it exists.
 - Prompts `01` through `03`
 - Latest session logs for prompts `01` through `03`
@@ -25,6 +26,8 @@ Convert parsed source records into the normalized occurrence schema and rejected
 
 - Define normalized occurrence data structures or schema using stable snake_case field names.
 - Map Darwin Core terms into the canonical fields documented in `docs/output_format.md`.
+- Reuse existing test fixture roots from Prompt 01; add normalization fixtures
+  under `tests/fixtures/` only with explicit paths.
 - Parse longitude and latitude into numeric `decimal_longitude` and `decimal_latitude`.
 - Validate coordinate ranges and prepare rejection reason codes for coordinate failures.
 - Normalize `event_date` and derive `event_year` where practical.
@@ -54,6 +57,8 @@ Write `session_logs/YYYY-MM-DD_04_occurrence_normalization.md` with:
 - Rejection model summary.
 - Mapping decisions and any deviations from `docs/output_format.md`.
 - Verification commands and results.
+- Confirmation that verification used the documented `.venv/` workflow or a
+  documented equivalent.
 - `Prompt Updates`: list later prompt files changed, or `None`.
 
 ## Prompt Maintenance

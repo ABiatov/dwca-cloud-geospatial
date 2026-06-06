@@ -11,10 +11,13 @@
 - `.codex/AGENTS.md`
 - `docs/development_plan.md`
 - `docs/output_format.md`
+- `docs/developer_setup.md`
 - `.codex/prompts/dev_flow_description.md`
 - `.codex/prompts/01_project_skeleton.md`
 - Latest `session_logs/*01_project_skeleton*.md`
-- Current package, CLI and test files created by Prompt 01.
+- Current package, CLI and test files created by Prompt 01:
+  `pyproject.toml`, `src/dwca_cloud_geospatial/`, `tests/conftest.py`,
+  `tests/fixtures/` and `docs/developer_setup.md`.
 - `examples/README.md` and the inventory of `examples/dwca/`.
 
 ## Goal
@@ -30,7 +33,8 @@ Implement safe inspection of local Darwin Core Archives and parse `meta.xml` int
 - Detect whether an occurrence core is present.
 - Report coordinate-field presence.
 - Add parser diagnostics for missing files, malformed metadata and unsupported structures.
-- Add a lightweight CLI inspection command if the CLI stub already supports subcommands; otherwise add the core inspection API and update Prompt 10 to wire the CLI.
+- Implement the existing `dwca-cloud-geospatial inspect` CLI stub as a thin
+  wrapper around the inspection API.
 - Draft or update `docs/dwca_parser.md` with accepted inspection behavior.
 
 ## Constraints
@@ -42,6 +46,9 @@ Implement safe inspection of local Darwin Core Archives and parse `meta.xml` int
 ## Acceptance Criteria
 
 - Local sample archives in `examples/dwca/` can be inspected.
+- Tests use explicit fixture paths rooted at
+  `tests/fixtures/dwca/minimal_occurrence/` where small local fixtures are
+  needed.
 - Field access is based on declared DwC-A terms and indexes.
 - Parser errors include source file or metadata context.
 - Tests cover at least one valid archive and one malformed or missing metadata case.
@@ -54,6 +61,8 @@ Write `session_logs/YYYY-MM-DD_02_dwca_inspection.md` with:
 - Sample archives tested.
 - Diagnostics behavior.
 - Verification commands and results.
+- Confirmation that verification used the documented `.venv/` workflow or a
+  documented equivalent.
 - `Prompt Updates`: list later prompt files changed, or `None`.
 
 ## Prompt Maintenance

@@ -13,6 +13,7 @@
 - `.codex/AGENTS.md`
 - `docs/development_plan.md`
 - `docs/output_format.md`
+- `docs/developer_setup.md`
 - `docs/dwca_parser.md` if it exists.
 - Prompts `01` through `09`
 - Latest session logs for prompts `01` through `09`
@@ -28,7 +29,8 @@ Expose repeatable conversion, inspection and validation workflows through a thin
 - Support default FlatGeobuf conversion.
 - Support explicit GeoParquet output selection.
 - Enforce overwrite guardrails: existing output paths are rejected unless `--overwrite` is passed.
-- Add CLI commands for `convert`, `inspect` and `validate`.
+- Refine the existing `argparse` CLI commands `convert`, `inspect` and
+  `validate` exposed by `dwca-cloud-geospatial`.
 - Keep CLI command handlers thin wrappers around core functions and structured configuration/result objects.
 - Return human-readable errors and non-zero exit codes for failed conversions/validations.
 - Add or update `docs/converter.md`.
@@ -57,6 +59,8 @@ Write `session_logs/YYYY-MM-DD_10_core_api_cli.md` with:
 - Overwrite behavior evidence.
 - Sample commands tested.
 - Verification commands and results.
+- Confirmation that verification used the documented `.venv/` workflow or a
+  documented equivalent.
 - `Prompt Updates`: list later prompt files changed, or `None`.
 
 ## Prompt Maintenance

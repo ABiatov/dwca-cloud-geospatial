@@ -12,6 +12,7 @@
 - `.codex/AGENTS.md`
 - `docs/development_plan.md`
 - `docs/output_format.md`
+- `docs/developer_setup.md`
 - Prompts `01` through `06`
 - Latest session logs for prompts `01` through `06`
 - Current FlatGeobuf writer and normalized occurrence implementation.
@@ -23,6 +24,8 @@ Write explicit analytical GeoParquet output at `data/occurrences.parquet`.
 ## Tasks
 
 - Implement a streaming PyArrow-based GeoParquet writer.
+- Reuse existing fixture roots from Prompt 01, including
+  `tests/fixtures/output_bundles/` for bundle/output fixtures when needed.
 - Encode point geometry as WKB in a binary `geometry` column.
 - Add GeoParquet `1.1.0` metadata.
 - Declare CRS `OGC:CRS84` and longitude-latitude coordinate order.
@@ -54,6 +57,8 @@ Write `session_logs/YYYY-MM-DD_07_geoparquet_writer.md` with:
 - GeoParquet metadata decisions.
 - Projection fields implemented.
 - Verification commands and results.
+- Confirmation that verification used the documented `.venv/` workflow or a
+  documented equivalent.
 - `Prompt Updates`: list later prompt files changed, or `None`.
 
 ## Prompt Maintenance

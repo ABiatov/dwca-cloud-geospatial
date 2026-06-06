@@ -12,6 +12,7 @@
 - `.codex/AGENTS.md`
 - `docs/development_plan.md`
 - `docs/output_format.md`
+- `docs/developer_setup.md`
 - Prompts `01` through `05`
 - Latest session logs for prompts `01` through `05`
 - Current normalized occurrence and quality-rule implementation.
@@ -23,6 +24,8 @@ Write accepted occurrence records to the MVP default FlatGeobuf export at `expor
 ## Tasks
 
 - Implement an isolated FlatGeobuf writer using Pyogrio/GDAL where available.
+- Reuse existing fixture roots from Prompt 01, including
+  `tests/fixtures/output_bundles/` for bundle/output fixtures when needed.
 - Write point geometry in longitude/latitude order with CRS assumption `OGC:CRS84`.
 - Use the compact normalized projection required by `docs/output_format.md`.
 - Include viewer display/filter fields when present.
@@ -55,6 +58,8 @@ Write `session_logs/YYYY-MM-DD_06_flatgeobuf_writer.md` with:
 - Projection fields implemented.
 - Large dataset guardrail behavior.
 - Verification commands and results.
+- Confirmation that verification used the documented `.venv/` workflow or a
+  documented equivalent.
 - `Prompt Updates`: list later prompt files changed, or `None`.
 
 ## Prompt Maintenance

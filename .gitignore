@@ -3,6 +3,14 @@
 venv/
 env/
 
+# Python generated artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
 # Local environment
 .env
 .env.*

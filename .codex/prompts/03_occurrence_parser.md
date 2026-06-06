@@ -11,6 +11,7 @@
 - `.codex/AGENTS.md`
 - `docs/development_plan.md`
 - `docs/output_format.md`
+- `docs/developer_setup.md`
 - `docs/dwca_parser.md` if it exists.
 - `.codex/prompts/dev_flow_description.md`
 - Prompts `01` and `02`
@@ -25,6 +26,8 @@ Read occurrence core rows from inspected DwC-A archives into structured source r
 
 - Implement a streaming or chunked row reader for the occurrence core.
 - Use `meta.xml` field mappings for term access.
+- Reuse the fixture path contract from Prompt 01:
+  `tests/fixtures/dwca/minimal_occurrence/` for small local parser fixtures.
 - Honor declared delimiters, quote characters, encodings and header row counts where available.
 - Apply `meta.xml` defaults only when the field has no source column index or the source column is not present in the row shape.
 - Preserve `source_file`, physical 1-based `source_row_number`, and logical `source_data_row_number` when available.
@@ -53,6 +56,8 @@ Write `session_logs/YYYY-MM-DD_03_occurrence_parser.md` with:
 - Row-numbering and default-handling decisions.
 - Tests and sample evidence.
 - Open issues affecting normalization.
+- Confirmation that verification used the documented `.venv/` workflow or a
+  documented equivalent.
 - `Prompt Updates`: list later prompt files changed, or `None`.
 
 ## Prompt Maintenance
