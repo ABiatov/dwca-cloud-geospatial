@@ -29,6 +29,7 @@ The MVP excludes:
 - Live GBIF, OBIS or other archive download flows.
 - Required taxonomy matching or checklist enrichment.
 - PMTiles generation, except as documented MVP+ work.
+- Full raw table export for DwC-A core and extension tables.
 - Standalone packaged desktop binaries.
 
 ## Development Principles
@@ -49,6 +50,12 @@ The MVP excludes:
 - Rejected records report: `reports/rejected_records.csv` should be written only when at least one source record is rejected or skipped.
 - Overwrite behavior: CLI conversions must not overwrite an existing output path unless the user passes `--overwrite`.
 - GUI overwrite behavior: GUI conversions must not overwrite an existing output path unless the user selects an overwrite checkbox.
+- MVP CLI framework: use the Python standard library `argparse` for the MVP CLI. Command handlers should remain thin wrappers around core functions and structured configuration/result objects. Do not add Click or Typer unless the CLI grows enough that `argparse` becomes burdensome to maintain.
+- MVP inspect command: include `inspect <archive>` in the MVP CLI as a lightweight archive/schema inspection command. It should parse DwC-A structure through `meta.xml`, report core/extension files, row types, declared fields, coordinate field presence and parser warnings. It must not perform full occurrence normalization, geospatial conversion or output bundle writing. Full data-quality validation remains part of conversion and `validate <output-dir>`. Human-readable text output is sufficient for MVP; `--json` is useful but optional.
+- DwC-A defaults and row numbering: apply `meta.xml` field defaults only when the declared field has no source column index or the source column is not present in the row shape. Do not use defaults to replace explicit empty strings or invalid source values in present columns. Store `source_row_number` as the physical 1-based row number in the source data file, including skipped header rows, and store `source_data_row_number` as the logical 1-based data-record number after declared header rows when available.
+- Type conversion failure policy: for MVP, type conversion failures should be counted by field and reason in processing metadata. Optional-field conversion failures should set normalized values to null and emit warnings when the failure rate for a field is `>= 5%` of parsed records. Critical-field failures, including coordinate parsing failures, should reject affected records with stable reason codes. The conversion should fail only when no accepted occurrence records remain, required provenance fields cannot be produced, or parser/metadata structure prevents reliable row interpretation. Future releases may add configurable warning/failure thresholds.
+- Future raw table export: full Parquet-family export of DwC-A core and extension tables is deferred until after MVP. The MVP parser should preserve the design path for that mode by reading core/extensions through `meta.xml`, retaining field metadata, relationship keys such as `_id` and `_coreid`, source files and row-number provenance.
+- Future PMTiles generation: PMTiles remains deferred to MVP+ and should use Tippecanoe as the preferred tiler when available. Tippecanoe is an optional external dependency, not an MVP runtime requirement; requested PMTiles generation should fail gracefully with an actionable message when `tippecanoe` is not installed. PMTiles point attributes should default to the same compact normalized occurrence field set as FlatGeobuf, with a smaller PMTiles-specific attribute profile allowed later for large datasets if tile size or browser performance requires it.
 
 ## Accepted GeoParquet Writer Stack
 
@@ -68,6 +75,7 @@ Accepted defaults:
 - Library: `pyarrow` as the required GeoParquet writer dependency.
 - Geometry encoding: WKB point geometry in a binary `geometry` column.
 - GeoParquet version: `1.1.0` for broad reader compatibility.
+- GeoParquet 2.0: deferred to post-MVP; may be added later only as an explicit opt-in output option after target downstream readers and validation tools demonstrate reliable support. Adding 2.0 must not change the default GeoParquet version without a separate accepted decision.
 - CRS: `OGC:CRS84`, matching the accepted output contract.
 - Compression: ZSTD.
 - Row group size: configurable, with an initial default around 100,000 rows.
@@ -104,6 +112,7 @@ Accepted defaults:
 - Spatial index: enabled by default for FlatGeobuf output.
 - Large-output guardrail: estimate spatial-index memory before writing; emit a required large dataset warning when projected memory or feature count is high enough to make the indexed write risky.
 - Geometry policy: write only accepted records with non-null point geometry.
+- Field policy: write a compact normalized occurrence field set optimized for viewer and lightweight exchange, not the full source/raw Darwin Core field set. Include geometry, required provenance fields, accepted viewer display/filter fields, coordinates, `quality_flags` and the additional accepted Darwin Core fields documented in `docs/output_format.md`.
 - GeoPandas role: allowed only for tests, examples and notebooks during early development. Production writer code should call Pyogrio/GDAL directly where practical.
 
 ## Accepted MVP Viewer Filters
@@ -191,7 +200,7 @@ Deliverables:
 - Mapping from Darwin Core terms into normalized occurrence fields.
 - Coordinate parsing and validation for longitude, latitude, ranges and `0,0` policy.
 - Event date and event year normalization where practical.
-- Required provenance fields: `source_record_id`, `source_file` and `source_row_number`.
+- Required provenance fields: `source_record_id`, `source_file` and physical `source_row_number`; include `source_data_row_number` when available.
 - Quality flag assignment using stable lowercase snake_case tokens that do not contain `|`.
 - Rejection reason model aligned with `reports/rejected_records.csv`.
 
@@ -236,7 +245,7 @@ Deliverables:
 - CLI command for conversion.
 - CLI `--overwrite` flag for explicitly replacing an existing output path.
 - CLI command for validating an existing output bundle.
-- CLI command for inspecting a DwC-A archive, if useful during implementation.
+- CLI command for lightweight DwC-A archive/schema inspection.
 - Human-readable errors and non-zero exit codes for failed conversions.
 
 Acceptance criteria:

@@ -58,9 +58,13 @@ Do not hide behavior in working-directory assumptions.
 - PostgreSQL/PostGIS should not become a required runtime.
 - Network downloads and GBIF API integration should remain optional until explicitly accepted.
 
+## Resolved By Accepted Docs
+
+- DuckDB may be evaluated only as an optional development, inspection or validation helper. It must not become a required runtime dependency for the baseline converter, per `.codex/AGENTS.md` and the accepted GeoParquet writer stack in `docs/development_plan.md`.
+- Output generation should have a primary `convert <archive> --output <dir>` workflow with explicit options, plus a separate `validate <output-dir>` workflow. `docs/development_plan.md` M4 requires a conversion command and a CLI command for validating an existing output bundle; M3 also allows a bundle validation command or API.
+- The MVP CLI should use the Python standard library `argparse`. Command handlers should remain thin wrappers around core functions and structured configuration/result objects. Click or Typer should not be added unless the CLI grows enough that `argparse` becomes burdensome to maintain.
+- `inspect <archive>` should ship in the MVP CLI as a lightweight archive/schema inspection command. It should parse DwC-A structure through `meta.xml`, report core/extension files, row types, declared fields, coordinate field presence and parser warnings, and avoid full occurrence normalization, geospatial conversion or output bundle writing. Human-readable text output is sufficient for MVP; `--json` is useful but optional.
+
 ## Open Questions
 
-- Which Python CLI framework to use, if any.
-- Whether DuckDB should be an optional dependency for validation/query convenience.
-- Whether output generation should be one command with flags or separate staged commands.
-
+- None currently.

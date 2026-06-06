@@ -48,9 +48,11 @@ Candidate convention from `dwca2parquet`:
 
 DwC-A field-level defaults are part of the archive schema and should be applied or explicitly preserved:
 
-- If a defaulted field is missing from the data file, add the output column filled with the default.
-- If the field exists but has null or empty values, fill those values only when that matches accepted parser behavior.
-- Record default application in metadata so downstream users can distinguish source-provided values from descriptor-provided values.
+- Apply `meta.xml` field defaults only when the declared field has no source column index or the source column is not present in the row shape.
+- Do not use defaults to replace explicit empty strings or invalid source values in present columns.
+- Normalize explicit empty strings as null for typed/normalized fields.
+- Preserve raw source values where raw fields are retained.
+- Record default application in processing metadata so downstream users can distinguish source-provided values from descriptor-provided values.
 
 ## Archive Safety
 
@@ -59,9 +61,13 @@ DwC-A field-level defaults are part of the archive schema and should be applied 
 - Keep overwrite behavior explicit.
 - Treat encodings and malformed CSV rows as validation concerns with reported warnings.
 
+## Resolved By Accepted Docs
+
+- Baseline parsing belongs in the project-owned Python core library layer. `docs/development_plan.md` M1 requires safe archive inspection, a `meta.xml` parser, occurrence core detection, chunked row reading, EML extraction and parser diagnostics; ADR-001 requires CLI, GUI and future integrations to call the same core conversion APIs.
+- Output provenance must include `source_record_id`, `source_file` and `source_row_number`, per `docs/development_plan.md` M2 and `docs/output_format.md`.
+- `source_row_number` is the physical 1-based row number in the source data file, including skipped header rows. `source_data_row_number` is the logical 1-based data-record number after declared header rows when available. Diagnostics and rejection reports should include both values where practical.
+- `meta.xml` field defaults are applied only when the declared field has no source column index or the source column is not present in the row shape; they are not used to replace explicit empty strings or invalid source values in present columns.
+
 ## Open Questions
 
-- Whether baseline conversion should depend on an existing DwC-A reader or implement a small project-owned parser.
-- Exact semantics for empty strings versus nulls when applying `meta.xml` defaults.
-- Whether row numbers should be physical CSV row numbers, logical data row numbers after skipped headers, or both.
-
+- None currently.

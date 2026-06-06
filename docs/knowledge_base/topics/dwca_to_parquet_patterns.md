@@ -73,9 +73,13 @@ Candidate defaults to evaluate:
 - Row group sizing chosen for expected query patterns.
 - Explicit file metadata for source archive, row type, conversion mode, generated time, and tool version.
 
+## Resolved By Accepted Docs
+
+- The MVP baseline is interpreted normalized occurrence conversion, not a raw-first archive table export. `docs/development_plan.md` M2 defines conversion into the normalized occurrence schema accepted by `docs/output_format.md`; raw table preservation can remain a future or optional mode.
+- Final geospatial outputs should contain accepted occurrence records with usable point geometry, while skipped or rejected coordinate rows are preserved in diagnostics/reports. This follows `docs/development_plan.md` M2-M3 and `docs/output_format.md`.
+- The output bundle manifest and JSON metadata are the main discovery and provenance contract. `docs/output_format.md` defines `manifest.json`, `metadata/source.json` and `metadata/processing.json` as required bundle files; Parquet footers should carry format-specific metadata such as GeoParquet geometry metadata and useful file metadata, not replace the manifest.
+- Full raw table export for DwC-A core and extension tables is needed after MVP, but it should not be added to the MVP output scope. The MVP parser should still be designed so this future mode is straightforward: read core and extension tables through `meta.xml`, preserve field metadata, preserve relationship keys such as `_id` and `_coreid`, and retain source file and row-number provenance.
+
 ## Open Questions
 
-- Exact baseline mode default: raw-first, interpreted-first, or explicit mode required.
-- Whether Parquet output should always include all rows with null geometry, or whether final geospatial outputs should separate skipped coordinate rows.
-- How much metadata belongs in Parquet footers versus a separate manifest JSON.
-
+- None currently.

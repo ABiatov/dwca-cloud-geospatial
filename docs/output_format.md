@@ -39,7 +39,7 @@ MVP files:
 
 Deferred MVP+ files:
 
-- `tiles/occurrences.pmtiles`: future optimized tiled map output.
+- `tiles/occurrences.pmtiles`: future optimized tiled map output. PMTiles generation is deferred to MVP+ and should use Tippecanoe as the preferred tiler when available. Tippecanoe remains an optional external dependency, not an MVP runtime requirement. PMTiles point attributes should default to the same compact normalized occurrence field set as FlatGeobuf; a smaller PMTiles-specific attribute profile may be introduced later for large datasets if tile size or browser performance requires it.
 
 ## Format Selection
 
@@ -302,6 +302,7 @@ Required fields:
 | `field_mapping` | object | Darwin Core terms mapped into normalized fields. |
 | `quality_rules` | object | Coordinate, date and required-field rule versions. |
 | `counts` | object | Source, accepted, rejected and output row counts. |
+| `type_conversion_failures` | array | Type conversion failures counted by field and reason. |
 | `warnings` | array | Non-fatal conversion warnings. |
 | `validation` | object | Output validation result summary. |
 
@@ -317,6 +318,18 @@ Required `counts` fields:
 | `flatgeobuf_records` | integer |
 
 For formats not generated in a conversion, the corresponding output count should be `0`.
+
+Required `type_conversion_failures[]` fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `field` | string | Normalized field name or source term. |
+| `reason_code` | string | Stable machine-readable conversion failure reason. |
+| `failure_count` | integer | Number of parsed records affected. |
+| `failure_rate` | number | Failure count divided by parsed record count. |
+| `action` | string | `null_value`, `record_rejected` or `conversion_failed`. |
+
+Optional-field conversion failures should set normalized values to null and emit warnings when the failure rate for a field is `>= 5%` of parsed records. Critical-field failures, including coordinate parsing failures, should reject affected records with stable reason codes. The conversion should fail only when no accepted occurrence records remain, required provenance fields cannot be produced, or parser/metadata structure prevents reliable row interpretation.
 
 Recommended `validation` fields:
 
@@ -346,7 +359,8 @@ Required normalized fields:
 | `occurrence_id` | string or null | Darwin Core `occurrenceID`. |
 | `source_record_id` | string | Stable project source row identifier. |
 | `source_file` | string | Source archive file containing the row. |
-| `source_row_number` | integer | 1-based source data row number after skipped headers. |
+| `source_row_number` | integer | Physical 1-based row number in the source data file, including skipped header rows. |
+| `source_data_row_number` | integer or null | Logical 1-based data-record number after declared header rows, when available. |
 | `scientific_name` | string or null | Darwin Core `scientificName`. |
 | `kingdom` | string or null | Darwin Core `kingdom`. |
 | `taxon_id` | string or null | Darwin Core `taxonID`. |
@@ -401,11 +415,50 @@ Required behavior:
 - Geometry type: point.
 - Coordinate order: longitude, latitude.
 - CRS assumption: `OGC:CRS84`.
-- Include all required viewer display fields.
+- Use a compact normalized occurrence field set optimized for viewer and lightweight exchange, not the full source/raw Darwin Core field set.
+- Include all required viewer display fields and accepted filter fields when present.
 - Include stable source identifiers so viewer-selected features can be traced back to source rows.
 - Write a spatial index by default.
 - Emit a large dataset warning before indexed writes that may require substantial memory.
 - Store `quality_flags` using the same nullable `|`-delimited string representation as GeoParquet.
+
+Required FlatGeobuf columns:
+
+| Column | Type | Source or meaning |
+| --- | --- | --- |
+| `source_record_id` | string | Stable project source row identifier. |
+| `source_file` | string | Source archive file containing the row. |
+| `source_row_number` | integer | Physical 1-based row number in the source data file, including skipped header rows. |
+| `source_data_row_number` | integer or null | Logical 1-based data-record number after declared header rows, when available. |
+| `occurrence_id` | string or null | Darwin Core `occurrenceID`. |
+| `scientific_name` | string or null | Darwin Core `scientificName`. |
+| `verbatim_scientific_name` | string or null | Darwin Core `verbatimScientificName`. |
+| `kingdom` | string or null | Darwin Core `kingdom`. |
+| `phylum` | string or null | Darwin Core `phylum`. |
+| `class` | string or null | Darwin Core `class`. |
+| `order` | string or null | Darwin Core `order`. |
+| `family` | string or null | Darwin Core `family`. |
+| `genus` | string or null | Darwin Core `genus`. |
+| `taxon_rank` | string or null | Darwin Core `taxonRank`. |
+| `basis_of_record` | string or null | Darwin Core `basisOfRecord`. |
+| `degree_of_establishment` | string or null | Darwin Core `degreeOfEstablishment`. |
+| `iucnRedListCategory` | string or null | IUCN Red List category when present in source data or accepted enrichment. |
+| `event_date` | string or null | Darwin Core `eventDate`, normalized where possible. |
+| `event_year` | integer or null | Year derived from `eventDate` or `year`. |
+| `decimal_longitude` | double | Parsed longitude. |
+| `decimal_latitude` | double | Parsed latitude. |
+| `coordinate_uncertainty_in_meters` | double or null | Darwin Core `coordinateUncertaintyInMeters`. |
+| `country_code` | string or null | Darwin Core `countryCode`. |
+| `locality` | string or null | Darwin Core `locality`. |
+| `identified_by` | string or null | Darwin Core `identifiedBy`. |
+| `license` | string or null | Record or dataset license when available. |
+| `references` | string or null | Darwin Core `references`. |
+| `rights_holder` | string or null | Darwin Core `rightsHolder`. |
+| `dataset_name` | string or null | Darwin Core `datasetName` or source metadata. |
+| `quality_flags` | string or null | Quality flags assigned by the converter as `\|`-delimited tokens. Null when no flags are present. |
+| `geometry` | point geometry | Accepted occurrence point geometry in `OGC:CRS84`. |
+
+Full source/raw Darwin Core core and extension table preservation belongs in future raw Parquet-family exports, not in the MVP FlatGeobuf layer.
 
 The static viewer should prefer `exports/occurrences.fgb` for MVP map display.
 
@@ -418,7 +471,7 @@ Required columns:
 | Column | Type | Description |
 | --- | --- | --- |
 | `source_file` | string | Source archive file containing the row. |
-| `source_row_number` | integer | 1-based source data row number after skipped headers. |
+| `source_row_number` | integer | Physical 1-based row number in the source data file, including skipped header rows. |
 | `source_record_id` | string or null | Project source row identifier if available. |
 | `occurrence_id` | string or null | Darwin Core `occurrenceID` when available. |
 | `scientific_name` | string or null | Darwin Core `scientificName` when available. |
@@ -427,6 +480,12 @@ Required columns:
 | `event_date` | string or null | Raw event date value. |
 | `reason_code` | string | Stable machine-readable rejection reason. |
 | `reason_message` | string | Human-readable explanation. |
+
+Recommended columns:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `source_data_row_number` | integer or null | Logical 1-based data-record number after declared header rows, when available. |
 
 Initial reason codes:
 
@@ -468,21 +527,33 @@ The viewer must be able to show these feature fields in popups or a details pane
 | Field |
 | --- |
 | `scientific_name` |
+| `verbatim_scientific_name` |
 | `kingdom` |
+| `phylum` |
+| `class` |
+| `order` |
+| `family` |
+| `genus` |
+| `taxon_rank` |
 | `iucnRedListCategory` |
 | `event_date` |
 | `event_year` |
 | `basis_of_record` |
+| `degree_of_establishment` |
 | `decimal_longitude` |
 | `decimal_latitude` |
 | `coordinate_uncertainty_in_meters` |
 | `country_code` |
 | `locality` |
+| `identified_by` |
 | `dataset_name` |
 | `license` |
+| `references` |
+| `rights_holder` |
 | `source_record_id` |
 | `source_file` |
 | `source_row_number` |
+| `source_data_row_number` |
 | `quality_flags` |
 
 The viewer must support filters for these fields when present:
