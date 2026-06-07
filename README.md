@@ -16,6 +16,9 @@ This repository is at the initial prototype stage. The first goal is to prove a 
 
 APIs, file layouts and command-line interfaces should be treated as experimental until the first tagged release.
 
+Checklist DwC-A archives with `Taxon` cores can be inspected, but the MVP
+conversion workflow targets occurrence archives that declare coordinate terms.
+
 The accepted MVP development plan is documented in [docs/development_plan.md](docs/development_plan.md).
 
 ## Developer Quick Start
@@ -38,9 +41,9 @@ dwca-cloud-geospatial --help
 ```
 
 The Python import package is `dwca_cloud_geospatial`; the console command is
-`dwca-cloud-geospatial`. The initial CLI is an `argparse` stub for the planned
-`inspect`, `convert` and `validate` workflows. Converter behavior is deferred
-to later MVP milestones.
+`dwca-cloud-geospatial`. The `inspect` command parses local DwC-A `meta.xml`
+structure. The `convert` and `validate` commands are still stubs for later MVP
+milestones.
 
 More setup details are documented in [docs/developer_setup.md](docs/developer_setup.md).
 

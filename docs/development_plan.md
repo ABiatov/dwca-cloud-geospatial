@@ -52,6 +52,12 @@ The MVP excludes:
 - GUI overwrite behavior: GUI conversions must not overwrite an existing output path unless the user selects an overwrite checkbox.
 - MVP CLI framework: use the Python standard library `argparse` for the MVP CLI. Command handlers should remain thin wrappers around core functions and structured configuration/result objects. Do not add Click or Typer unless the CLI grows enough that `argparse` becomes burdensome to maintain.
 - MVP inspect command: include `inspect <archive>` in the MVP CLI as a lightweight archive/schema inspection command. It should parse DwC-A structure through `meta.xml`, report core/extension files, row types, declared fields, coordinate field presence and parser warnings. It must not perform full occurrence normalization, geospatial conversion or output bundle writing. Full data-quality validation remains part of conversion and `validate <output-dir>`. Human-readable text output is sufficient for MVP; `--json` is useful but optional.
+- Checklist/Taxon DwC-A handling: valid checklist archives with a `Taxon` core
+  must remain inspectable through `inspect` and `inspect --json`, but they are
+  outside the MVP occurrence geospatial conversion workflow. Occurrence row
+  reading and conversion should fail fast when no occurrence core or coordinate
+  terms are present, using actionable diagnostics instead of treating
+  `taxon.txt` as occurrence data.
 - DwC-A defaults and row numbering: apply `meta.xml` field defaults only when the declared field has no source column index or the source column is not present in the row shape. Do not use defaults to replace explicit empty strings or invalid source values in present columns. Store `source_row_number` as the physical 1-based row number in the source data file, including skipped header rows, and store `source_data_row_number` as the logical 1-based data-record number after declared header rows when available.
 - Type conversion failure policy: for MVP, type conversion failures should be counted by field and reason in processing metadata. Optional-field conversion failures should set normalized values to null and emit warnings when the failure rate for a field is `>= 5%` of parsed records. Critical-field failures, including coordinate parsing failures, should reject affected records with stable reason codes. The conversion should fail only when no accepted occurrence records remain, required provenance fields cannot be produced, or parser/metadata structure prevents reliable row interpretation. Future releases may add configurable warning/failure thresholds.
 - Future raw table export: full Parquet-family export of DwC-A core and extension tables is deferred until after MVP. The MVP parser should preserve the design path for that mode by reading core/extensions through `meta.xml`, retaining field metadata, relationship keys such as `_id` and `_coreid`, source files and row-number provenance.
@@ -182,12 +188,15 @@ Deliverables:
 - `meta.xml` parser for core files, field mappings, delimiters, headers and row types.
 - Occurrence core detection.
 - Streaming or chunked row reader for occurrence records.
-- Source metadata extraction from EML where available.
+- Source metadata file discovery from `meta.xml`; full EML content extraction
+  is deferred to the metadata/source writer work.
 - Parser diagnostics for missing files, malformed metadata and row parse failures.
 
 Acceptance criteria:
 
 - The parser reads the local sample DwC-A archives in `examples/dwca/`.
+- Checklist/Taxon-core archives are inspectable but rejected by occurrence row
+  reading with actionable non-occurrence diagnostics.
 - Field access is based on declared DwC-A terms instead of hard-coded column positions.
 - Parser errors are reported with source file and row context.
 
@@ -220,7 +229,8 @@ Deliverables:
 - FlatGeobuf writer for default `exports/occurrences.fgb` output.
 - GeoParquet writer for explicit `data/occurrences.parquet` output.
 - `manifest.json` writer.
-- `metadata/source.json` writer.
+- `metadata/source.json` writer, including EML content extraction from the
+  declared DwC-A metadata file where available.
 - `metadata/processing.json` writer.
 - Conditional `reports/rejected_records.csv` writer for rejected or skipped records.
 - Bundle validation command or API.
@@ -253,6 +263,8 @@ Acceptance criteria:
 - A user can convert a local sample archive with one CLI command.
 - CLI and tests call the same core conversion API.
 - Existing output paths are rejected unless `--overwrite` is set.
+- Non-occurrence checklist archives fail conversion with a clear error while
+  remaining valid inputs for `inspect`.
 
 ### M5: Static Viewer Contract And Implementation
 
@@ -320,7 +332,7 @@ Documents to create or update during the milestones:
 | Document | Owner Milestone | Purpose |
 | --- | --- | --- |
 | `docs/development_plan.md` | M0 | Accepted implementation plan and milestone sequence. |
-| `docs/dwca_parser.md` | M1 | Parser behavior, `meta.xml` handling, source metadata and diagnostics. |
+| `docs/dwca_parser.md` | M1 | Parser behavior, `meta.xml` handling, metadata file discovery and diagnostics. |
 | `docs/output_format.md` | M2-M3 | Output bundle schema and validation rules. |
 | `docs/converter.md` | M4 | CLI, Python API, configuration and overwrite behavior. |
 | `docs/viewer_contract.md` | M5 | Static viewer inputs, fields, filters and failure handling. |
@@ -343,8 +355,8 @@ No open questions remain for the accepted MVP plan.
 
 ## Immediate Next Actions
 
-1. Create the Python package skeleton, CLI stub and test harness.
-2. Implement DwC-A archive inspection and `meta.xml` parsing against `examples/dwca/`.
-3. Draft `docs/dwca_parser.md` while implementing the parser.
-4. Implement occurrence normalization and rejection reason reporting.
-5. Implement the output bundle writer and validation checks.
+1. Implement occurrence row iteration from inspected DwC-A archives.
+2. Reject non-occurrence checklist archives from row reading with actionable diagnostics while preserving successful inspection.
+3. Implement occurrence normalization and rejection reason reporting.
+4. Implement quality rules and conversion failure accounting.
+5. Implement the FlatGeobuf and GeoParquet writers, then bundle metadata and validation checks.

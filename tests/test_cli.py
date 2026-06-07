@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from conftest import MINIMAL_OCCURRENCE_FIXTURE_DIR
 from dwca_cloud_geospatial.cli import COMMAND_NOT_IMPLEMENTED, build_parser, main
 
 
@@ -27,9 +28,20 @@ def test_parser_exposes_expected_subcommands() -> None:
     assert "COMMAND" in help_text
 
 
-def test_placeholder_command_returns_clear_error(capsys: pytest.CaptureFixture[str]) -> None:
+def test_inspect_command_reports_archive_structure(capsys: pytest.CaptureFixture[str]) -> None:
+    exit_code = main(["inspect", str(MINIMAL_OCCURRENCE_FIXTURE_DIR / "valid")])
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Occurrence core: yes" in captured.out
+    assert "decimalLatitude=yes" in captured.out
+    assert "Diagnostics: none" in captured.out
+
+
+def test_placeholder_commands_return_clear_error(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as excinfo:
-        main(["inspect", "/explicit/path/to/archive.zip"])
+        main(["convert", "/explicit/path/to/archive.zip", "/explicit/path/to/output"])
 
     captured = capsys.readouterr()
 

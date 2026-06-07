@@ -85,5 +85,5 @@ Without activating `.venv/`, use:
 "${REPO}/.venv/bin/dwca-cloud-geospatial" --help
 ```
 
-The Prompt 01 CLI is a stub. It exposes the planned `inspect`, `convert` and
-`validate` commands, but converter behavior is intentionally deferred.
+The `inspect` command parses local DwC-A `meta.xml` structure. The `convert`
+and `validate` commands remain stubs until later MVP milestones.

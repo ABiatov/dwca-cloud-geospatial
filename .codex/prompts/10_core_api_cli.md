@@ -29,10 +29,22 @@ Expose repeatable conversion, inspection and validation workflows through a thin
 - Support default FlatGeobuf conversion.
 - Support explicit GeoParquet output selection.
 - Enforce overwrite guardrails: existing output paths are rejected unless `--overwrite` is passed.
+- Preserve the existing `inspect <archive>` implementation as a thin wrapper
+  around `dwca_cloud_geospatial.inspection.inspect_dwca`, including `--json`
+  output and error diagnostics.
+- Preserve successful `inspect --json` behavior for valid non-occurrence
+  checklist DwC-A archives with `Taxon` cores, including the local examples
+  `dwca-reddatabookofukraine_plants-fungi-algae_checklist-v1.1.zip`,
+  `dwca-appendixiibernconventionua-v1.2.zip` and
+  `dwca-kharkivredliastua-v1.0.zip`.
 - Refine the existing `argparse` CLI commands `convert`, `inspect` and
-  `validate` exposed by `dwca-cloud-geospatial`.
+  `validate` exposed by `dwca-cloud-geospatial` without duplicating parser
+  logic in CLI handlers.
 - Keep CLI command handlers thin wrappers around core functions and structured configuration/result objects.
 - Return human-readable errors and non-zero exit codes for failed conversions/validations.
+- Make conversion fail fast with an actionable error when the inspected archive
+  has no occurrence core or lacks coordinate terms. Checklist/Taxon archives are
+  inspectable but outside the MVP occurrence geospatial conversion workflow.
 - Add or update `docs/converter.md`.
 - Add integration tests for CLI success, CLI failure and overwrite behavior.
 
@@ -49,6 +61,8 @@ Expose repeatable conversion, inspection and validation workflows through a thin
 - CLI and tests call the same core conversion API.
 - Existing output paths are rejected unless `--overwrite` is set.
 - `inspect` reports archive/schema information without doing full conversion.
+- `inspect --json` succeeds for valid checklist/Taxon DwC-A archives, while
+  `convert` rejects them with a clear non-occurrence input error.
 - `validate` reports structured validation results.
 
 ## Required Session Log

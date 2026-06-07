@@ -23,9 +23,9 @@ The baseline workflow should be reproducible from explicit input and output path
 Possible command shape:
 
 - `inspect <archive>`: summarize `meta.xml`, files, row types, fields, and coordinate availability.
-- `convert <archive> --output <dir>`: write Parquet/GeoParquet outputs and metadata.
-- `validate <output-dir>`: validate output bundle, GeoParquet, manifest, and diagnostics.
-- `viewer <output-dir>` or `build-viewer <output-dir>`: generate static viewer assets if not included in `convert`.
+- `convert <archive> <output>`: write the default FlatGeobuf output bundle, with explicit options for GeoParquet when supported.
+- `validate <bundle>`: validate output bundle, GeoParquet, FlatGeobuf, manifest, metadata and diagnostics.
+- `viewer <bundle>` or `build-viewer <bundle>`: generate or launch static viewer assets if not included in `convert`.
 
 ## Implementation Shape
 
@@ -61,9 +61,10 @@ Do not hide behavior in working-directory assumptions.
 ## Resolved By Accepted Docs
 
 - DuckDB may be evaluated only as an optional development, inspection or validation helper. It must not become a required runtime dependency for the baseline converter, per `.codex/AGENTS.md` and the accepted GeoParquet writer stack in `docs/development_plan.md`.
-- Output generation should have a primary `convert <archive> --output <dir>` workflow with explicit options, plus a separate `validate <output-dir>` workflow. `docs/development_plan.md` M4 requires a conversion command and a CLI command for validating an existing output bundle; M3 also allows a bundle validation command or API.
+- Output generation should have a primary `convert <archive> <output>` workflow with explicit options, plus a separate `validate <bundle>` workflow. `docs/development_plan.md` M4 requires a conversion command and a CLI command for validating an existing output bundle; M3 also allows a bundle validation command or API.
 - The MVP CLI should use the Python standard library `argparse`. Command handlers should remain thin wrappers around core functions and structured configuration/result objects. Click or Typer should not be added unless the CLI grows enough that `argparse` becomes burdensome to maintain.
 - `inspect <archive>` should ship in the MVP CLI as a lightweight archive/schema inspection command. It should parse DwC-A structure through `meta.xml`, report core/extension files, row types, declared fields, coordinate field presence and parser warnings, and avoid full occurrence normalization, geospatial conversion or output bundle writing. Human-readable text output is sufficient for MVP; `--json` is useful but optional.
+- Checklist/Taxon DwC-A archives should remain valid for `inspect`, but `convert` should fail fast with an actionable non-occurrence input error when no occurrence core or coordinate terms are present.
 
 ## Open Questions
 

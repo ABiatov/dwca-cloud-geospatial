@@ -28,7 +28,7 @@ Build a safe parser that reads a DwC-A archive descriptor and streams declared c
 7. Apply or preserve default values according to accepted policy.
 8. Add source lineage fields or metadata.
 9. Emit row batches and parse warnings.
-10. Add fixture tests for small archives, missing fields, defaults, extensions, and malformed coordinates.
+10. Add fixture tests for small archives, missing files, defaults, extensions, malformed rows and non-occurrence checklist archives.
 
 ## Acceptance Evidence
 
@@ -42,4 +42,3 @@ Build a safe parser that reads a DwC-A archive descriptor and streams declared c
 
 - `../topics/dwca_archive_parsing.md`
 - `../topics/validation_and_quality.md`
-

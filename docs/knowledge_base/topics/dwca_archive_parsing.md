@@ -64,7 +64,7 @@ DwC-A field-level defaults are part of the archive schema and should be applied 
 
 ## Resolved By Accepted Docs
 
-- Baseline parsing belongs in the project-owned Python core library layer. `docs/development_plan.md` M1 requires safe archive inspection, a `meta.xml` parser, occurrence core detection, chunked row reading, EML extraction and parser diagnostics; ADR-001 requires CLI, GUI and future integrations to call the same core conversion APIs.
+- Baseline parsing belongs in the project-owned Python core library layer. `docs/development_plan.md` M1 requires safe archive inspection, a `meta.xml` parser, occurrence core detection, chunked row reading, metadata file discovery and parser diagnostics; full EML content extraction is deferred to metadata/source writer work. ADR-001 requires CLI, GUI and future integrations to call the same core conversion APIs.
 - Output provenance must include `source_record_id`, `source_file` and `source_row_number`, per `docs/development_plan.md` M2 and `docs/output_format.md`.
 - `source_row_number` is the physical 1-based row number in the source data file, including skipped header rows. `source_data_row_number` is the logical 1-based data-record number after declared header rows when available. Diagnostics and rejection reports should include both values where practical.
 - `meta.xml` field defaults are applied only when the declared field has no source column index or the source column is not present in the row shape; they are not used to replace explicit empty strings or invalid source values in present columns.

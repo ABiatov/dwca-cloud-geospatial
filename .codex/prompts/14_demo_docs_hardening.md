@@ -22,6 +22,17 @@
 - All prompts `01` through `13`
 - Latest session logs for prompts `01` through `13`
 - Current tests, examples and generated sample bundle instructions.
+- Prompt 02 inspection API and docs:
+  `dwca_cloud_geospatial.inspection.inspect_dwca`,
+  `docs/dwca_parser.md`, the CLI command
+  `dwca-cloud-geospatial inspect [--json] <archive>`, and fixtures under
+  `tests/fixtures/dwca/minimal_occurrence/`.
+- Checklist DwC-A examples inspected after Prompt 02:
+  `examples/dwca/dwca-reddatabookofukraine_plants-fungi-algae_checklist-v1.1.zip`,
+  `examples/dwca/dwca-appendixiibernconventionua-v1.2.zip` and
+  `examples/dwca/dwca-kharkivredliastua-v1.0.zip`. They are valid
+  inspectable `Taxon` core archives, but they are not occurrence geospatial
+  conversion inputs for the MVP workflow.
 
 ## Goal
 
@@ -36,6 +47,12 @@ Make the MVP understandable, repeatable and ready for external review.
 - Confirm `docs/output_format.md` matches implemented bundle behavior.
 - Add regression tests for parser behavior, normalization, output writing and bundle validation where gaps remain.
 - Add known limitations and MVP+ roadmap, including PMTiles as deferred.
+- Document the checklist limitation clearly: checklist/Taxon DwC-A archives can
+  be inspected, but the MVP converter only produces geospatial outputs from
+  occurrence archives with coordinate terms.
+- Include the three local checklist archives in final demo evidence as
+  non-occurrence inspection examples and, when conversion exists, negative
+  conversion examples with actionable errors.
 - Record demo evidence and validation results.
 - Remove stale prompt assumptions only if they contradict final accepted docs; otherwise leave historical prompts intact.
 

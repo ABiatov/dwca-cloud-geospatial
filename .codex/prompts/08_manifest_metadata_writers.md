@@ -28,6 +28,9 @@ Generate the static output bundle metadata files: `manifest.json`, `metadata/sou
   `tests/fixtures/output_bundles/` for sample bundle fixtures.
 - Write `manifest.json` with schema versions, id, title, timestamps, generator, source summary, files inventory, layers, viewer defaults and counts.
 - Write `metadata/source.json` from archive, DwC-A, EML, dataset, rights, GBIF and OBIS provenance when available.
+- Implement the EML content extraction deferred from Prompt 02/03 by reading
+  the declared `ArchiveMetadata.metadata_file` when present and safely
+  available. Missing EML values must remain nullable source metadata fields.
 - Write `metadata/processing.json` with effective configuration, field mapping, quality rules, counts, type conversion failures, warnings and validation summary placeholder.
 - Write `reports/rejected_records.csv` only when at least one record is rejected or skipped.
 - Omit files not generated from `manifest.files`.

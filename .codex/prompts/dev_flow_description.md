@@ -61,3 +61,7 @@ At the end of each prompt:
 3. Patch later prompts immediately when the next session would otherwise receive stale instructions.
 4. In the session log, include a section named `Prompt Updates` listing which later prompt files were changed or stating `None`.
 5. If a durable architecture or output-format decision changed, update the canonical project document first, then update prompts to match the canonical document.
+
+## Current next work item
+
+`03_occurrence_parser.md`
