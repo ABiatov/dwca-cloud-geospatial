@@ -27,6 +27,17 @@
   `docs/dwca_parser.md`, the CLI command
   `dwca-cloud-geospatial inspect [--json] <archive>`, and fixtures under
   `tests/fixtures/dwca/minimal_occurrence/`.
+- Prompt 03 occurrence row reader API and docs:
+  `dwca_cloud_geospatial.occurrence.read_occurrence_rows`,
+  `iter_occurrence_rows`, `OccurrenceReadResult`,
+  `OccurrenceSourceRecord`, `docs/dwca_parser.md`, and occurrence parser
+  fixtures under `tests/fixtures/dwca/minimal_occurrence/`.
+- Post-Prompt-03 handoff clarification: the Prompt 03 `Open Issues Affecting
+  Normalization` were confirmed to be scope boundaries, not blockers before
+  Prompt 04. Final docs should preserve that split: source row reading in
+  Prompt 03, normalization in Prompt 04, quality thresholds in Prompt 05,
+  metadata/EML extraction in Prompt 08, and multi-file occurrence-core
+  streaming as deferred work unless implemented later.
 - Checklist DwC-A examples inspected after Prompt 02:
   `examples/dwca/dwca-reddatabookofukraine_plants-fungi-algae_checklist-v1.1.zip`,
   `examples/dwca/dwca-appendixiibernconventionua-v1.2.zip` and

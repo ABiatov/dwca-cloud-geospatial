@@ -16,6 +16,9 @@
 - Prompts `01` through `06`
 - Latest session logs for prompts `01` through `06`
 - Current FlatGeobuf writer and normalized occurrence implementation.
+- Prompt 03 source-record handoff API for provenance context:
+  `dwca_cloud_geospatial.occurrence.read_occurrence_rows`,
+  `OccurrenceReadResult` and `OccurrenceSourceRecord`.
 
 ## Goal
 

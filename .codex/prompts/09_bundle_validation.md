@@ -16,6 +16,9 @@
 - Prompts `01` through `08`
 - Latest session logs for prompts `01` through `08`
 - Current bundle writer implementation and tests.
+- Prompt 03 source-record handoff API for provenance context:
+  `dwca_cloud_geospatial.occurrence.read_occurrence_rows`,
+  `OccurrenceReadResult` and `OccurrenceSourceRecord`.
 
 ## Goal
 

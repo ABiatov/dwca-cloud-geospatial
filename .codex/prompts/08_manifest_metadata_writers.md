@@ -16,6 +16,13 @@
 - Prompts `01` through `07`
 - Latest session logs for prompts `01` through `07`
 - Current parser, normalization, quality, FlatGeobuf and GeoParquet writer APIs.
+- Prompt 03 source-record handoff API for parser provenance context:
+  `dwca_cloud_geospatial.occurrence.read_occurrence_rows`,
+  `OccurrenceReadResult` and `OccurrenceSourceRecord`.
+- Post-Prompt-03 handoff clarification: EML content extraction was deferred
+  deliberately and is not a blocker for Prompt 04 normalization. Prompt 08 is
+  the first prompt expected to read the declared `ArchiveMetadata.metadata_file`
+  contents for `metadata/source.json`.
 
 ## Goal
 

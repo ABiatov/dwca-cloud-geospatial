@@ -17,6 +17,16 @@
 - Prompts `01` through `03`
 - Latest session logs for prompts `01` through `03`
 - Current parser/source-record implementation and tests.
+- Prompt 03 occurrence row reader API:
+  `dwca_cloud_geospatial.occurrence.read_occurrence_rows`,
+  `iter_occurrence_rows`, `OccurrenceReadResult` and
+  `OccurrenceSourceRecord`.
+- Post-Prompt-03 handoff clarification: there are no parser blockers that
+  must be resolved before starting Prompt 04. The `Open Issues Affecting
+  Normalization` in `session_logs/2026-06-07_03_occurrence_parser.md` are
+  scope boundaries: normalization belongs here, quality thresholds belong to
+  Prompt 05, multi-file occurrence-core streaming remains deferred, and EML
+  extraction belongs to Prompt 08.
 
 ## Goal
 
@@ -25,6 +35,8 @@ Convert parsed source records into the normalized occurrence schema and rejected
 ## Tasks
 
 - Define normalized occurrence data structures or schema using stable snake_case field names.
+- Consume `OccurrenceSourceRecord` values through `value_for_term(term)` or
+  `values_by_term`; do not hard-code source positions.
 - Map Darwin Core terms into the canonical fields documented in `docs/output_format.md`.
 - Reuse existing test fixture roots from Prompt 01; add normalization fixtures
   under `tests/fixtures/` only with explicit paths.
@@ -35,6 +47,8 @@ Convert parsed source records into the normalized occurrence schema and rejected
 - Preserve nullable dataset, GBIF and OBIS provenance fields only when present in source metadata or records.
 - Create the rejected-record model aligned with `reports/rejected_records.csv`, but do not require writing the CSV in this prompt.
 - Add focused tests for accepted and rejected records.
+- Do not treat Prompt 03 deferred multi-file occurrence-core streaming or EML
+  extraction as prerequisites for normalization.
 
 ## Constraints
 

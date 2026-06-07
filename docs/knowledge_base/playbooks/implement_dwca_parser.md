@@ -27,7 +27,8 @@ Build a safe parser that reads a DwC-A archive descriptor and streams declared c
 6. Read CSV rows using delimiter, quote, encoding, and header settings from `meta.xml`.
 7. Apply or preserve default values according to accepted policy.
 8. Add source lineage fields or metadata.
-9. Emit row batches and parse warnings.
+9. Emit `OccurrenceSourceRecord` entries through a structured result object
+   and report row parse failures as diagnostics with source context.
 10. Add fixture tests for small archives, missing files, defaults, extensions, malformed rows and non-occurrence checklist archives.
 
 ## Acceptance Evidence

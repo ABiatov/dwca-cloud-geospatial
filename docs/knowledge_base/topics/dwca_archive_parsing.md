@@ -60,14 +60,18 @@ DwC-A field-level defaults are part of the archive schema and should be applied 
 - Inspect zip members without unsafe extraction.
 - Reject or sanitize paths with traversal segments or absolute paths.
 - Keep overwrite behavior explicit.
-- Treat encodings and malformed CSV rows as validation concerns with reported warnings.
+- Treat encodings and malformed CSV rows as parser concerns with structured
+  diagnostics. Occurrence-core row parse failures currently emit
+  `occurrence_row_parse_error` diagnostics with source file and row context.
 
 ## Resolved By Accepted Docs
 
 - Baseline parsing belongs in the project-owned Python core library layer. `docs/development_plan.md` M1 requires safe archive inspection, a `meta.xml` parser, occurrence core detection, chunked row reading, metadata file discovery and parser diagnostics; full EML content extraction is deferred to metadata/source writer work. ADR-001 requires CLI, GUI and future integrations to call the same core conversion APIs.
+- The Prompt 03 row reader API is `dwca_cloud_geospatial.occurrence.read_occurrence_rows(path)`. It returns `OccurrenceReadResult` with `OccurrenceSourceRecord` entries for later normalization.
 - Output provenance must include `source_record_id`, `source_file` and `source_row_number`, per `docs/development_plan.md` M2 and `docs/output_format.md`.
 - `source_row_number` is the physical 1-based row number in the source data file, including skipped header rows. `source_data_row_number` is the logical 1-based data-record number after declared header rows when available. Diagnostics and rejection reports should include both values where practical.
 - `meta.xml` field defaults are applied only when the declared field has no source column index or the source column is not present in the row shape; they are not used to replace explicit empty strings or invalid source values in present columns.
+- Occurrence row reading is complete enough to start normalization; deferred multi-file occurrence-core streaming and EML content extraction are not blockers for Prompt 04.
 
 ## Open Questions
 

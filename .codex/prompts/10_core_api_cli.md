@@ -18,6 +18,10 @@
 - Prompts `01` through `09`
 - Latest session logs for prompts `01` through `09`
 - Current parser, normalization, writer and validator APIs.
+- Prompt 03 occurrence row reader API:
+  `dwca_cloud_geospatial.occurrence.read_occurrence_rows`,
+  `iter_occurrence_rows`, `OccurrenceReadResult` and
+  `OccurrenceSourceRecord`.
 
 ## Goal
 
@@ -45,6 +49,9 @@ Expose repeatable conversion, inspection and validation workflows through a thin
 - Make conversion fail fast with an actionable error when the inspected archive
   has no occurrence core or lacks coordinate terms. Checklist/Taxon archives are
   inspectable but outside the MVP occurrence geospatial conversion workflow.
+- Reuse the occurrence row reader diagnostics for missing occurrence cores and
+  unsupported multi-file occurrence cores instead of duplicating row-reader
+  logic in CLI handlers.
 - Add or update `docs/converter.md`.
 - Add integration tests for CLI success, CLI failure and overwrite behavior.
 

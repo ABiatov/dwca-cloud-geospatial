@@ -17,6 +17,12 @@
 - Prompts `01` through `04`
 - Latest session logs for prompts `01` through `04`
 - Current normalization and rejected-record tests.
+- Prompt 03 source-record handoff API for provenance context:
+  `dwca_cloud_geospatial.occurrence.read_occurrence_rows`,
+  `OccurrenceReadResult` and `OccurrenceSourceRecord`.
+- Post-Prompt-03 handoff clarification: optional-field warning thresholds and
+  critical-field rejection policy were intentionally left for Prompt 05; they
+  are not parser blockers and should not be moved back into Prompt 04.
 
 ## Goal
 

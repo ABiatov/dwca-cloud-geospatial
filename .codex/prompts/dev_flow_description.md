@@ -59,9 +59,10 @@ At the end of each prompt:
 1. Add or update `session_logs/YYYY-MM-DD_<prompt-number>_<short-name>.md`.
 2. Review all later prompt files for references to paths, commands, APIs, schemas, or acceptance criteria changed in this session.
 3. Patch later prompts immediately when the next session would otherwise receive stale instructions.
-4. In the session log, include a section named `Prompt Updates` listing which later prompt files were changed or stating `None`.
-5. If a durable architecture or output-format decision changed, update the canonical project document first, then update prompts to match the canonical document.
+4. Update the canonical `## Current next work item` pointer in this file to exactly one next prompt, or to `None` only when the active sequence is complete.
+5. In the session log, include a section named `Prompt Updates` listing which later prompt files were changed and whether `.codex/prompts/dev_flow_description.md` was updated, or stating `None`.
+6. If a durable architecture or output-format decision changed, update the canonical project document first, then update prompts to match the canonical document.
 
 ## Current next work item
 
-`03_occurrence_parser.md`
+`04_occurrence_normalization.md`
