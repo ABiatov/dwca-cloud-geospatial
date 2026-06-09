@@ -1,6 +1,6 @@
 ---
 id: flatgeobuf-output
-status: candidate
+status: accepted
 applies_to:
   - geospatial conversion
   - FlatGeobuf outputs
@@ -14,7 +14,7 @@ sources:
 
 ## Use In This Project
 
-FlatGeobuf is a candidate lightweight vector exchange and browser-accessible geospatial output. It is more viewer-friendly than analytical Parquet for some clients because it is streamable and supports HTTP range request access patterns.
+FlatGeobuf is the accepted MVP lightweight vector exchange and browser-accessible geospatial output. It is more viewer-friendly than analytical Parquet for some clients because it is streamable and supports HTTP range request access patterns.
 
 ## Fit
 
@@ -32,9 +32,9 @@ Use FlatGeobuf when the project needs:
 - It complements GeoParquet rather than replacing it.
 - It is likely a better exchange/viewer artifact than a primary analytical artifact.
 
-## Candidate Output Role
+## Output Role
 
-Candidate or future output roles:
+Accepted and planned output roles:
 
 - GeoParquet can be the analytical table.
 - FlatGeobuf can be an exchange or viewer data layer.
@@ -54,6 +54,52 @@ Accepted MVP override: FlatGeobuf is the default viewer/exchange output, not opt
   `class_` is emitted as output column `class`.
 - Additional Darwin Core fields required in FlatGeobuf beyond the previously accepted viewer fields are: `license`, `references`, `rightsHolder`, `identifiedBy`, `scientificName`, `kingdom`, `phylum`, `class`, `order`, `family`, `genus`, `taxonRank`, `verbatimScientificName`, `coordinateUncertaintyInMeters` and `degreeOfEstablishment`. The generated column names should follow the normalized occurrence schema naming used by the output contract.
 
+## Implemented Prompt 06 Writer
+
+- Writer API:
+  `dwca_cloud_geospatial.flatgeobuf.write_flatgeobuf_occurrences`.
+- Output path: `exports/occurrences.fgb`.
+- Production backend: Pyogrio/GDAL through PyArrow; do not use GeoPandas for
+  the production writer path.
+- Development dependency extra: install with
+  `python -m pip install -e "${REPO}[dev,flatgeobuf]"`.
+- Verified local stack after Prompt 06 follow-up: Pyogrio `0.12.1`, GDAL
+  `3.11.4` as reported by Pyogrio, PyArrow `24.0.0`, and FlatGeobuf driver
+  support `rw`.
+- Dependency behavior: if Pyogrio/PyArrow/GDAL support is unavailable, the
+  writer raises `FlatGeobufDependencyError`; tests can still validate
+  projection and guardrails through the isolated backend seam.
+- Verification evidence: `tests/test_flatgeobuf_writer.py` passes with
+  `6 passed` when the optional writer stack is installed, and the full suite
+  passed with `27 passed`.
+
+## Spatial Index And Large Outputs
+
+- Prompt 06 requests `SPATIAL_INDEX=YES` by default.
+- `FlatGeobufWriterOptions(spatial_index=False)` requests
+  `SPATIAL_INDEX=NO` and suppresses spatial-index memory warnings.
+- Initial warning code: `large_indexed_flatgeobuf_write`.
+- Initial warning thresholds: indexed writes at `>= 1,000,000` accepted
+  features or estimated spatial-index memory `>= 256 MiB`.
+- Initial estimate: `64` bytes per accepted feature for spatial-index
+  construction.
+- Large-output warnings are non-fatal. The writer warns before the backend
+  write but still attempts the indexed write unless conversion options
+  explicitly disable the index.
+- Example: 5 million accepted features estimate about 320,000,000 bytes for
+  spatial-index construction, so the writer emits
+  `large_indexed_flatgeobuf_write` and still attempts the indexed write by
+  default.
+
+## Current Large-Data Limitation
+
+Prompt 06 does not yet provide a fully streaming large-data pipeline. The
+current parser, normalizer and FlatGeobuf writer materialize full record sets
+in memory. Very large DwC-A inputs may take a long time, consume substantial
+memory or fail until chunked parser/normalizer/writer handoff is implemented.
+
 ## Open Questions
 
-- None currently.
+- When Prompt 10 exposes conversion options, decide whether users can request
+  `SPATIAL_INDEX=NO` from CLI/core configuration and how large indexed-write
+  warnings are displayed.

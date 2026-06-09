@@ -2,7 +2,7 @@
 
 Status: Accepted baseline for MVP
 
-Last updated: 2026-06-05
+Last updated: 2026-06-09
 
 ## Purpose
 
@@ -491,6 +491,20 @@ Required behavior:
 - Write a spatial index by default.
 - Emit a large dataset warning before indexed writes that may require substantial memory.
 - Store `quality_flags` using the same nullable `|`-delimited string representation as GeoParquet.
+
+Initial large indexed-write warning behavior:
+
+- Warning code: `large_indexed_flatgeobuf_write`.
+- Warn when indexed writes have `>= 1,000,000` accepted features or estimated
+  spatial-index construction memory `>= 256 MiB`.
+- Initial spatial-index memory estimate: `64` bytes per accepted feature.
+- The warning is non-fatal and does not automatically change the writer option
+  to `SPATIAL_INDEX=NO`; a no-index write must be explicitly requested by
+  conversion options.
+- For example, 5 million accepted features estimate about 320,000,000 bytes
+  for spatial-index construction, so they should emit
+  `large_indexed_flatgeobuf_write` before the writer attempts the indexed
+  FlatGeobuf output.
 
 Required FlatGeobuf projection columns:
 

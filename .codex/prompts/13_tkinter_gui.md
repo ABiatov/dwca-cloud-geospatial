@@ -24,6 +24,15 @@
 - Prompt 05 normalization result additions so GUI status can display
   `warning_count` and optional conversion warnings from the core workflow
   without treating them as conversion failures.
+- Prompt 06 FlatGeobuf behavior: default conversion uses
+  `exports/occurrences.fgb` with `SPATIAL_INDEX=YES` unless core conversion
+  exposes and the user selects an explicit no-index option. Large indexed
+  writes emit structured warning code `large_indexed_flatgeobuf_write`; GUI
+  status should surface that as a warning, not a failure.
+- Prompt 06 dependency setup: FlatGeobuf-capable development installs use
+  `python -m pip install -e "${REPO}[dev,flatgeobuf]"`. If the core API
+  raises `FlatGeobufDependencyError`, GUI errors should preserve its actionable
+  dependency message.
 
 ## Goal
 
@@ -36,6 +45,8 @@ Implement a primitive `tkinter` desktop entry point for non-CLI users while reus
 - Provide output format options consistent with the CLI: FlatGeobuf default and explicit GeoParquet when supported.
 - Add an overwrite checkbox required before replacing an existing output path.
 - Show progress/status and actionable errors.
+- Show non-fatal conversion warnings, including large FlatGeobuf indexed-write
+  warnings, separately from conversion failures.
 - Provide a way to open the generated output directory or show viewer instructions.
 - Add tests for GUI-adjacent logic where possible without requiring an interactive display.
 - Document GUI usage in `docs/converter.md` or another accepted docs path.

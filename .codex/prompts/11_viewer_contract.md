@@ -17,6 +17,17 @@
 - Prompts `01` through `10`
 - Latest session logs for prompts `01` through `10`
 - Current generated bundle examples/tests.
+- Prompt 06 FlatGeobuf output path and projection:
+  `exports/occurrences.fgb` from `DEFAULT_FLATGEOBUF_RELATIVE_PATH`, required
+  columns from `FLATGEOBUF_PROJECTION_COLUMNS`, point geometry in
+  longitude/latitude order, CRS assumption `OGC:CRS84`, and default indexed
+  writes with dependency-specific validation when Pyogrio/PyArrow/GDAL are
+  available.
+- Prompt 06 large-output behavior: FlatGeobuf spatial indexing is requested by
+  default and large indexed writes produce metadata-worthy warnings rather than
+  automatically disabling the index. Viewer contract work should define how
+  processing warnings are displayed if Prompt 08 exposes them in
+  `metadata/processing.json`.
 - Prompt 04 normalized field model for accepted/rejected occurrence records,
   especially `NormalizedOccurrenceRecord.to_dict()` exporting the Python
   `class_` attribute as output field `class`.

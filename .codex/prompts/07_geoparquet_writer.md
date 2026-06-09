@@ -20,6 +20,12 @@
   `RejectedOccurrenceRecord`, `OccurrenceNormalizationResult`,
   `OccurrenceNormalizationCounts`, `TypeConversionFailure`,
   `OccurrenceNormalizationWarning` and `normalize_occurrence_records`.
+- Prompt 06 FlatGeobuf writer dependency follow-up: the local `.venv/` can be
+  installed with `.[dev,flatgeobuf]`, which provides `pyogrio>=0.12`,
+  `pyarrow>=24` and GDAL through Pyogrio wheels on supported platforms. The
+  verified local stack was `pyogrio 0.12.1`, GDAL `3.11.4`,
+  `pyarrow 24.0.0`, FlatGeobuf driver `rw`, and
+  `tests/test_flatgeobuf_writer.py` passed with no dependency skip.
 - Prompt 05 stores accepted-record `quality_flags` as nullable
   `|`-delimited exact tokens, adds `has_quality_flags`, and counts optional
   and critical conversion failures in `OccurrenceNormalizationResult`.

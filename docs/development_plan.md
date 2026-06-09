@@ -107,19 +107,45 @@ Rationale:
 
 - GeoPandas `to_file()` delegates file writing to Pyogrio when available, so Pyogrio/GDAL is the actual writer layer.
 - Pyogrio has full read/write support for FlatGeobuf through GDAL and can use Arrow for faster writing.
-- Pyogrio still writes an entire GeoDataFrame at once, so the MVP implementation must validate memory limits before writing very large FlatGeobuf outputs.
+- The Prompt 06 production implementation uses `pyogrio.write_arrow` with a
+  PyArrow table, not a GeoPandas GeoDataFrame. It still materializes the
+  projected record table and WKB geometries before writing, so the MVP
+  implementation must validate memory limits before writing very large
+  FlatGeobuf outputs.
 - GDAL's FlatGeobuf driver creates a spatial index by default, which is useful for static viewer and remote bbox reads, but its packed Hilbert R-tree requires memory proportional to feature count.
 
 Accepted defaults:
 
 - Library: `pyogrio` with GDAL FlatGeobuf support.
-- Engine settings: use Arrow-accelerated writes when `pyarrow` is installed.
+- Engine settings: use `pyogrio.write_arrow` with a PyArrow table; PyArrow is
+  required for the current production FlatGeobuf backend.
+- Development install: use the optional `flatgeobuf` extra from
+  `pyproject.toml`, normally `python -m pip install -e "${REPO}[dev,flatgeobuf]"`.
+  The verified local `.venv/` stack is Pyogrio `0.12.1`, GDAL `3.11.4` as
+  reported by Pyogrio, PyArrow `24.0.0`, and FlatGeobuf driver support `rw`.
 - Layer options: `SPATIAL_INDEX=YES`.
 - Spatial index: enabled by default for FlatGeobuf output.
 - Large-output guardrail: estimate spatial-index memory before writing; emit a required large dataset warning when projected memory or feature count is high enough to make the indexed write risky.
+- Initial guardrail thresholds: warn for indexed writes at `>= 1,000,000`
+  accepted features or estimated spatial-index construction memory
+  `>= 256 MiB`, using an initial estimate of `64` bytes per feature.
+- Large-output warning behavior: emit structured warning code
+  `large_indexed_flatgeobuf_write` before the backend write. The warning does
+  not fail conversion and does not automatically switch to `SPATIAL_INDEX=NO`.
+  Users or future CLI/core options must explicitly request no spatial index.
 - Geometry policy: write only accepted records with non-null point geometry.
 - Field policy: write a compact normalized occurrence field set optimized for viewer and lightweight exchange, not the full source/raw Darwin Core field set. Include geometry, required provenance fields, accepted viewer display/filter fields, coordinates, `quality_flags`, `has_quality_flags` and the additional accepted Darwin Core fields documented in `docs/output_format.md`.
 - GeoPandas role: allowed only for tests, examples and notebooks during early development. Production writer code should call Pyogrio/GDAL directly where practical.
+
+Current implementation limitation:
+
+- Prompt 06's parser, normalizer and FlatGeobuf writer still materialize full
+  record sets in memory. For very large DwC-A inputs, such as 5 million
+  accepted occurrence records, the writer estimates about 320,000,000 bytes for
+  spatial-index construction and emits `large_indexed_flatgeobuf_write`, but it
+  still attempts the indexed write by default. The process may take a long
+  time, consume substantial memory or fail until a chunked parser/normalizer/
+  writer handoff is implemented.
 
 ## Accepted MVP Viewer Filters
 
@@ -358,8 +384,7 @@ No open questions remain for the accepted MVP plan.
 
 ## Immediate Next Actions
 
-1. Implement the FlatGeobuf and GeoParquet writers, then bundle metadata and
-   validation checks.
+1. Implement the GeoParquet writer, then bundle metadata and validation checks.
 2. Implement EML content extraction during the metadata/source writer work.
 3. Keep multi-file occurrence-core streaming deferred until a real sample or
    user need requires it.

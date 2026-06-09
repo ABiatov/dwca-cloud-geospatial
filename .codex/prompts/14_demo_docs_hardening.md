@@ -43,6 +43,31 @@
   `type_conversion_failures`, `warnings`, nullable exact-token
   `quality_flags`, `has_quality_flags`, and quality-rule fixtures under
   `tests/fixtures/dwca/minimal_occurrence/quality_rules/`.
+- Prompt 06 FlatGeobuf writer API:
+  `dwca_cloud_geospatial.flatgeobuf.write_flatgeobuf_occurrences`,
+  `FlatGeobufWriteResult`, `FlatGeobufWriterOptions`,
+  `FlatGeobufWriterWarning`, `FlatGeobufDependencyError`,
+  `DEFAULT_FLATGEOBUF_RELATIVE_PATH`, `FLATGEOBUF_PROJECTION_COLUMNS`, and
+  tests in `tests/test_flatgeobuf_writer.py`. The writer produces
+  `exports/occurrences.fgb`, uses an optional Pyogrio/PyArrow/GDAL production
+  backend, requests `SPATIAL_INDEX=YES` by default, emits structured
+  `large_indexed_flatgeobuf_write` warnings for risky indexed writes, and has
+  dependency-specific real FlatGeobuf checks that skip explicitly when local
+  geospatial writer dependencies are absent.
+- Prompt 06 dependency follow-up: `pyproject.toml` includes the `flatgeobuf`
+  optional extra and `docs/developer_setup.md` documents
+  `python -m pip install -e "${REPO}[dev,flatgeobuf]"`. The local `.venv/`
+  verified Pyogrio `0.12.1`, GDAL `3.11.4`, PyArrow `24.0.0`, FlatGeobuf
+  driver `rw`, Prompt 06 writer tests with `6 passed`, and the full suite with
+  `27 passed`.
+- Prompt 06 large-data limitation to preserve in final docs: the current
+  parser, normalizer and FlatGeobuf writer still materialize full record sets
+  in memory. For very large DwC-A inputs, such as 5 million accepted
+  occurrence records, the writer estimates about 320,000,000 bytes for
+  spatial-index construction, emits `large_indexed_flatgeobuf_write`, keeps
+  `SPATIAL_INDEX=YES` by default, and attempts the write. It may take a long
+  time, consume substantial memory, or fail; it does not auto-switch to
+  `SPATIAL_INDEX=NO` unless a future accepted change introduces that behavior.
 - Post-Prompt-03 handoff clarification: the Prompt 03 `Open Issues Affecting
   Normalization` were confirmed to be scope boundaries, not blockers before
   Prompt 04. Final docs should preserve that split: source row reading in
@@ -67,8 +92,13 @@ Make the MVP understandable, repeatable and ready for external review.
   installation, CLI, GUI and viewer usage.
 - Complete or update `docs/dwca_parser.md`, `docs/converter.md`, `docs/viewer_contract.md` and `docs/deployment.md`.
 - Confirm `docs/output_format.md` matches implemented bundle behavior.
+- Confirm `docs/developer_setup.md` still documents the FlatGeobuf optional
+  dependency stack and real writer verification command.
 - Add regression tests for parser behavior, normalization, output writing and bundle validation where gaps remain.
 - Add known limitations and MVP+ roadmap, including PMTiles as deferred.
+- Document the current large-DwC-A limitation clearly: full-record
+  materialization remains a risk until chunked parser/normalizer/writer
+  handoff is implemented.
 - Document the checklist limitation clearly: checklist/Taxon DwC-A archives can
   be inspected, but the MVP converter only produces geospatial outputs from
   occurrence archives with coordinate terms.

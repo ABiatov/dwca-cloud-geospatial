@@ -28,7 +28,10 @@ Confirm that generated files are internally consistent, readable by expected too
 5. Validate GeoParquet metadata and geometry data.
 6. Confirm row counts match conversion reports.
 7. If raw core or extension table exports are generated, confirm extension relationship keys can join to core keys.
-8. Validate FlatGeobuf or PMTiles files if present.
+8. Validate FlatGeobuf or PMTiles files if present. FlatGeobuf validation is
+   dependency-dependent: use the documented `.[dev,flatgeobuf]` stack when
+   available, and report skipped geospatial file-inspection checks as warnings
+   rather than failing otherwise.
 9. Check viewer manifest paths, bounds, layers, and field names.
 10. Confirm normalized output fields use snake_case project names and do not
     emit parser/source camelCase terms; `class` is the output field, not
@@ -37,7 +40,10 @@ Confirm that generated files are internally consistent, readable by expected too
     for exact-token checks.
 12. Reconcile `warning_count`, `warnings`, and `type_conversion_failures` in
     processing metadata.
-13. Write a validation report with errors, warnings, and tool versions.
+13. Reconcile FlatGeobuf writer warnings recorded in processing metadata,
+    including non-fatal `large_indexed_flatgeobuf_write` warnings for indexed
+    writes over large accepted record sets.
+14. Write a validation report with errors, warnings, and tool versions.
 
 ## Acceptance Evidence
 
@@ -46,6 +52,8 @@ Confirm that generated files are internally consistent, readable by expected too
 - Validation reports skipped/invalid coordinate counts.
 - Validation catches malformed `quality_flags` tokens or delimiter usage.
 - Validation reconciles warning counts with processing warnings.
+- Validation treats `large_indexed_flatgeobuf_write` as a non-fatal processing
+  warning unless a later accepted core-conversion policy changes it.
 - Validation report is saved as a portable JSON or text artifact.
 
 ## Related Topics

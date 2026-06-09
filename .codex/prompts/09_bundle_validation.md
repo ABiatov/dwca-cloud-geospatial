@@ -16,6 +16,27 @@
 - Prompts `01` through `08`
 - Latest session logs for prompts `01` through `08`
 - Current bundle writer implementation and tests.
+- Prompt 06 FlatGeobuf writer API and projection constants:
+  `write_flatgeobuf_occurrences`, `FlatGeobufWriteResult`,
+  `FlatGeobufWriterWarning`, `FlatGeobufDependencyError`,
+  `DEFAULT_FLATGEOBUF_RELATIVE_PATH` and
+  `FLATGEOBUF_PROJECTION_COLUMNS`.
+- Prompt 06 dependency behavior: production writes require optional
+  Pyogrio/PyArrow/GDAL support, while tests can validate projection and
+  guardrails through the isolated backend seam. Validation should report
+  FlatGeobuf file-inspection skips as dependency-dependent warnings when local
+  dependencies are absent.
+- Prompt 06 dependency follow-up: `pyproject.toml` includes the `flatgeobuf`
+  optional extra and `docs/developer_setup.md` documents
+  `python -m pip install -e "${REPO}[dev,flatgeobuf]"`. The local `.venv/`
+  verified Pyogrio `0.12.1`, GDAL `3.11.4`, PyArrow `24.0.0`, FlatGeobuf
+  driver `rw`, `tests/test_flatgeobuf_writer.py` with `6 passed`, and the full
+  test suite with `27 passed`.
+- Prompt 06 large-output behavior: large FlatGeobuf indexed writes emit
+  structured warning code `large_indexed_flatgeobuf_write` but are not stopped
+  and do not auto-switch to `SPATIAL_INDEX=NO`. Validator work should check
+  that any emitted writer warnings are preserved in metadata once Prompt 08
+  records them.
 - Prompt 04/05 normalization model names and count fields:
   `NormalizedOccurrenceRecord`, `RejectedOccurrenceRecord`,
   `OccurrenceNormalizationResult`, `OccurrenceNormalizationCounts`,

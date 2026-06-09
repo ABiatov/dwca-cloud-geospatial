@@ -65,4 +65,4 @@ At the end of each prompt:
 
 ## Current next work item
 
-`06_flatgeobuf_writer.md`
+`07_geoparquet_writer.md`

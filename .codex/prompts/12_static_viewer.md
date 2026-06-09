@@ -18,6 +18,16 @@
 - Prompts `01` through `11`
 - Latest session logs for prompts `01` through `11`
 - Current sample output bundle generation path.
+- Prompt 06 FlatGeobuf writer output contract: MVP bundles load
+  `exports/occurrences.fgb`, with required fields from
+  `FLATGEOBUF_PROJECTION_COLUMNS`, point geometry in longitude/latitude order,
+  CRS assumption `OGC:CRS84`, nullable `quality_flags`, and
+  `has_quality_flags`.
+- Prompt 06 large-output behavior: generated FlatGeobuf files are indexed by
+  default unless conversion explicitly used `SPATIAL_INDEX=NO`. If processing
+  metadata exposes writer warning code `large_indexed_flatgeobuf_write`, the
+  viewer should treat it as a non-fatal processing warning, not as a data-load
+  error.
 - Prompt 04 normalized occurrence field names and rejection/count structures,
   especially `quality_flags`, `has_quality_flags`, `source_records`,
   `accepted_records` and `rejected_records`.

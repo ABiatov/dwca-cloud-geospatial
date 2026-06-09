@@ -18,6 +18,30 @@
 - Prompts `01` through `09`
 - Latest session logs for prompts `01` through `09`
 - Current parser, normalization, writer and validator APIs.
+- Prompt 06 FlatGeobuf writer API:
+  `dwca_cloud_geospatial.flatgeobuf.write_flatgeobuf_occurrences`,
+  `FlatGeobufWriteResult`, `FlatGeobufWriterOptions`,
+  `FlatGeobufWriterWarning`, `FlatGeobufDependencyError`,
+  `DEFAULT_FLATGEOBUF_RELATIVE_PATH` and
+  `FLATGEOBUF_PROJECTION_COLUMNS`.
+- Prompt 06 FlatGeobuf dependency behavior: default conversion should use the
+  writer for `exports/occurrences.fgb`; if Pyogrio/PyArrow/GDAL support is not
+  installed, surface `FlatGeobufDependencyError` as an actionable conversion
+  error instead of failing with an import traceback. Preserve structured
+  `large_indexed_flatgeobuf_write` warnings in conversion results and
+  processing metadata.
+- Prompt 06 dependency follow-up: the documented writer-capable development
+  install is `python -m pip install -e "${REPO}[dev,flatgeobuf]"`; local
+  verification used Pyogrio `0.12.1`, GDAL `3.11.4`, PyArrow `24.0.0` and
+  FlatGeobuf driver `rw`.
+- Prompt 06 large-output behavior to preserve unless deliberately changed:
+  `SPATIAL_INDEX=YES` is requested by default even for very large accepted
+  record sets. For example, 5 million accepted features trigger
+  `large_indexed_flatgeobuf_write` because the spatial-index memory estimate is
+  about 320,000,000 bytes, but the writer still attempts the indexed write.
+  Future core/CLI options may expose `FlatGeobufWriterOptions(spatial_index=False)`
+  for users who explicitly want `SPATIAL_INDEX=NO`; do not silently auto-disable
+  the index without updating `docs/output_format.md` and downstream prompts.
 - Prompt 04/05 normalization API:
   `dwca_cloud_geospatial.normalization.normalize_occurrence_records`,
   `OccurrenceNormalizationResult`, `OccurrenceNormalizationCounts`,
@@ -39,6 +63,8 @@ Expose repeatable conversion, inspection and validation workflows through a thin
 
 - Create or refine a core conversion API with explicit input path, output path and options.
 - Support default FlatGeobuf conversion.
+- Preserve and surface large FlatGeobuf writer warnings without treating them
+  as conversion failures by default.
 - Support explicit GeoParquet output selection.
 - Enforce overwrite guardrails: existing output paths are rejected unless `--overwrite` is passed.
 - Preserve the existing `inspect <archive>` implementation as a thin wrapper

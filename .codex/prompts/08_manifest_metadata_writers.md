@@ -16,6 +16,28 @@
 - Prompts `01` through `07`
 - Latest session logs for prompts `01` through `07`
 - Current parser, normalization, quality, FlatGeobuf and GeoParquet writer APIs.
+- Prompt 06 FlatGeobuf writer API:
+  `dwca_cloud_geospatial.flatgeobuf.write_flatgeobuf_occurrences`,
+  `FlatGeobufWriteResult`, `FlatGeobufWriterOptions`,
+  `FlatGeobufWriterWarning`, `FlatGeobufDependencyError`,
+  `DEFAULT_FLATGEOBUF_RELATIVE_PATH` and
+  `FLATGEOBUF_PROJECTION_COLUMNS`.
+- Prompt 06 writes accepted records under `exports/occurrences.fgb`, requests
+  `SPATIAL_INDEX=YES` by default, returns structured large indexed-write
+  warnings with code `large_indexed_flatgeobuf_write`, and raises
+  `FlatGeobufDependencyError` when optional Pyogrio/PyArrow/GDAL support is
+  unavailable.
+- Prompt 06 dependency follow-up: `pyproject.toml` now provides the
+  `flatgeobuf` optional extra. The documented full install command is
+  `python -m pip install -e "${REPO}[dev,flatgeobuf]"`; the local `.venv/`
+  verified Pyogrio `0.12.1`, GDAL `3.11.4`, PyArrow `24.0.0`, FlatGeobuf
+  driver `rw`, and real FlatGeobuf writer tests passed with no dependency
+  skip.
+- Prompt 06 large-output behavior: the writer does not automatically disable
+  spatial indexing for large accepted record sets. With the default
+  `spatial_index=True`, it warns before writing when feature count is high or
+  estimated index memory is high, but still attempts the indexed write unless a
+  later core-conversion policy changes that behavior.
 - Prompt 04/05 normalization API, quality and count/rejection models:
   `normalize_occurrence_records`, `OccurrenceNormalizationResult`,
   `OccurrenceNormalizationCounts`, `NormalizedOccurrenceRecord` and
@@ -52,6 +74,9 @@ Generate the static output bundle metadata files: `manifest.json`, `metadata/sou
   the declared `ArchiveMetadata.metadata_file` when present and safely
   available. Missing EML values must remain nullable source metadata fields.
 - Write `metadata/processing.json` with effective configuration, field mapping, quality rules, counts, type conversion failures, warnings and validation summary placeholder.
+- Include FlatGeobuf writer warnings, especially
+  `large_indexed_flatgeobuf_write`, in processing metadata when emitted by the
+  writer.
 - Write `reports/rejected_records.csv` only when at least one record is rejected or skipped.
 - Omit files not generated from `manifest.files`.
 - Include file size and checksum where practical.

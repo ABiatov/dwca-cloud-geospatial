@@ -31,6 +31,10 @@ dependencies = []
 dev = [
   "pytest>=8"
 ]
+flatgeobuf = [
+  "pyogrio>=0.12",
+  "pyarrow>=24"
+]
 
 [project.scripts]
 dwca-cloud-geospatial = "dwca_cloud_geospatial.cli:main"
