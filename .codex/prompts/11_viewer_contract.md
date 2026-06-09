@@ -17,6 +17,9 @@
 - Prompts `01` through `10`
 - Latest session logs for prompts `01` through `10`
 - Current generated bundle examples/tests.
+- Prompt 04 normalized field model for accepted/rejected occurrence records,
+  especially `NormalizedOccurrenceRecord.to_dict()` exporting the Python
+  `class_` attribute as output field `class`.
 
 ## Goal
 

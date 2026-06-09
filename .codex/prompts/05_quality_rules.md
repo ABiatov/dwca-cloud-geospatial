@@ -17,6 +17,14 @@
 - Prompts `01` through `04`
 - Latest session logs for prompts `01` through `04`
 - Current normalization and rejected-record tests.
+- Prompt 04 normalization API:
+  `dwca_cloud_geospatial.normalization.normalize_occurrence_records`,
+  `normalize_occurrence_record`, `OccurrenceNormalizationResult`,
+  `OccurrenceNormalizationCounts`, `NormalizedOccurrenceRecord` and
+  `RejectedOccurrenceRecord`.
+- Prompt 04 reason codes already implemented for coordinate rejection:
+  `missing_coordinates`, `invalid_latitude`, `invalid_longitude`,
+  `coordinate_out_of_range` and `zero_zero_coordinate`.
 - Prompt 03 source-record handoff API for provenance context:
   `dwca_cloud_geospatial.occurrence.read_occurrence_rows`,
   `OccurrenceReadResult` and `OccurrenceSourceRecord`.
@@ -35,7 +43,8 @@ Complete MVP quality behavior: stable `quality_flags`, type conversion failure a
   under `tests/fixtures/` only with explicit paths.
 - Represent `quality_flags` as nullable `|`-delimited string; no flags must be null.
 - Add `has_quality_flags` where the output schema requires it.
-- Implement `0,0` coordinate policy from `docs/output_format.md` and current decisions.
+- Preserve the Prompt 04 `0,0` coordinate rejection policy and reason code
+  `zero_zero_coordinate`; add tests only if quality-rule changes touch it.
 - Count type conversion failures by field and reason.
 - Apply optional-field conversion failure behavior: set normalized value to null and warn when field failure rate is `>= 5%` of parsed records.
 - Apply critical-field conversion behavior: reject affected records for coordinate and required provenance failures.

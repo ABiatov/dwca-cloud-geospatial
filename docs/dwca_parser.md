@@ -1,15 +1,16 @@
-# DwC-A Parser
+# DwC-A Parser And Occurrence Normalization Handoff
 
-Status: Accepted parser behavior for inspection and occurrence row reading
+Status: Accepted parser behavior for inspection, occurrence row reading and
+normalization handoff
 
 ## Scope
 
 The current parser implementation supports safe inspection of local Darwin
 Core Archives and occurrence-core row reading. It parses `meta.xml`, reports
 archive structure and reads occurrence source rows into parser-level source
-records. It does not normalize coordinates, normalize dates, validate Darwin
-Core values into the final occurrence schema or write geospatial output
-bundles.
+records. The separate normalization API consumes those source records and
+builds accepted/rejected occurrence models. This document covers that handoff,
+but geospatial output bundle writing remains out of scope here.
 
 Supported inputs:
 
@@ -164,9 +165,8 @@ reading the affected occurrence core file.
 
 ## Parser To Normalization Handoff
 
-Occurrence row reading is complete enough to start occurrence normalization.
-There are no parser blockers that must be resolved before the normalization
-work begins.
+Occurrence row reading feeds the occurrence normalization API. There are no
+parser blockers that must be resolved before normalization work continues.
 
 `OccurrenceSourceRecord` entries are intentionally source records only. They
 preserve term-addressable values, raw row cells, field metadata, source file,
@@ -183,6 +183,42 @@ Deferred parser-adjacent work should not block normalization:
   will read the declared `ArchiveMetadata.metadata_file` when available.
 - Optional-field warning thresholds and critical-field rejection policy belong
   to the quality-rule stage, not the row reader.
+
+## Occurrence Normalization API
+
+Use `dwca_cloud_geospatial.normalization.normalize_occurrence_records(records)`
+to convert `OccurrenceSourceRecord` values into accepted normalized records and
+rejected records. It returns an `OccurrenceNormalizationResult` with:
+
+- `accepted_records`, a tuple of `NormalizedOccurrenceRecord` values.
+- `rejected_records`, a tuple of `RejectedOccurrenceRecord` values aligned
+  with the future `reports/rejected_records.csv` schema.
+- `counts`, an `OccurrenceNormalizationCounts` value with `source_records`,
+  `parsed_records`, `accepted_records` and `rejected_records`.
+
+`NormalizedOccurrenceRecord` uses project-owned snake_case field names from
+`docs/output_format.md`. The Python attribute for the Darwin Core class field
+is `class_` because `class` is reserved in Python; `to_dict()` exports it as
+`class` for output projections.
+
+Normalization consumes source values through `OccurrenceSourceRecord.value_for_term(term)`.
+It does not hard-code source column positions. It parses
+`decimal_longitude` and `decimal_latitude` as finite floats, validates
+longitude/latitude ranges, rejects exact `0,0` coordinates, normalizes
+single-value ISO-style `event_date` values where practical and derives
+`event_year` from `eventDate` or `year`.
+
+Current normalization rejection reason codes are:
+
+- `missing_coordinates`
+- `invalid_latitude`
+- `invalid_longitude`
+- `coordinate_out_of_range`
+- `zero_zero_coordinate`
+
+The rejected-record model also preserves the output-contract placeholder
+reason codes `missing_required_field`, `row_parse_error` and
+`type_conversion_failed` for later conversion/reporting stages.
 
 ## Diagnostics
 
@@ -219,5 +255,6 @@ These decisions are accepted for the current MVP sequence:
   preserves the declared metadata file path, and source metadata extraction
   should be implemented with the output metadata/source writer work.
 - Occurrence row reading intentionally does not normalize coordinates, dates
-  or Darwin Core terms into the final occurrence schema. That belongs to
-  Prompt 04 and later conversion stages.
+  or Darwin Core terms into the final occurrence schema. Those responsibilities
+  are handled by the normalization API documented above and later quality-rule
+  and conversion stages.

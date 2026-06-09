@@ -18,6 +18,9 @@
 - Prompts `01` through `12`
 - Latest session logs for prompts `01` through `12`
 - Current core conversion API, CLI and viewer launch instructions.
+- Prompt 04 normalization result boundaries so GUI status/count displays use
+  accepted/rejected counts from the core workflow rather than re-normalizing
+  occurrence rows.
 
 ## Goal
 

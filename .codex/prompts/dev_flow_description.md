@@ -65,4 +65,4 @@ At the end of each prompt:
 
 ## Current next work item
 
-`04_occurrence_normalization.md`
+`05_quality_rules.md`

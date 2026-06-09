@@ -18,6 +18,10 @@
 - Prompts `01` through `09`
 - Latest session logs for prompts `01` through `09`
 - Current parser, normalization, writer and validator APIs.
+- Prompt 04 normalization API:
+  `dwca_cloud_geospatial.normalization.normalize_occurrence_records`,
+  `OccurrenceNormalizationResult`, `NormalizedOccurrenceRecord` and
+  `RejectedOccurrenceRecord`.
 - Prompt 03 occurrence row reader API:
   `dwca_cloud_geospatial.occurrence.read_occurrence_rows`,
   `iter_occurrence_rows`, `OccurrenceReadResult` and

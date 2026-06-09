@@ -30,7 +30,10 @@ Confirm that generated files are internally consistent, readable by expected too
 7. If raw core or extension table exports are generated, confirm extension relationship keys can join to core keys.
 8. Validate FlatGeobuf or PMTiles files if present.
 9. Check viewer manifest paths, bounds, layers, and field names.
-10. Write a validation report with errors, warnings, and tool versions.
+10. Confirm normalized output fields use snake_case project names and do not
+    emit parser/source camelCase terms; `class` is the output field, not
+    Python attribute `class_`.
+11. Write a validation report with errors, warnings, and tool versions.
 
 ## Acceptance Evidence
 

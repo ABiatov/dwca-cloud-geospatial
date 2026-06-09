@@ -49,8 +49,8 @@ More setup details are documented in [docs/developer_setup.md](docs/developer_se
 
 ## MVP Outputs
 
-- GeoParquet for analytical workflows.
-- FlatGeobuf for lightweight geospatial exchange.
+- FlatGeobuf for the default lightweight geospatial exchange and viewer output.
+- GeoParquet for analytical workflows when explicitly selected.
 - Metadata describing source files, processing parameters and generated outputs.
 - A minimal static MapLibre viewer.
 

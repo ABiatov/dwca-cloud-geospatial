@@ -32,6 +32,12 @@
   `iter_occurrence_rows`, `OccurrenceReadResult`,
   `OccurrenceSourceRecord`, `docs/dwca_parser.md`, and occurrence parser
   fixtures under `tests/fixtures/dwca/minimal_occurrence/`.
+- Prompt 04 occurrence normalization API and docs:
+  `dwca_cloud_geospatial.normalization.normalize_occurrence_records`,
+  `normalize_occurrence_record`, `OccurrenceNormalizationResult`,
+  `OccurrenceNormalizationCounts`, `NormalizedOccurrenceRecord`,
+  `RejectedOccurrenceRecord`, `docs/dwca_parser.md`, and normalization
+  fixtures under `tests/fixtures/dwca/minimal_occurrence/normalization/`.
 - Post-Prompt-03 handoff clarification: the Prompt 03 `Open Issues Affecting
   Normalization` were confirmed to be scope boundaries, not blockers before
   Prompt 04. Final docs should preserve that split: source row reading in

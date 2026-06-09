@@ -18,6 +18,9 @@
 - Prompts `01` through `11`
 - Latest session logs for prompts `01` through `11`
 - Current sample output bundle generation path.
+- Prompt 04 normalized occurrence field names and rejection/count structures,
+  especially `quality_flags`, `has_quality_flags`, `source_records`,
+  `accepted_records` and `rejected_records`.
 
 ## Goal
 

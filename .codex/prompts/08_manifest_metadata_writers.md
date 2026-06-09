@@ -16,6 +16,17 @@
 - Prompts `01` through `07`
 - Latest session logs for prompts `01` through `07`
 - Current parser, normalization, quality, FlatGeobuf and GeoParquet writer APIs.
+- Prompt 04 normalization API and count/rejection models:
+  `normalize_occurrence_records`, `OccurrenceNormalizationResult`,
+  `OccurrenceNormalizationCounts`, `NormalizedOccurrenceRecord` and
+  `RejectedOccurrenceRecord`.
+- Use Prompt 04 counts for `source_records`, `parsed_records`,
+  `accepted_records` and `rejected_records`; use
+  `RejectedOccurrenceRecord.to_dict()` or an equivalent explicit column
+  mapping for `reports/rejected_records.csv`.
+- When serializing accepted normalized records for metadata/projection helpers,
+  preserve the Prompt 04 `class_` to output `class` mapping and avoid emitting
+  source camelCase Darwin Core terms as normalized fields.
 - Prompt 03 source-record handoff API for parser provenance context:
   `dwca_cloud_geospatial.occurrence.read_occurrence_rows`,
   `OccurrenceReadResult` and `OccurrenceSourceRecord`.

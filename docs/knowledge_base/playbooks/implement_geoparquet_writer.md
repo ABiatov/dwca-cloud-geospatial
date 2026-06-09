@@ -16,20 +16,26 @@ sources:
 
 ## Goal
 
-Write occurrence records with usable coordinates to a valid GeoParquet file while preserving Darwin Core fields and provenance.
+Write accepted normalized occurrence records with usable coordinates to a valid
+GeoParquet file while preserving project fields and provenance.
 
 ## Steps
 
-1. Start from parsed core table batches.
-2. Normalize or cast coordinate fields according to selected conversion mode.
-3. Validate latitude and longitude ranges.
-4. Build point geometry from longitude, latitude.
-5. Preserve original coordinate columns.
+1. Start from accepted `NormalizedOccurrenceRecord` values produced by
+   `normalize_occurrence_records`.
+2. Use parsed `decimal_longitude` and `decimal_latitude`; do not repeat
+   parser-level Darwin Core term extraction.
+3. Build point geometry from longitude, latitude.
+4. Preserve original coordinate strings through `raw_decimal_longitude` and
+   `raw_decimal_latitude` when included in the projection.
+5. Exclude `RejectedOccurrenceRecord` values from GeoParquet rows; they belong
+   in reports/metadata.
 6. Write Parquet with compression and schema metadata.
 7. Add GeoParquet metadata for geometry column, CRS, geometry type, and bbox.
-8. Record null-geometry or skipped-row counts.
+8. Record accepted/rejected counts from `OccurrenceNormalizationResult`.
 9. Validate output with at least one GeoParquet-aware tool or reader.
-10. Add tests for valid coordinates, invalid coordinates, null geometry, and metadata.
+10. Add tests for accepted coordinates, rejected coordinates, projection
+    fields, `class_` to `class` output naming, row counts and metadata.
 
 ## Candidate Defaults
 
@@ -50,4 +56,3 @@ Write occurrence records with usable coordinates to a valid GeoParquet file whil
 
 - `../topics/geoparquet_output.md`
 - `../topics/validation_and_quality.md`
-

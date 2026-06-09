@@ -1,6 +1,6 @@
 # Developer Setup
 
-Status: Initial project skeleton
+Status: Active development setup
 
 ## Paths
 

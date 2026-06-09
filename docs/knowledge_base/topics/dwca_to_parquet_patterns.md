@@ -76,6 +76,11 @@ Candidate defaults to evaluate:
 ## Resolved By Accepted Docs
 
 - The MVP baseline is interpreted normalized occurrence conversion, not a raw-first archive table export. `docs/development_plan.md` M2 defines conversion into the normalized occurrence schema accepted by `docs/output_format.md`; raw table preservation can remain a future or optional mode.
+- Prompt 04 established the normalized occurrence boundary:
+  `normalize_occurrence_records` returns accepted `NormalizedOccurrenceRecord`
+  values and rejected `RejectedOccurrenceRecord` values. GeoParquet and other
+  geospatial writers should consume accepted normalized records rather than
+  repeating parser-level Darwin Core term extraction.
 - Final geospatial outputs should contain accepted occurrence records with usable point geometry, while skipped or rejected coordinate rows are preserved in diagnostics/reports. This follows `docs/development_plan.md` M2-M3 and `docs/output_format.md`.
 - The output bundle manifest and JSON metadata are the main discovery and provenance contract. `docs/output_format.md` defines `manifest.json`, `metadata/source.json` and `metadata/processing.json` as required bundle files; Parquet footers should carry format-specific metadata such as GeoParquet geometry metadata and useful file metadata, not replace the manifest.
 - Full raw table export for DwC-A core and extension tables is needed after MVP, but it should not be added to the MVP output scope. The MVP parser should still be designed so this future mode is straightforward: read core and extension tables through `meta.xml`, preserve field metadata, preserve relationship keys such as `_id` and `_coreid`, and retain source file and row-number provenance.

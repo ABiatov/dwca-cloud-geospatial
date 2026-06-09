@@ -2,7 +2,7 @@
 
 Status: Accepted MVP plan
 
-Last updated: 2026-06-07
+Last updated: 2026-06-09
 
 ## Purpose
 
@@ -355,12 +355,11 @@ No open questions remain for the accepted MVP plan.
 
 ## Immediate Next Actions
 
-1. Implement occurrence normalization and rejection reason reporting from
-   `OccurrenceSourceRecord` values produced by the Prompt 03 row reader.
-2. Implement quality rules and conversion failure accounting, including
+1. Implement quality rules and conversion failure accounting on top of the
+   Prompt 04 `OccurrenceNormalizationResult`, including
    optional-field warning thresholds and critical-field rejection policy.
-3. Implement the FlatGeobuf and GeoParquet writers, then bundle metadata and
+2. Implement the FlatGeobuf and GeoParquet writers, then bundle metadata and
    validation checks.
-4. Implement EML content extraction during the metadata/source writer work.
-5. Keep multi-file occurrence-core streaming deferred until a real sample or
+3. Implement EML content extraction during the metadata/source writer work.
+4. Keep multi-file occurrence-core streaming deferred until a real sample or
    user need requires it.

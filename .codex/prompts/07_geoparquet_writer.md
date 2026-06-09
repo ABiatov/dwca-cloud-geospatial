@@ -15,7 +15,14 @@
 - `docs/developer_setup.md`
 - Prompts `01` through `06`
 - Latest session logs for prompts `01` through `06`
-- Current FlatGeobuf writer and normalized occurrence implementation.
+- Current FlatGeobuf writer and normalized occurrence implementation,
+  including Prompt 04 `NormalizedOccurrenceRecord`,
+  `RejectedOccurrenceRecord`, `OccurrenceNormalizationResult`,
+  `OccurrenceNormalizationCounts` and `normalize_occurrence_records`.
+- Use `NormalizedOccurrenceRecord.to_dict()` or an equivalent explicit
+  projection when writing output fields so the Python attribute `class_`
+  becomes the normalized output column `class`, and no source camelCase terms
+  are exposed.
 - Prompt 03 source-record handoff API for provenance context:
   `dwca_cloud_geospatial.occurrence.read_occurrence_rows`,
   `OccurrenceReadResult` and `OccurrenceSourceRecord`.

@@ -1,0 +1,8 @@
+occurrenceID	scientificName	eventDate	year	decimalLatitude	decimalLongitude	coordinateUncertaintyInMeters	geodeticDatum	datasetName	license	gbifID	datasetKey	obisID	iucnRedListCategory	countryCode	basisOfRecord
+occ-accepted	Example species	2020-05-17T12:30:00Z		38.7223	-9.1393	25	WGS84	Sample dataset	CC-BY-4.0	12345	dataset-key-1	obis-1	LC	PT	HUMAN_OBSERVATION
+occ-year-only	Year species		1999	40.1	-8.2		WGS84							PT	PRESERVED_SPECIMEN
+occ-missing-coordinate	Missing coordinate species	2021-01-01		12.3											
+occ-invalid-latitude	Invalid latitude species	2021-01-01		north	10										
+occ-invalid-longitude	Invalid longitude species	2021-01-01		10	west										
+occ-out-of-range	Out range species	2021-01-01		91	10										
+occ-zero-zero	Zero coordinate species	2021-01-01		0	0										

@@ -22,7 +22,8 @@ GeoParquet is the primary analytical geospatial output for occurrence records wi
 
 ## Geometry Rules
 
-- Build point geometry only from parseable `decimalLongitude` and `decimalLatitude`.
+- Build point geometry only from parsed normalized `decimal_longitude` and
+  `decimal_latitude`.
 - Store coordinates in longitude, latitude order.
 - Preserve original coordinate columns alongside geometry.
 - Use null geometry or rejected-row reporting for missing or invalid coordinates, according to the accepted output policy.
@@ -69,6 +70,10 @@ Validation should check both metadata and actual data where possible.
 ## Resolved By Accepted Docs
 
 - The accepted baseline GeoParquet version is `1.1.0`, with `OGC:CRS84`, WKB point geometry, ZSTD compression, enabled statistics and configurable row group size. This is recorded in the accepted GeoParquet writer stack in `docs/development_plan.md`.
+- GeoParquet writing should start from accepted `NormalizedOccurrenceRecord`
+  values produced by Prompt 04 normalization, not parser-level
+  `OccurrenceSourceRecord` rows. Rejected coordinate rows belong in
+  `reports/rejected_records.csv` and processing metadata.
 - File-level bbox metadata should be included in GeoParquet metadata. A GeoParquet 1.1 covering bbox column is only something to evaluate for large outputs, not a required MVP project schema column.
 - Spatial sorting is not mandatory for all MVP outputs. It is a large-data extension to evaluate after the first writer works, using simple lon/lat sorting first or optional DuckDB/geoparquet-io Hilbert-sort workflows.
 - GeoParquet 2.0 support is deferred to post-MVP. The MVP and default output remain GeoParquet `1.1.0` for broad reader compatibility. GeoParquet 2.0 may be added later as an explicit opt-in output option only after target downstream readers and validation tools demonstrate reliable support. Adding 2.0 must not change the default GeoParquet version without a separate accepted decision.

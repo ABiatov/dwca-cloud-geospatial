@@ -9,6 +9,14 @@ from dwca_cloud_geospatial.occurrence import (
     iter_occurrence_rows,
     read_occurrence_rows,
 )
+from dwca_cloud_geospatial.normalization import (
+    NormalizedOccurrenceRecord,
+    OccurrenceNormalizationCounts,
+    OccurrenceNormalizationResult,
+    RejectedOccurrenceRecord,
+    normalize_occurrence_record,
+    normalize_occurrence_records,
+)
 
 try:
     __version__ = version("dwca-cloud-geospatial")
@@ -20,6 +28,12 @@ __all__ = [
     "inspect_dwca",
     "OccurrenceReadResult",
     "OccurrenceSourceRecord",
+    "NormalizedOccurrenceRecord",
+    "OccurrenceNormalizationCounts",
+    "OccurrenceNormalizationResult",
+    "RejectedOccurrenceRecord",
     "iter_occurrence_rows",
+    "normalize_occurrence_record",
+    "normalize_occurrence_records",
     "read_occurrence_rows",
 ]

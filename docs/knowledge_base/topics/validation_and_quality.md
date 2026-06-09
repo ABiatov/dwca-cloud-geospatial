@@ -43,13 +43,20 @@ Check:
 - null, empty, or invalid coordinates are counted;
 - geometry nulls and rejected rows are explained.
 
-Candidate quality flags:
+Implemented coordinate rejection reason codes from occurrence normalization:
 
 - `missing_coordinates`
 - `invalid_latitude`
 - `invalid_longitude`
 - `zero_zero_coordinate`
 - `coordinate_out_of_range`
+
+These are rejection reason codes for rows excluded from accepted geospatial
+outputs, not `quality_flags` on accepted records. Prompt 05 owns quality flag
+assignment for accepted records.
+
+Candidate future quality or conversion diagnostics:
+
 - `type_conversion_failed`
 - `dwca_default_applied`
 
@@ -79,6 +86,11 @@ Write diagnostics as portable files, likely JSON and/or CSV:
 
 ## Resolved By Accepted Docs
 
+- Prompt 04 implemented occurrence normalization through
+  `dwca_cloud_geospatial.normalization.normalize_occurrence_records`. It
+  returns `OccurrenceNormalizationResult` with `accepted_records`,
+  `rejected_records` and counts for `source_records`, `parsed_records`,
+  `accepted_records` and `rejected_records`.
 - Invalid or incomplete coordinate records are rejected from geospatial outputs and preserved through diagnostics/reports, including stable reason codes. `docs/development_plan.md` M2 requires invalid or incomplete coordinate records to be rejected, M3 requires `reports/rejected_records.csv` when records are rejected or skipped, and `docs/output_format.md` makes that report conditional on at least one rejected/skipped record.
 - Validation should exist both during conversion and as a separate validation surface. `docs/development_plan.md` M3 calls for a bundle validation command or API, and M4 calls for a CLI command for validating an existing output bundle.
 - For MVP, type conversion failures should be counted by field and reason in processing metadata. Optional-field conversion failures should set normalized values to null and emit warnings when the failure rate for a field is `>= 5%` of parsed records. Critical-field failures, including coordinate parsing failures, should reject affected records with stable reason codes. The conversion should fail only when no accepted occurrence records remain, required provenance fields cannot be produced, or parser/metadata structure prevents reliable row interpretation. Future releases may add configurable warning/failure thresholds.
