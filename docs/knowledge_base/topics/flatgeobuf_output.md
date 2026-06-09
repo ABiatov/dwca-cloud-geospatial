@@ -47,11 +47,11 @@ Accepted MVP override: FlatGeobuf is the default viewer/exchange output, not opt
 - FlatGeobuf is the default MVP output when the user does not choose an explicit conversion format. `docs/development_plan.md` and `docs/output_format.md` both record `exports/occurrences.fgb` as the default output.
 - FlatGeobuf should contain accepted records with non-null point geometry, not rejected or null-geometry rows. Rejected or skipped rows are represented through diagnostics/reports, especially conditional `reports/rejected_records.csv`.
 - FlatGeobuf must include the viewer-required fields and MVP filter fields when those fields are present in the generated bundle, per `docs/development_plan.md` M3 and M5.
-- FlatGeobuf should use a compact normalized occurrence field set optimized for viewer and lightweight exchange, not the full source/raw Darwin Core field set. It must include geometry, required provenance fields, accepted viewer display fields, accepted filter fields when present, coordinates and quality flags. Full raw/core/extension table preservation belongs in future raw Parquet-family exports, not in the MVP FlatGeobuf layer.
+- FlatGeobuf should use a compact normalized occurrence field set optimized for viewer and lightweight exchange, not the full source/raw Darwin Core field set. It must include geometry, required provenance fields, accepted viewer display fields, accepted filter fields when present, coordinates, nullable `quality_flags` and `has_quality_flags`. Full raw/core/extension table preservation belongs in future raw Parquet-family exports, not in the MVP FlatGeobuf layer.
 - FlatGeobuf writing should start from accepted `NormalizedOccurrenceRecord`
-  values produced by Prompt 04 normalization. Use `to_dict()` or an equivalent
-  explicit projection so Python attribute `class_` is emitted as output column
-  `class`.
+  values produced by normalization after Prompt 05 quality rules. Use
+  `to_dict()` or an equivalent explicit projection so Python attribute
+  `class_` is emitted as output column `class`.
 - Additional Darwin Core fields required in FlatGeobuf beyond the previously accepted viewer fields are: `license`, `references`, `rightsHolder`, `identifiedBy`, `scientificName`, `kingdom`, `phylum`, `class`, `order`, `family`, `genus`, `taxonRank`, `verbatimScientificName`, `coordinateUncertaintyInMeters` and `degreeOfEstablishment`. The generated column names should follow the normalized occurrence schema naming used by the output contract.
 
 ## Open Questions

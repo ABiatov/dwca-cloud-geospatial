@@ -21,6 +21,9 @@
 - Prompt 04 normalization result boundaries so GUI status/count displays use
   accepted/rejected counts from the core workflow rather than re-normalizing
   occurrence rows.
+- Prompt 05 normalization result additions so GUI status can display
+  `warning_count` and optional conversion warnings from the core workflow
+  without treating them as conversion failures.
 
 ## Goal
 

@@ -33,13 +33,19 @@ Confirm that generated files are internally consistent, readable by expected too
 10. Confirm normalized output fields use snake_case project names and do not
     emit parser/source camelCase terms; `class` is the output field, not
     Python attribute `class_`.
-11. Write a validation report with errors, warnings, and tool versions.
+11. Validate `quality_flags` as nullable `|`-delimited strings and split them
+    for exact-token checks.
+12. Reconcile `warning_count`, `warnings`, and `type_conversion_failures` in
+    processing metadata.
+13. Write a validation report with errors, warnings, and tool versions.
 
 ## Acceptance Evidence
 
 - Validation fails on missing files.
 - Validation fails or warns on invalid GeoParquet metadata.
 - Validation reports skipped/invalid coordinate counts.
+- Validation catches malformed `quality_flags` tokens or delimiter usage.
+- Validation reconciles warning counts with processing warnings.
 - Validation report is saved as a portable JSON or text artifact.
 
 ## Related Topics

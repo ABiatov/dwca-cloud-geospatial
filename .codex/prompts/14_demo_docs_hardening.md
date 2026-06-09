@@ -38,6 +38,11 @@
   `OccurrenceNormalizationCounts`, `NormalizedOccurrenceRecord`,
   `RejectedOccurrenceRecord`, `docs/dwca_parser.md`, and normalization
   fixtures under `tests/fixtures/dwca/minimal_occurrence/normalization/`.
+- Prompt 05 quality-rule API additions:
+  `TypeConversionFailure`, `OccurrenceNormalizationWarning`, `warning_count`,
+  `type_conversion_failures`, `warnings`, nullable exact-token
+  `quality_flags`, `has_quality_flags`, and quality-rule fixtures under
+  `tests/fixtures/dwca/minimal_occurrence/quality_rules/`.
 - Post-Prompt-03 handoff clarification: the Prompt 03 `Open Issues Affecting
   Normalization` were confirmed to be scope boundaries, not blockers before
   Prompt 04. Final docs should preserve that split: source row reading in

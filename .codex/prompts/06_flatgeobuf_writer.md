@@ -16,9 +16,13 @@
 - Prompts `01` through `05`
 - Latest session logs for prompts `01` through `05`
 - Current normalized occurrence and quality-rule implementation, including
-  Prompt 04 `NormalizedOccurrenceRecord`, `RejectedOccurrenceRecord`,
-  `OccurrenceNormalizationResult`, `OccurrenceNormalizationCounts` and
+  `NormalizedOccurrenceRecord`, `RejectedOccurrenceRecord`,
+  `OccurrenceNormalizationResult`, `OccurrenceNormalizationCounts`,
+  `TypeConversionFailure`, `OccurrenceNormalizationWarning` and
   `normalize_occurrence_records`.
+- Prompt 05 stores accepted-record `quality_flags` as nullable
+  `|`-delimited exact tokens, adds `has_quality_flags`, and counts optional
+  and critical conversion failures in `OccurrenceNormalizationResult`.
 - Use `NormalizedOccurrenceRecord.to_dict()` or an equivalent explicit
   projection when writing output fields so the Python attribute `class_`
   becomes the normalized output column `class`, and no source camelCase terms
@@ -40,7 +44,9 @@ Write accepted occurrence records to the MVP default FlatGeobuf export at `expor
 - Use the compact normalized projection required by `docs/output_format.md`.
 - Include viewer display/filter fields when present.
 - Include stable source identifiers and coordinates.
-- Store `quality_flags` using the same nullable `|`-delimited string representation.
+- Store `quality_flags` using the same nullable `|`-delimited string
+  representation and include `has_quality_flags` where the projection requires
+  it.
 - Enable FlatGeobuf spatial index by default.
 - Add a large-output guardrail/warning before indexed writes that may require substantial memory.
 - Add tests that verify required columns, record count, geometry behavior and absent rejected records from the export.

@@ -194,7 +194,14 @@ rejected records. It returns an `OccurrenceNormalizationResult` with:
 - `rejected_records`, a tuple of `RejectedOccurrenceRecord` values aligned
   with the future `reports/rejected_records.csv` schema.
 - `counts`, an `OccurrenceNormalizationCounts` value with `source_records`,
-  `parsed_records`, `accepted_records` and `rejected_records`.
+  `parsed_records`, `accepted_records`, `rejected_records` and
+  `warning_count`.
+- `type_conversion_failures`, a tuple of `TypeConversionFailure` values
+  counted by field, reason code and action for later `metadata/processing.json`
+  serialization.
+- `warnings`, a tuple of `OccurrenceNormalizationWarning` values. Optional
+  conversion failures warn when the field failure rate is `>= 5%` of parsed
+  records.
 
 `NormalizedOccurrenceRecord` uses project-owned snake_case field names from
 `docs/output_format.md`. The Python attribute for the Darwin Core class field
@@ -208,6 +215,24 @@ longitude/latitude ranges, rejects exact `0,0` coordinates, normalizes
 single-value ISO-style `event_date` values where practical and derives
 `event_year` from `eventDate` or `year`.
 
+Accepted records assign stable quality flags in fixed order and serialize
+them as a nullable `|`-delimited `quality_flags` string. Records without flags
+store `quality_flags = None` and `has_quality_flags = False`. Initial quality
+flag codes are:
+
+- `missing_scientific_name`
+- `missing_event_date`
+- `missing_coordinate_uncertainty`
+- `invalid_coordinate_uncertainty`
+- `missing_geodetic_datum`
+- `invalid_event_year`
+
+Optional conversion failures currently include `invalid_float` for
+`coordinate_uncertainty_in_meters` and `invalid_integer` for `event_year`.
+Those values are normalized to null and counted with action `null_value`.
+Critical coordinate and required-provenance failures reject affected records
+and are counted with action `record_rejected`.
+
 Current normalization rejection reason codes are:
 
 - `missing_coordinates`
@@ -215,10 +240,11 @@ Current normalization rejection reason codes are:
 - `invalid_longitude`
 - `coordinate_out_of_range`
 - `zero_zero_coordinate`
+- `missing_required_field`
 
 The rejected-record model also preserves the output-contract placeholder
-reason codes `missing_required_field`, `row_parse_error` and
-`type_conversion_failed` for later conversion/reporting stages.
+reason codes `row_parse_error` and `type_conversion_failed` for later
+conversion/reporting stages.
 
 ## Diagnostics
 

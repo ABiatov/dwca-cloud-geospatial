@@ -18,10 +18,14 @@
 - Prompts `01` through `09`
 - Latest session logs for prompts `01` through `09`
 - Current parser, normalization, writer and validator APIs.
-- Prompt 04 normalization API:
+- Prompt 04/05 normalization API:
   `dwca_cloud_geospatial.normalization.normalize_occurrence_records`,
-  `OccurrenceNormalizationResult`, `NormalizedOccurrenceRecord` and
-  `RejectedOccurrenceRecord`.
+  `OccurrenceNormalizationResult`, `OccurrenceNormalizationCounts`,
+  `NormalizedOccurrenceRecord`, `RejectedOccurrenceRecord`,
+  `TypeConversionFailure` and `OccurrenceNormalizationWarning`.
+- Prompt 05 conversion results include `warning_count`,
+  `type_conversion_failures`, `warnings`, nullable exact-token
+  `quality_flags`, and `has_quality_flags`.
 - Prompt 03 occurrence row reader API:
   `dwca_cloud_geospatial.occurrence.read_occurrence_rows`,
   `iter_occurrence_rows`, `OccurrenceReadResult` and
@@ -53,6 +57,10 @@ Expose repeatable conversion, inspection and validation workflows through a thin
 - Make conversion fail fast with an actionable error when the inspected archive
   has no occurrence core or lacks coordinate terms. Checklist/Taxon archives are
   inspectable but outside the MVP occurrence geospatial conversion workflow.
+- Make conversion fail only when no accepted normalized records remain,
+  required provenance cannot be produced, or parser/metadata structure prevents
+  reliable row interpretation; optional conversion warnings must not fail a
+  conversion by themselves.
 - Reuse the occurrence row reader diagnostics for missing occurrence cores and
   unsupported multi-file occurrence cores instead of duplicating row-reader
   logic in CLI handlers.

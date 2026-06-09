@@ -65,4 +65,4 @@ At the end of each prompt:
 
 ## Current next work item
 
-`05_quality_rules.md`
+`06_flatgeobuf_writer.md`

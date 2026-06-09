@@ -16,12 +16,14 @@
 - Prompts `01` through `07`
 - Latest session logs for prompts `01` through `07`
 - Current parser, normalization, quality, FlatGeobuf and GeoParquet writer APIs.
-- Prompt 04 normalization API and count/rejection models:
+- Prompt 04/05 normalization API, quality and count/rejection models:
   `normalize_occurrence_records`, `OccurrenceNormalizationResult`,
   `OccurrenceNormalizationCounts`, `NormalizedOccurrenceRecord` and
-  `RejectedOccurrenceRecord`.
+  `RejectedOccurrenceRecord`, plus Prompt 05 `TypeConversionFailure` and
+  `OccurrenceNormalizationWarning`.
 - Use Prompt 04 counts for `source_records`, `parsed_records`,
-  `accepted_records` and `rejected_records`; use
+  `accepted_records` and `rejected_records`; use Prompt 05 `warning_count`,
+  `type_conversion_failures` and `warnings` for processing metadata; use
   `RejectedOccurrenceRecord.to_dict()` or an equivalent explicit column
   mapping for `reports/rejected_records.csv`.
 - When serializing accepted normalized records for metadata/projection helpers,

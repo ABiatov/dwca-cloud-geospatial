@@ -20,6 +20,10 @@
 - Prompt 04 normalized field model for accepted/rejected occurrence records,
   especially `NormalizedOccurrenceRecord.to_dict()` exporting the Python
   `class_` attribute as output field `class`.
+- Prompt 05 quality flag contract: `quality_flags` is nullable
+  `|`-delimited text, no flags are null, `has_quality_flags` is boolean, and
+  viewers must split on `|` for exact-token matching instead of substring
+  matching.
 
 ## Goal
 
@@ -33,6 +37,8 @@ Create `docs/viewer_contract.md` as the accepted contract for the minimal static
 - Define dataset provenance panel fields.
 - Define feature details panel fields.
 - Define MVP filters: `scientific_name`, `kingdom`, `event_year`, `basis_of_record`, `iucn_red_list_category`, `quality_flags`.
+- Define `quality_flags` filter semantics using exact tokens and
+  `has_quality_flags` where available.
 - Specify behavior when optional fields or metadata are absent.
 - Specify no-backend/static-hosting constraints.
 - Specify no live GBIF/OBIS API dependency.

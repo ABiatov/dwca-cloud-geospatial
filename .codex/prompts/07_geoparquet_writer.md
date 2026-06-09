@@ -16,9 +16,13 @@
 - Prompts `01` through `06`
 - Latest session logs for prompts `01` through `06`
 - Current FlatGeobuf writer and normalized occurrence implementation,
-  including Prompt 04 `NormalizedOccurrenceRecord`,
+  including `NormalizedOccurrenceRecord`,
   `RejectedOccurrenceRecord`, `OccurrenceNormalizationResult`,
-  `OccurrenceNormalizationCounts` and `normalize_occurrence_records`.
+  `OccurrenceNormalizationCounts`, `TypeConversionFailure`,
+  `OccurrenceNormalizationWarning` and `normalize_occurrence_records`.
+- Prompt 05 stores accepted-record `quality_flags` as nullable
+  `|`-delimited exact tokens, adds `has_quality_flags`, and counts optional
+  and critical conversion failures in `OccurrenceNormalizationResult`.
 - Use `NormalizedOccurrenceRecord.to_dict()` or an equivalent explicit
   projection when writing output fields so the Python attribute `class_`
   becomes the normalized output column `class`, and no source camelCase terms
@@ -57,6 +61,7 @@ Write explicit analytical GeoParquet output at `data/occurrences.parquet`.
 - GeoParquet metadata declares point geometry, `geometry` column and `OGC:CRS84`.
 - Required projection columns are present.
 - `quality_flags` uses the accepted nullable string representation.
+- `has_quality_flags` is present and consistent with `quality_flags`.
 - Tests validate metadata and row counts.
 
 ## Required Session Log

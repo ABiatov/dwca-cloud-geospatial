@@ -118,7 +118,7 @@ Accepted defaults:
 - Spatial index: enabled by default for FlatGeobuf output.
 - Large-output guardrail: estimate spatial-index memory before writing; emit a required large dataset warning when projected memory or feature count is high enough to make the indexed write risky.
 - Geometry policy: write only accepted records with non-null point geometry.
-- Field policy: write a compact normalized occurrence field set optimized for viewer and lightweight exchange, not the full source/raw Darwin Core field set. Include geometry, required provenance fields, accepted viewer display/filter fields, coordinates, `quality_flags` and the additional accepted Darwin Core fields documented in `docs/output_format.md`.
+- Field policy: write a compact normalized occurrence field set optimized for viewer and lightweight exchange, not the full source/raw Darwin Core field set. Include geometry, required provenance fields, accepted viewer display/filter fields, coordinates, `quality_flags`, `has_quality_flags` and the additional accepted Darwin Core fields documented in `docs/output_format.md`.
 - GeoPandas role: allowed only for tests, examples and notebooks during early development. Production writer code should call Pyogrio/GDAL directly where practical.
 
 ## Accepted MVP Viewer Filters
@@ -153,6 +153,9 @@ Accepted defaults:
 - Flag code format: stable lowercase snake_case tokens.
 - Delimiter rule: flag codes must not contain `|`.
 - Matching rule: viewers and downstream consumers must split the string on `|` and perform exact token matching, not substring matching.
+- Initial flag codes: `missing_scientific_name`, `missing_event_date`,
+  `missing_coordinate_uncertainty`, `invalid_coordinate_uncertainty`,
+  `missing_geodetic_datum` and `invalid_event_year`.
 
 Rationale:
 
@@ -355,11 +358,8 @@ No open questions remain for the accepted MVP plan.
 
 ## Immediate Next Actions
 
-1. Implement quality rules and conversion failure accounting on top of the
-   Prompt 04 `OccurrenceNormalizationResult`, including
-   optional-field warning thresholds and critical-field rejection policy.
-2. Implement the FlatGeobuf and GeoParquet writers, then bundle metadata and
+1. Implement the FlatGeobuf and GeoParquet writers, then bundle metadata and
    validation checks.
-3. Implement EML content extraction during the metadata/source writer work.
-4. Keep multi-file occurrence-core streaming deferred until a real sample or
+2. Implement EML content extraction during the metadata/source writer work.
+3. Keep multi-file occurrence-core streaming deferred until a real sample or
    user need requires it.

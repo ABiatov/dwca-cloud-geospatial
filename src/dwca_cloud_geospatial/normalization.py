@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Iterable, Mapping
 from dataclasses import asdict, dataclass
 from datetime import date, datetime
@@ -25,6 +26,30 @@ ZERO_ZERO_COORDINATE = "zero_zero_coordinate"
 MISSING_REQUIRED_FIELD = "missing_required_field"
 ROW_PARSE_ERROR = "row_parse_error"
 TYPE_CONVERSION_FAILED = "type_conversion_failed"
+INVALID_FLOAT = "invalid_float"
+INVALID_INTEGER = "invalid_integer"
+
+NULL_VALUE_ACTION = "null_value"
+RECORD_REJECTED_ACTION = "record_rejected"
+CONVERSION_FAILED_ACTION = "conversion_failed"
+
+OPTIONAL_CONVERSION_WARNING_RATE = 0.05
+
+MISSING_SCIENTIFIC_NAME_FLAG = "missing_scientific_name"
+MISSING_EVENT_DATE_FLAG = "missing_event_date"
+MISSING_COORDINATE_UNCERTAINTY_FLAG = "missing_coordinate_uncertainty"
+INVALID_COORDINATE_UNCERTAINTY_FLAG = "invalid_coordinate_uncertainty"
+MISSING_GEODETIC_DATUM_FLAG = "missing_geodetic_datum"
+INVALID_EVENT_YEAR_FLAG = "invalid_event_year"
+
+QUALITY_FLAG_CODES: tuple[str, ...] = (
+    MISSING_SCIENTIFIC_NAME_FLAG,
+    MISSING_EVENT_DATE_FLAG,
+    MISSING_COORDINATE_UNCERTAINTY_FLAG,
+    INVALID_COORDINATE_UNCERTAINTY_FLAG,
+    MISSING_GEODETIC_DATUM_FLAG,
+    INVALID_EVENT_YEAR_FLAG,
+)
 
 REJECTION_REASON_MESSAGES: Mapping[str, str] = {
     MISSING_COORDINATES: "Latitude or longitude is empty or absent.",
@@ -40,6 +65,7 @@ REJECTION_REASON_MESSAGES: Mapping[str, str] = {
 _YEAR_PATTERN = re.compile(r"^\d{4}$")
 _YEAR_MONTH_PATTERN = re.compile(r"^\d{4}-\d{2}$")
 _YEAR_MONTH_DAY_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_QUALITY_FLAG_PATTERN = re.compile(r"^[a-z][a-z0-9_]*$")
 
 
 @dataclass(frozen=True)
@@ -127,6 +153,36 @@ class OccurrenceNormalizationCounts:
     parsed_records: int
     accepted_records: int
     rejected_records: int
+    warning_count: int = 0
+
+
+@dataclass(frozen=True)
+class TypeConversionFailure:
+    """Counted type conversion or critical validation failure."""
+
+    field: str
+    reason_code: str
+    failure_count: int
+    failure_rate: float
+    action: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class OccurrenceNormalizationWarning:
+    """Non-fatal normalization warning for later processing metadata."""
+
+    code: str
+    message: str
+    field: str
+    reason_code: str
+    failure_count: int
+    failure_rate: float
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
 
 
 @dataclass(frozen=True)
@@ -136,6 +192,15 @@ class OccurrenceNormalizationResult:
     accepted_records: tuple[NormalizedOccurrenceRecord, ...]
     rejected_records: tuple[RejectedOccurrenceRecord, ...]
     counts: OccurrenceNormalizationCounts
+    type_conversion_failures: tuple[TypeConversionFailure, ...] = ()
+    warnings: tuple[OccurrenceNormalizationWarning, ...] = ()
+
+
+@dataclass(frozen=True)
+class _ConversionFailureEvent:
+    field: str
+    reason_code: str
+    action: str
 
 
 def _dwc(local_name: str) -> str:
@@ -205,15 +270,22 @@ def normalize_occurrence_records(
 
     accepted: list[NormalizedOccurrenceRecord] = []
     rejected: list[RejectedOccurrenceRecord] = []
+    conversion_failure_events: list[_ConversionFailureEvent] = []
     source_count = 0
 
     for record in records:
         source_count += 1
-        normalized = normalize_occurrence_record(record)
+        normalized, failure_events = _normalize_occurrence_record_with_failures(record)
+        conversion_failure_events.extend(failure_events)
         if isinstance(normalized, RejectedOccurrenceRecord):
             rejected.append(normalized)
         else:
             accepted.append(normalized)
+
+    type_conversion_failures = _type_conversion_failures(
+        conversion_failure_events, source_count
+    )
+    warnings = _normalization_warnings(type_conversion_failures)
 
     return OccurrenceNormalizationResult(
         accepted_records=tuple(accepted),
@@ -223,7 +295,10 @@ def normalize_occurrence_records(
             parsed_records=source_count,
             accepted_records=len(accepted),
             rejected_records=len(rejected),
+            warning_count=len(warnings),
         ),
+        type_conversion_failures=type_conversion_failures,
+        warnings=warnings,
     )
 
 
@@ -232,22 +307,68 @@ def normalize_occurrence_record(
 ) -> NormalizedOccurrenceRecord | RejectedOccurrenceRecord:
     """Normalize one occurrence source record or return its rejection model."""
 
+    normalized, _failure_events = _normalize_occurrence_record_with_failures(record)
+    return normalized
+
+
+def _normalize_occurrence_record_with_failures(
+    record: OccurrenceSourceRecord,
+) -> tuple[
+    NormalizedOccurrenceRecord | RejectedOccurrenceRecord,
+    tuple[_ConversionFailureEvent, ...],
+]:
+    failure_events: list[_ConversionFailureEvent] = []
+
     raw_latitude = _term_value(record, "decimal_latitude")
     raw_longitude = _term_value(record, "decimal_longitude")
     occurrence_id = _term_value(record, "occurrence_id")
     scientific_name = _term_value(record, "scientific_name")
     raw_event_date = _term_value(record, "event_date")
 
+    provenance_failure_field = _required_provenance_failure_field(record)
+    if provenance_failure_field is not None:
+        failure_events.append(
+            _ConversionFailureEvent(
+                field=provenance_failure_field,
+                reason_code=MISSING_REQUIRED_FIELD,
+                action=RECORD_REJECTED_ACTION,
+            )
+        )
+        return (
+            _rejected_record(
+                record=record,
+                occurrence_id=occurrence_id,
+                scientific_name=scientific_name,
+                raw_longitude=raw_longitude,
+                raw_latitude=raw_latitude,
+                raw_event_date=raw_event_date,
+                reason_code=MISSING_REQUIRED_FIELD,
+            ),
+            tuple(failure_events),
+        )
+
     coordinate_error = _coordinate_rejection_reason(raw_longitude, raw_latitude)
     if coordinate_error is not None:
-        return _rejected_record(
-            record=record,
-            occurrence_id=occurrence_id,
-            scientific_name=scientific_name,
-            raw_longitude=raw_longitude,
-            raw_latitude=raw_latitude,
-            raw_event_date=raw_event_date,
-            reason_code=coordinate_error,
+        failure_events.append(
+            _ConversionFailureEvent(
+                field=_coordinate_failure_field(
+                    coordinate_error, raw_longitude, raw_latitude
+                ),
+                reason_code=coordinate_error,
+                action=RECORD_REJECTED_ACTION,
+            )
+        )
+        return (
+            _rejected_record(
+                record=record,
+                occurrence_id=occurrence_id,
+                scientific_name=scientific_name,
+                raw_longitude=raw_longitude,
+                raw_latitude=raw_latitude,
+                raw_event_date=raw_event_date,
+                reason_code=coordinate_error,
+            ),
+            tuple(failure_events),
         )
 
     assert raw_longitude is not None
@@ -258,60 +379,97 @@ def normalize_occurrence_record(
     assert decimal_latitude is not None
 
     event_date, event_year = _normalize_event_date(raw_event_date)
+    invalid_event_year = False
     if event_year is None:
-        event_year = _parse_year(_term_value(record, "year"))
+        raw_year = _term_value(record, "year")
+        event_year = _parse_year(raw_year)
+        if _blank_to_none(raw_year) is not None and event_year is None:
+            invalid_event_year = True
+            failure_events.append(
+                _ConversionFailureEvent(
+                    field="event_year",
+                    reason_code=INVALID_INTEGER,
+                    action=NULL_VALUE_ACTION,
+                )
+            )
 
-    quality_flags = None
+    raw_coordinate_uncertainty = _term_value(
+        record, "coordinate_uncertainty_in_meters"
+    )
+    coordinate_uncertainty, invalid_coordinate_uncertainty = _parse_optional_float_value(
+        raw_coordinate_uncertainty
+    )
+    if invalid_coordinate_uncertainty:
+        failure_events.append(
+            _ConversionFailureEvent(
+                field="coordinate_uncertainty_in_meters",
+                reason_code=INVALID_FLOAT,
+                action=NULL_VALUE_ACTION,
+            )
+        )
 
-    return NormalizedOccurrenceRecord(
-        source_record_id=_source_record_id(record, occurrence_id),
-        source_file=record.source_file,
-        source_row_number=record.source_row_number,
-        source_data_row_number=record.source_data_row_number,
-        occurrence_id=occurrence_id,
-        scientific_name=scientific_name,
-        verbatim_scientific_name=_term_value(record, "verbatim_scientific_name"),
-        kingdom=_term_value(record, "kingdom"),
-        phylum=_term_value(record, "phylum"),
-        class_=_term_value(record, "class_"),
-        order=_term_value(record, "order"),
-        family=_term_value(record, "family"),
-        genus=_term_value(record, "genus"),
-        taxon_id=_term_value(record, "taxon_id"),
-        taxon_rank=_term_value(record, "taxon_rank"),
-        identified_by=_term_value(record, "identified_by"),
-        basis_of_record=_term_value(record, "basis_of_record"),
-        degree_of_establishment=_term_value(record, "degree_of_establishment"),
-        event_date=event_date,
-        event_year=event_year,
-        recorded_by=_term_value(record, "recorded_by"),
-        decimal_longitude=decimal_longitude,
-        decimal_latitude=decimal_latitude,
-        coordinate_uncertainty_in_meters=_parse_optional_float(
-            _term_value(record, "coordinate_uncertainty_in_meters")
+    quality_flags = _format_quality_flags(
+        _quality_flags_for_record(
+            scientific_name=scientific_name,
+            event_date=event_date,
+            event_year=event_year,
+            raw_coordinate_uncertainty=raw_coordinate_uncertainty,
+            invalid_coordinate_uncertainty=invalid_coordinate_uncertainty,
+            geodetic_datum=_term_value(record, "geodetic_datum"),
+            invalid_event_year=invalid_event_year,
+        )
+    )
+
+    return (
+        NormalizedOccurrenceRecord(
+            source_record_id=_source_record_id(record, occurrence_id),
+            source_file=record.source_file,
+            source_row_number=record.source_row_number,
+            source_data_row_number=record.source_data_row_number,
+            occurrence_id=occurrence_id,
+            scientific_name=scientific_name,
+            verbatim_scientific_name=_term_value(record, "verbatim_scientific_name"),
+            kingdom=_term_value(record, "kingdom"),
+            phylum=_term_value(record, "phylum"),
+            class_=_term_value(record, "class_"),
+            order=_term_value(record, "order"),
+            family=_term_value(record, "family"),
+            genus=_term_value(record, "genus"),
+            taxon_id=_term_value(record, "taxon_id"),
+            taxon_rank=_term_value(record, "taxon_rank"),
+            identified_by=_term_value(record, "identified_by"),
+            basis_of_record=_term_value(record, "basis_of_record"),
+            degree_of_establishment=_term_value(record, "degree_of_establishment"),
+            event_date=event_date,
+            event_year=event_year,
+            recorded_by=_term_value(record, "recorded_by"),
+            decimal_longitude=decimal_longitude,
+            decimal_latitude=decimal_latitude,
+            coordinate_uncertainty_in_meters=coordinate_uncertainty,
+            geodetic_datum=_term_value(record, "geodetic_datum"),
+            country_code=_term_value(record, "country_code"),
+            locality=_term_value(record, "locality"),
+            dataset_name=_term_value(record, "dataset_name"),
+            dataset_key=_term_value(record, "dataset_key"),
+            publisher=_term_value(record, "publisher"),
+            license=_term_value(record, "license"),
+            rights_holder=_term_value(record, "rights_holder"),
+            references=_term_value(record, "references"),
+            quality_flags=quality_flags,
+            has_quality_flags=quality_flags is not None,
+            iucn_red_list_category=_term_value(record, "iucn_red_list_category"),
+            catalog_number=_term_value(record, "catalog_number"),
+            collection_code=_term_value(record, "collection_code"),
+            institution_code=_term_value(record, "institution_code"),
+            record_number=_term_value(record, "record_number"),
+            organism_id=_term_value(record, "organism_id"),
+            gbif_id=_term_value(record, "gbif_id"),
+            obis_id=_term_value(record, "obis_id"),
+            raw_decimal_longitude=raw_longitude,
+            raw_decimal_latitude=raw_latitude,
+            raw_event_date=raw_event_date,
         ),
-        geodetic_datum=_term_value(record, "geodetic_datum"),
-        country_code=_term_value(record, "country_code"),
-        locality=_term_value(record, "locality"),
-        dataset_name=_term_value(record, "dataset_name"),
-        dataset_key=_term_value(record, "dataset_key"),
-        publisher=_term_value(record, "publisher"),
-        license=_term_value(record, "license"),
-        rights_holder=_term_value(record, "rights_holder"),
-        references=_term_value(record, "references"),
-        quality_flags=quality_flags,
-        has_quality_flags=quality_flags is not None,
-        iucn_red_list_category=_term_value(record, "iucn_red_list_category"),
-        catalog_number=_term_value(record, "catalog_number"),
-        collection_code=_term_value(record, "collection_code"),
-        institution_code=_term_value(record, "institution_code"),
-        record_number=_term_value(record, "record_number"),
-        organism_id=_term_value(record, "organism_id"),
-        gbif_id=_term_value(record, "gbif_id"),
-        obis_id=_term_value(record, "obis_id"),
-        raw_decimal_longitude=raw_longitude,
-        raw_decimal_latitude=raw_latitude,
-        raw_event_date=raw_event_date,
+        tuple(failure_events),
     )
 
 
@@ -332,6 +490,36 @@ def _coordinate_rejection_reason(
     if latitude == 0 and longitude == 0:
         return ZERO_ZERO_COORDINATE
     return None
+
+
+def _required_provenance_failure_field(record: OccurrenceSourceRecord) -> str | None:
+    if _blank_to_none(record.source_file) is None:
+        return "source_file"
+    if record.source_row_number < 1:
+        return "source_row_number"
+    return None
+
+
+def _coordinate_failure_field(
+    reason_code: str, raw_longitude: str | None, raw_latitude: str | None
+) -> str:
+    if reason_code == INVALID_LATITUDE:
+        return "decimal_latitude"
+    if reason_code == INVALID_LONGITUDE:
+        return "decimal_longitude"
+    if reason_code == MISSING_COORDINATES:
+        if raw_latitude is None and raw_longitude is not None:
+            return "decimal_latitude"
+        if raw_longitude is None and raw_latitude is not None:
+            return "decimal_longitude"
+    if reason_code == COORDINATE_OUT_OF_RANGE:
+        latitude = _parse_float(raw_latitude) if raw_latitude is not None else None
+        longitude = _parse_float(raw_longitude) if raw_longitude is not None else None
+        if latitude is not None and not (-90 <= latitude <= 90):
+            return "decimal_latitude"
+        if longitude is not None and not (-180 <= longitude <= 180):
+            return "decimal_longitude"
+    return "coordinates"
 
 
 def _rejected_record(
@@ -398,10 +586,12 @@ def _parse_float(value: str) -> float | None:
     return parsed
 
 
-def _parse_optional_float(value: str | None) -> float | None:
+def _parse_optional_float_value(value: str | None) -> tuple[float | None, bool]:
+    value = _blank_to_none(value)
     if value is None:
-        return None
-    return _parse_float(value)
+        return None, False
+    parsed = _parse_float(value)
+    return parsed, parsed is None
 
 
 def _normalize_event_date(value: str | None) -> tuple[str | None, int | None]:
@@ -451,3 +641,84 @@ def _year_prefix(value: str) -> int | None:
     if _YEAR_PATTERN.fullmatch(prefix):
         return int(prefix)
     return None
+
+
+def _quality_flags_for_record(
+    *,
+    scientific_name: str | None,
+    event_date: str | None,
+    event_year: int | None,
+    raw_coordinate_uncertainty: str | None,
+    invalid_coordinate_uncertainty: bool,
+    geodetic_datum: str | None,
+    invalid_event_year: bool,
+) -> tuple[str, ...]:
+    flags: list[str] = []
+    if scientific_name is None:
+        flags.append(MISSING_SCIENTIFIC_NAME_FLAG)
+    if event_date is None and event_year is None:
+        flags.append(MISSING_EVENT_DATE_FLAG)
+    if _blank_to_none(raw_coordinate_uncertainty) is None:
+        flags.append(MISSING_COORDINATE_UNCERTAINTY_FLAG)
+    elif invalid_coordinate_uncertainty:
+        flags.append(INVALID_COORDINATE_UNCERTAINTY_FLAG)
+    if geodetic_datum is None:
+        flags.append(MISSING_GEODETIC_DATUM_FLAG)
+    if invalid_event_year:
+        flags.append(INVALID_EVENT_YEAR_FLAG)
+    return tuple(flags)
+
+
+def _format_quality_flags(flags: tuple[str, ...]) -> str | None:
+    if not flags:
+        return None
+    for flag in flags:
+        if "|" in flag or _QUALITY_FLAG_PATTERN.fullmatch(flag) is None:
+            raise ValueError(f"Invalid quality flag code: {flag}")
+    return "|".join(flags)
+
+
+def _type_conversion_failures(
+    events: Iterable[_ConversionFailureEvent], parsed_records: int
+) -> tuple[TypeConversionFailure, ...]:
+    counter = Counter(events)
+    failures: list[TypeConversionFailure] = []
+    for event, count in sorted(
+        counter.items(),
+        key=lambda item: (item[0].field, item[0].reason_code, item[0].action),
+    ):
+        failures.append(
+            TypeConversionFailure(
+                field=event.field,
+                reason_code=event.reason_code,
+                failure_count=count,
+                failure_rate=count / parsed_records if parsed_records else 0,
+                action=event.action,
+            )
+        )
+    return tuple(failures)
+
+
+def _normalization_warnings(
+    failures: Iterable[TypeConversionFailure],
+) -> tuple[OccurrenceNormalizationWarning, ...]:
+    warnings: list[OccurrenceNormalizationWarning] = []
+    for failure in failures:
+        if (
+            failure.action == NULL_VALUE_ACTION
+            and failure.failure_rate >= OPTIONAL_CONVERSION_WARNING_RATE
+        ):
+            warnings.append(
+                OccurrenceNormalizationWarning(
+                    code="optional_conversion_failure_rate",
+                    message=(
+                        f"Optional field {failure.field} failed conversion for "
+                        f"{failure.failure_count} parsed record(s)."
+                    ),
+                    field=failure.field,
+                    reason_code=failure.reason_code,
+                    failure_count=failure.failure_count,
+                    failure_rate=failure.failure_rate,
+                )
+            )
+    return tuple(warnings)

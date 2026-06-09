@@ -33,9 +33,12 @@ GeoParquet file while preserving project fields and provenance.
 6. Write Parquet with compression and schema metadata.
 7. Add GeoParquet metadata for geometry column, CRS, geometry type, and bbox.
 8. Record accepted/rejected counts from `OccurrenceNormalizationResult`.
-9. Validate output with at least one GeoParquet-aware tool or reader.
-10. Add tests for accepted coordinates, rejected coordinates, projection
-    fields, `class_` to `class` output naming, row counts and metadata.
+9. Preserve nullable `quality_flags` and `has_quality_flags` from accepted
+   normalized records.
+10. Validate output with at least one GeoParquet-aware tool or reader.
+11. Add tests for accepted coordinates, rejected coordinates, projection
+    fields, `quality_flags`, `has_quality_flags`, `class_` to `class` output
+    naming, row counts and metadata.
 
 ## Candidate Defaults
 

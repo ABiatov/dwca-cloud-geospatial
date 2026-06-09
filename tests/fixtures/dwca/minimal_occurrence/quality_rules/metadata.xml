@@ -1,0 +1,5 @@
+<eml:eml xmlns:eml="eml://ecoinformatics.org/eml-2.1.1">
+  <dataset>
+    <title>Quality rules fixture</title>
+  </dataset>
+</eml:eml>

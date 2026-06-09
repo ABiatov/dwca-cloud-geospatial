@@ -21,6 +21,9 @@
 - Prompt 04 normalized occurrence field names and rejection/count structures,
   especially `quality_flags`, `has_quality_flags`, `source_records`,
   `accepted_records` and `rejected_records`.
+- Prompt 05 quality flag semantics: split nullable `|`-delimited
+  `quality_flags` strings and match exact tokens; use `has_quality_flags`
+  when present for show/hide controls.
 
 ## Goal
 
@@ -37,6 +40,7 @@ Implement the minimal static MapLibre viewer for generated MVP bundles.
 - Show dataset provenance fields when available.
 - Show feature details for viewer-required fields.
 - Implement browser-side filters for fields present in the bundle: text contains search for `scientific_name`, categorical filters, year filtering and show/hide records with `quality_flags`.
+- Do not use substring matching for individual quality flag codes.
 - Omit absent filter fields from the UI without error.
 - Avoid live GBIF/OBIS API calls.
 - Add static viewer smoke tests or browser checks where practical in the existing toolchain.

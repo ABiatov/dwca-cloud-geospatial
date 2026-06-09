@@ -93,7 +93,7 @@ MVP outputs are projections of the canonical occurrence schema:
 | Output | Projection role | Required relationship to canonical schema |
 | --- | --- | --- |
 | `data/occurrences.parquet` | Analytical GeoParquet projection. | Should carry the broad normalized field set needed for analysis, provenance and GeoParquet geometry metadata. |
-| `exports/occurrences.fgb` | Compact viewer and exchange projection. | May omit analytical-only fields, but must include stable provenance fields, point geometry, viewer display fields, accepted filter fields, parsed coordinates and `quality_flags`. |
+| `exports/occurrences.fgb` | Compact viewer and exchange projection. | May omit analytical-only fields, but must include stable provenance fields, point geometry, viewer display fields, accepted filter fields, parsed coordinates, `quality_flags` and `has_quality_flags`. |
 | Future `tiles/occurrences.pmtiles` | MVP+ tiled visualization projection. | Should derive from the same accepted records and default to the FlatGeobuf compact field set unless a later accepted decision defines a smaller tile attribute profile. |
 
 When both GeoParquet and FlatGeobuf are generated, they must represent the same accepted occurrence record set unless `metadata/processing.json` documents a deliberate export filter. Rejected, skipped, missing-coordinate or invalid-coordinate rows are not part of the accepted occurrence projections; they belong in `reports/rejected_records.csv` and processing metadata.
@@ -342,6 +342,7 @@ Required `counts` fields:
 | `parsed_records` | integer |
 | `accepted_records` | integer |
 | `rejected_records` | integer |
+| `warning_count` | integer |
 | `geoparquet_records` | integer |
 | `flatgeobuf_records` | integer |
 
@@ -358,6 +359,36 @@ Required `type_conversion_failures[]` fields:
 | `action` | string | `null_value`, `record_rejected` or `conversion_failed`. |
 
 Optional-field conversion failures should set normalized values to null and emit warnings when the failure rate for a field is `>= 5%` of parsed records. Critical-field failures, including coordinate parsing failures, should reject affected records with stable reason codes. The conversion should fail only when no accepted occurrence records remain, required provenance fields cannot be produced, or parser/metadata structure prevents reliable row interpretation.
+
+Initial type-conversion and validation failure reason codes:
+
+| Reason code | Meaning |
+| --- | --- |
+| `invalid_float` | Optional numeric float conversion failed; the normalized value is set to null. |
+| `invalid_integer` | Optional integer conversion failed; the normalized value is set to null. |
+| `missing_coordinates` | Required latitude or longitude is empty or absent; the record is rejected. |
+| `invalid_latitude` | Required latitude cannot be parsed as a finite number; the record is rejected. |
+| `invalid_longitude` | Required longitude cannot be parsed as a finite number; the record is rejected. |
+| `coordinate_out_of_range` | Required latitude or longitude is outside valid ranges; the record is rejected. |
+| `zero_zero_coordinate` | Coordinate is exactly `0,0` and excluded by policy; the record is rejected. |
+| `missing_required_field` | Required provenance needed for output cannot be produced; the record is rejected. |
+
+Required `warnings[]` fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `code` | string | Stable machine-readable warning code. |
+| `message` | string | Human-readable warning message. |
+| `field` | string | Normalized field or source term affected. |
+| `reason_code` | string | Stable conversion failure reason that caused the warning. |
+| `failure_count` | integer | Number of parsed records affected. |
+| `failure_rate` | number | Failure count divided by parsed record count. |
+
+Initial warning code:
+
+| Warning code | Meaning |
+| --- | --- |
+| `optional_conversion_failure_rate` | Optional-field conversion failures for a field reached the warning threshold of `>= 5%` of parsed records. |
 
 Recommended `validation` fields:
 
@@ -414,6 +445,17 @@ Required GeoParquet projection fields:
 | `geometry` | geometry | GeoParquet point geometry. |
 
 `quality_flags` values must use stable lowercase snake_case flag codes. Flag codes must not contain the `|` delimiter. Viewers and downstream consumers must split `quality_flags` on `|` and perform exact token matching, not substring matching.
+
+Initial quality flag codes:
+
+| Flag code | Meaning |
+| --- | --- |
+| `missing_scientific_name` | Accepted record has no usable scientific name. |
+| `missing_event_date` | Accepted record has neither a usable event date nor an event year. |
+| `missing_coordinate_uncertainty` | Accepted record has no coordinate uncertainty value. |
+| `invalid_coordinate_uncertainty` | Accepted record had a coordinate uncertainty value that could not be parsed as a finite float and was normalized to null. |
+| `missing_geodetic_datum` | Accepted record has no geodetic datum value. |
+| `invalid_event_year` | Accepted record had a source year value that could not be parsed as an integer and was normalized to null. |
 
 Recommended optional source-preservation fields:
 
@@ -484,6 +526,7 @@ Required FlatGeobuf projection columns:
 | `rights_holder` | string or null | Darwin Core `rightsHolder`. |
 | `dataset_name` | string or null | Darwin Core `datasetName` or source metadata. |
 | `quality_flags` | string or null | Quality flags assigned by the converter as `\|`-delimited tokens. Null when no flags are present. |
+| `has_quality_flags` | boolean | True when `quality_flags` is not empty. |
 | `geometry` | point geometry | Accepted occurrence point geometry in `OGC:CRS84`. |
 
 Full source/raw Darwin Core core and extension table preservation belongs in future raw Parquet-family exports, not in the MVP FlatGeobuf layer.

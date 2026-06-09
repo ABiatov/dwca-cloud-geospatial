@@ -3,16 +3,22 @@ from __future__ import annotations
 from conftest import MINIMAL_OCCURRENCE_FIXTURE_DIR
 from dwca_cloud_geospatial.normalization import (
     COORDINATE_OUT_OF_RANGE,
+    INVALID_FLOAT,
+    INVALID_INTEGER,
     INVALID_LATITUDE,
     INVALID_LONGITUDE,
     MISSING_COORDINATES,
+    MISSING_REQUIRED_FIELD,
+    NULL_VALUE_ACTION,
+    RECORD_REJECTED_ACTION,
     ZERO_ZERO_COORDINATE,
     normalize_occurrence_records,
 )
-from dwca_cloud_geospatial.occurrence import read_occurrence_rows
+from dwca_cloud_geospatial.occurrence import OccurrenceSourceRecord, read_occurrence_rows
 
 
 NORMALIZATION_FIXTURE_DIR = MINIMAL_OCCURRENCE_FIXTURE_DIR / "normalization"
+QUALITY_RULES_FIXTURE_DIR = MINIMAL_OCCURRENCE_FIXTURE_DIR / "quality_rules"
 
 
 def test_valid_coordinates_become_normalized_occurrence_records() -> None:
@@ -94,3 +100,124 @@ def test_coordinate_failures_become_rejected_records_with_reason_codes() -> None
     assert rejected.decimal_longitude is None
     assert rejected.event_date == "2021-01-01"
     assert rejected.reason_message
+
+    failures_by_reason = {
+        failure.reason_code: failure for failure in result.type_conversion_failures
+    }
+    assert failures_by_reason[MISSING_COORDINATES].field == "decimal_longitude"
+    assert failures_by_reason[INVALID_LATITUDE].field == "decimal_latitude"
+    assert failures_by_reason[INVALID_LONGITUDE].field == "decimal_longitude"
+    assert failures_by_reason[COORDINATE_OUT_OF_RANGE].field == "decimal_latitude"
+    assert failures_by_reason[ZERO_ZERO_COORDINATE].field == "coordinates"
+    assert all(
+        failure.action == RECORD_REJECTED_ACTION
+        for failure in result.type_conversion_failures
+    )
+
+
+def test_quality_flags_are_nullable_pipe_delimited_exact_tokens() -> None:
+    read_result = read_occurrence_rows(QUALITY_RULES_FIXTURE_DIR)
+    result = normalize_occurrence_records(read_result.records)
+
+    assert not read_result.has_errors
+    assert result.counts.source_records == 20
+    assert result.counts.accepted_records == 20
+    assert result.counts.rejected_records == 0
+
+    records_by_id = {
+        record.occurrence_id: record for record in result.accepted_records
+    }
+    assert records_by_id["q-no-flags"].quality_flags is None
+    assert records_by_id["q-no-flags"].has_quality_flags is False
+
+    missing_date_tokens = records_by_id["q-missing-date"].quality_flags.split("|")
+    assert missing_date_tokens == ["missing_event_date"]
+    assert "missing_event" not in missing_date_tokens
+
+    assert records_by_id["q-missing-uncertainty"].quality_flags.split("|") == [
+        "missing_coordinate_uncertainty"
+    ]
+    assert records_by_id["q-missing-datum"].quality_flags.split("|") == [
+        "missing_geodetic_datum"
+    ]
+    assert records_by_id["q-missing-name"].quality_flags.split("|") == [
+        "missing_scientific_name"
+    ]
+    assert records_by_id["q-multiple-flags"].quality_flags.split("|") == [
+        "missing_event_date",
+        "missing_coordinate_uncertainty",
+    ]
+
+    for record in result.accepted_records:
+        if record.quality_flags is None:
+            continue
+        for token in record.quality_flags.split("|"):
+            assert token == token.lower()
+            assert "|" not in token
+
+
+def test_optional_conversion_failures_are_counted_and_warn_at_five_percent() -> None:
+    read_result = read_occurrence_rows(QUALITY_RULES_FIXTURE_DIR)
+    result = normalize_occurrence_records(read_result.records)
+
+    records_by_id = {
+        record.occurrence_id: record for record in result.accepted_records
+    }
+    invalid_uncertainty = records_by_id["q-invalid-uncertainty"]
+    assert invalid_uncertainty.coordinate_uncertainty_in_meters is None
+    assert invalid_uncertainty.quality_flags == "invalid_coordinate_uncertainty"
+
+    invalid_year = records_by_id["q-invalid-year"]
+    assert invalid_year.event_year is None
+    assert invalid_year.quality_flags == "missing_event_date|invalid_event_year"
+
+    failures = {
+        (failure.field, failure.reason_code, failure.action): failure
+        for failure in result.type_conversion_failures
+    }
+    uncertainty_failure = failures[
+        ("coordinate_uncertainty_in_meters", INVALID_FLOAT, NULL_VALUE_ACTION)
+    ]
+    assert uncertainty_failure.failure_count == 1
+    assert uncertainty_failure.failure_rate == 0.05
+
+    year_failure = failures[("event_year", INVALID_INTEGER, NULL_VALUE_ACTION)]
+    assert year_failure.failure_count == 1
+    assert year_failure.failure_rate == 0.05
+
+    warnings = {
+        (warning.field, warning.reason_code): warning
+        for warning in result.warnings
+    }
+    assert set(warnings) == {
+        ("coordinate_uncertainty_in_meters", INVALID_FLOAT),
+        ("event_year", INVALID_INTEGER),
+    }
+    assert result.counts.warning_count == len(result.warnings) == 2
+
+
+def test_required_provenance_failures_reject_records() -> None:
+    record = OccurrenceSourceRecord(
+        source_file="",
+        source_row_number=1,
+        source_data_row_number=1,
+        source_record_id="bad-provenance",
+        values_by_term={
+            "http://rs.tdwg.org/dwc/terms/occurrenceID": "bad-provenance",
+            "http://rs.tdwg.org/dwc/terms/scientificName": "Bad provenance species",
+            "http://rs.tdwg.org/dwc/terms/decimalLatitude": "10",
+            "http://rs.tdwg.org/dwc/terms/decimalLongitude": "20",
+        },
+        raw_values=(),
+        field_metadata=(),
+        relationship_keys={},
+    )
+
+    result = normalize_occurrence_records([record])
+
+    assert result.counts.accepted_records == 0
+    assert result.counts.rejected_records == 1
+    assert result.rejected_records[0].reason_code == MISSING_REQUIRED_FIELD
+    assert result.type_conversion_failures[0].field == "source_file"
+    assert result.type_conversion_failures[0].reason_code == MISSING_REQUIRED_FIELD
+    assert result.type_conversion_failures[0].action == RECORD_REJECTED_ACTION

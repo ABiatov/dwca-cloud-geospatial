@@ -16,11 +16,12 @@
 - Prompts `01` through `08`
 - Latest session logs for prompts `01` through `08`
 - Current bundle writer implementation and tests.
-- Prompt 04 normalization model names and count fields:
+- Prompt 04/05 normalization model names and count fields:
   `NormalizedOccurrenceRecord`, `RejectedOccurrenceRecord`,
   `OccurrenceNormalizationResult`, `OccurrenceNormalizationCounts`,
   `source_records`, `parsed_records`, `accepted_records` and
-  `rejected_records`.
+  `rejected_records`, plus Prompt 05 `warning_count`,
+  `type_conversion_failures` and `warnings`.
 - Prompt 03 source-record handoff API for provenance context:
   `dwca_cloud_geospatial.occurrence.read_occurrence_rows`,
   `OccurrenceReadResult` and `OccurrenceSourceRecord`.
@@ -42,7 +43,12 @@ Implement validation for generated output bundles.
 - Reconcile row counts across manifest, processing metadata, geospatial outputs and rejected report.
 - Validate rejected CSV required columns when the report exists.
 - Validate viewer fields are present in data or omitted from `manifest.viewer`.
-- Validate `quality_flags` representation and delimiter rule.
+- Validate `quality_flags` representation, delimiter rule and exact-token
+  semantics after splitting on `|`.
+- Validate `has_quality_flags` consistency where the output projection
+  includes it.
+- Validate processing metadata warning counts and type conversion failure
+  structures.
 - Expose a core validation API with structured result objects.
 - Add tests for valid and invalid bundles.
 

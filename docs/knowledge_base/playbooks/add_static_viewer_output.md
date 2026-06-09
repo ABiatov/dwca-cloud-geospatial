@@ -26,8 +26,10 @@ Generate static viewer-facing files from converted occurrence data without addin
 4. Write a manifest JSON that declares all viewer-facing paths.
 5. Ensure paths are relative and static-host friendly.
 6. Keep basemap or external asset URLs explicit in viewer config.
-7. Add diagnostics for missing or skipped geometry.
-8. Test the generated manifest with the static viewer loader.
+7. Use `has_quality_flags` when available for show/hide controls, and split
+   nullable `quality_flags` on `|` for exact-token filtering.
+8. Add diagnostics for missing or skipped geometry.
+9. Test the generated manifest with the static viewer loader.
 
 ## Acceptance Evidence
 
