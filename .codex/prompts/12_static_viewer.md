@@ -18,6 +18,18 @@
 - Prompts `01` through `11`, including `10b`
 - Latest session logs for prompts `01` through `11`, including `10b` when present
 - Current sample output bundle generation path.
+- Prompt 08 bundle metadata writer output: generated bundles expose
+  `manifest.json`, `metadata/source.json`, `metadata/processing.json`, and
+  optionally `reports/rejected_records.csv` only when rejected records exist.
+  `manifest.files` omits ungenerated formats and includes file size and
+  SHA-256 checksums where practical.
+- Prompt 08 viewer field behavior: `manifest.viewer.display_fields` and
+  `manifest.viewer.filter_fields` already include only fields supported by the
+  selected generated projection; the viewer should still handle missing
+  properties defensively.
+- Prompt 08 processing warnings: `metadata/processing.json.warnings` may
+  include `large_indexed_flatgeobuf_write` with `stage="flatgeobuf_writer"`,
+  `feature_count` and `estimated_spatial_index_bytes`.
 - Prompt 06 FlatGeobuf writer output contract: MVP bundles load
   `exports/occurrences.fgb`, with required fields from
   `FLATGEOBUF_PROJECTION_COLUMNS`, point geometry in longitude/latitude order,

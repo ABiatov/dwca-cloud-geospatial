@@ -17,7 +17,23 @@
 - `docs/dwca_parser.md` if it exists.
 - Prompts `01` through `09`
 - Latest session logs for prompts `01` through `09`
-- Current parser, normalization, writer and validator APIs.
+- Current parser, normalization, writer, metadata and validator APIs.
+- Prompt 08 bundle metadata writer APIs:
+  `dwca_cloud_geospatial.bundle.write_bundle_metadata`,
+  `build_source_metadata`, `build_processing_metadata`,
+  `write_rejected_records_csv`, `BundleWriterOptions` and
+  `BundleMetadataWriteResult`.
+- Prompt 08 conversion handoff: after parser, normalization and selected
+  geospatial writers complete, core conversion should call
+  `write_bundle_metadata` with the `OccurrenceReadResult`,
+  `OccurrenceNormalizationResult`, and any `FlatGeobufWriteResult` /
+  `GeoParquetWriteResult`. It writes `manifest.json`,
+  `metadata/source.json`, `metadata/processing.json`, and conditionally
+  `reports/rejected_records.csv`; do not duplicate this manifest/report logic
+  in CLI handlers.
+- Prompt 08 preserves FlatGeobuf writer warnings such as
+  `large_indexed_flatgeobuf_write` in `metadata/processing.json.warnings`
+  with `stage="flatgeobuf_writer"`.
 - Prompt 06 FlatGeobuf writer API:
   `dwca_cloud_geospatial.flatgeobuf.write_flatgeobuf_occurrences`,
   `FlatGeobufWriteResult`, `FlatGeobufWriterOptions`,

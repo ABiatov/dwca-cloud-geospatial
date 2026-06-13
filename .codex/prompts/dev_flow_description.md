@@ -67,4 +67,4 @@ At the end of each prompt:
 
 ## Current next work item
 
-`08_manifest_metadata_writers.md`
+`09_bundle_validation.md`

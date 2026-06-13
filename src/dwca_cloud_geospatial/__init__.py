@@ -2,6 +2,21 @@
 
 from importlib.metadata import PackageNotFoundError, version
 
+from dwca_cloud_geospatial.bundle import (
+    BUNDLE_SCHEMA_VERSION,
+    MANIFEST_RELATIVE_PATH,
+    OCCURRENCE_SCHEMA_VERSION,
+    PROCESSING_METADATA_RELATIVE_PATH,
+    REJECTED_RECORDS_RELATIVE_PATH,
+    SOURCE_METADATA_RELATIVE_PATH,
+    VIEWER_CONTRACT_VERSION,
+    BundleMetadataWriteResult,
+    BundleWriterOptions,
+    build_processing_metadata,
+    build_source_metadata,
+    write_bundle_metadata,
+    write_rejected_records_csv,
+)
 from dwca_cloud_geospatial.flatgeobuf import (
     DEFAULT_FLATGEOBUF_RELATIVE_PATH,
     FLATGEOBUF_PROJECTION_COLUMNS,
@@ -48,10 +63,19 @@ except PackageNotFoundError:
 
 __all__ = [
     "__version__",
+    "BUNDLE_SCHEMA_VERSION",
     "DEFAULT_FLATGEOBUF_RELATIVE_PATH",
     "DEFAULT_GEOPARQUET_RELATIVE_PATH",
     "FLATGEOBUF_PROJECTION_COLUMNS",
     "GEOPARQUET_PROJECTION_COLUMNS",
+    "MANIFEST_RELATIVE_PATH",
+    "OCCURRENCE_SCHEMA_VERSION",
+    "PROCESSING_METADATA_RELATIVE_PATH",
+    "REJECTED_RECORDS_RELATIVE_PATH",
+    "SOURCE_METADATA_RELATIVE_PATH",
+    "VIEWER_CONTRACT_VERSION",
+    "BundleMetadataWriteResult",
+    "BundleWriterOptions",
     "FlatGeobufDependencyError",
     "FlatGeobufLargeOutputWarning",
     "FlatGeobufWriteResult",
@@ -70,6 +94,8 @@ __all__ = [
     "OccurrenceNormalizationWarning",
     "RejectedOccurrenceRecord",
     "TypeConversionFailure",
+    "build_processing_metadata",
+    "build_source_metadata",
     "iter_occurrence_rows",
     "normalize_occurrence_record",
     "normalize_occurrence_records",
@@ -77,5 +103,7 @@ __all__ = [
     "project_geoparquet_record",
     "read_occurrence_rows",
     "write_flatgeobuf_occurrences",
+    "write_bundle_metadata",
     "write_geoparquet_occurrences",
+    "write_rejected_records_csv",
 ]

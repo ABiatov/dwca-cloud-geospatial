@@ -16,6 +16,30 @@
 - Prompts `01` through `08`
 - Latest session logs for prompts `01` through `08`
 - Current bundle writer implementation and tests.
+- Prompt 08 bundle metadata writer APIs:
+  `dwca_cloud_geospatial.bundle.write_bundle_metadata`,
+  `build_source_metadata`, `build_processing_metadata`,
+  `write_rejected_records_csv`, `BundleWriterOptions`,
+  `BundleMetadataWriteResult`, `BUNDLE_SCHEMA_VERSION`,
+  `VIEWER_CONTRACT_VERSION`, `OCCURRENCE_SCHEMA_VERSION`,
+  `SOURCE_METADATA_RELATIVE_PATH`, `PROCESSING_METADATA_RELATIVE_PATH`,
+  `REJECTED_RECORDS_RELATIVE_PATH` and `MANIFEST_RELATIVE_PATH`.
+- Prompt 08 writes `manifest.json`, `metadata/source.json`,
+  `metadata/processing.json`, and writes `reports/rejected_records.csv` only
+  when `OccurrenceNormalizationResult.rejected_records` is non-empty. The
+  manifest omits files that were not generated and includes size and SHA-256
+  checksums for generated metadata, report and geospatial files when present.
+- Prompt 08 source metadata behavior: the writer reads the declared
+  `ArchiveMetadata.metadata_file` when safely available and extracts common
+  EML dataset/rights values. Missing EML, GBIF or OBIS values are represented
+  as null and must not be treated as validation failures or invented by
+  validator repair logic.
+- Prompt 08 warning metadata includes normalization warnings and FlatGeobuf
+  writer warnings. `large_indexed_flatgeobuf_write` entries use
+  `stage="flatgeobuf_writer"` and include `feature_count` and
+  `estimated_spatial_index_bytes`; conversion-specific fields such as
+  `field`, `reason_code`, `failure_count` and `failure_rate` are null for
+  this writer warning.
 - Prompt 06 FlatGeobuf writer API and projection constants:
   `write_flatgeobuf_occurrences`, `FlatGeobufWriteResult`,
   `FlatGeobufWriterWarning`, `FlatGeobufDependencyError`,
@@ -32,11 +56,10 @@
   verified Pyogrio `0.12.1`, GDAL `3.11.4`, PyArrow `24.0.0`, FlatGeobuf
   driver `rw`, `tests/test_flatgeobuf_writer.py` with `6 passed`, and the full
   test suite with `27 passed`.
-- Prompt 06 large-output behavior: large FlatGeobuf indexed writes emit
+- Prompt 06/08 large-output behavior: large FlatGeobuf indexed writes emit
   structured warning code `large_indexed_flatgeobuf_write` but are not stopped
-  and do not auto-switch to `SPATIAL_INDEX=NO`. Validator work should check
-  that any emitted writer warnings are preserved in metadata once Prompt 08
-  records them.
+  and do not auto-switch to `SPATIAL_INDEX=NO`. Prompt 08 preserves emitted
+  writer warnings in `metadata/processing.json.warnings`.
 - Prompt 07 GeoParquet writer API and projection constants:
   `write_geoparquet_occurrences`, `GeoParquetWriteResult`,
   `GeoParquetWriterOptions`, `GeoParquetDependencyError`,
@@ -121,6 +144,8 @@ Implement validation for generated output bundles.
   includes it.
 - Validate processing metadata warning counts and type conversion failure
   structures.
+- Validate that nullable source provenance fields, including missing GBIF and
+  OBIS identifiers, are accepted as null rather than required values.
 - Expose a core validation API with structured result objects.
 - Add tests for valid and invalid bundles.
 

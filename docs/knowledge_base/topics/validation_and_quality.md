@@ -105,6 +105,10 @@ Write diagnostics as portable files, likely JSON and/or CSV:
 - Prompt 05 added quality flag assignment, `TypeConversionFailure` accounting
   by field/reason/action and `OccurrenceNormalizationWarning` entries for
   optional conversion failure rates at `>= 5%` of parsed records.
+- Prompt 08 writes `metadata/processing.json` with normalization warnings and
+  writer warnings. In processing metadata, `warning_count` reconciles with the
+  serialized `warnings` array, including FlatGeobuf writer warnings such as
+  `large_indexed_flatgeobuf_write` when emitted.
 - Invalid or incomplete coordinate records are rejected from geospatial outputs and preserved through diagnostics/reports, including stable reason codes. `docs/development_plan.md` M2 requires invalid or incomplete coordinate records to be rejected, M3 requires `reports/rejected_records.csv` when records are rejected or skipped, and `docs/output_format.md` makes that report conditional on at least one rejected/skipped record.
 - Validation should exist both during conversion and as a separate validation surface. `docs/development_plan.md` M3 calls for a bundle validation command or API, and M4 calls for a CLI command for validating an existing output bundle.
 - For MVP, type conversion failures should be counted by field and reason in processing metadata. Optional-field conversion failures should set normalized values to null and emit warnings when the failure rate for a field is `>= 5%` of parsed records. Critical-field failures, including coordinate parsing failures, should reject affected records with stable reason codes. The conversion should fail only when no accepted occurrence records remain, required provenance fields cannot be produced, or parser/metadata structure prevents reliable row interpretation. Future releases may add configurable warning/failure thresholds.

@@ -18,6 +18,15 @@
 - Prompts `01` through `12`, including `10b`
 - Latest session logs for prompts `01` through `12`, including `10b` when present
 - Current core conversion API, CLI and viewer launch instructions.
+- Prompt 08 bundle metadata writer APIs used by core conversion:
+  `dwca_cloud_geospatial.bundle.write_bundle_metadata`,
+  `BundleWriterOptions` and `BundleMetadataWriteResult`. GUI code should use
+  the core conversion API that calls these writers rather than writing
+  manifests, processing metadata or rejected-record reports directly.
+- Prompt 08 output behavior: `reports/rejected_records.csv` is written only
+  when rejected records exist, and `metadata/processing.json.warnings`
+  preserves FlatGeobuf writer warnings such as
+  `large_indexed_flatgeobuf_write`.
 - Prompt 04 normalization result boundaries so GUI status/count displays use
   accepted/rejected counts from the core workflow rather than re-normalizing
   occurrence rows.

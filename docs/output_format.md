@@ -2,7 +2,7 @@
 
 Status: Accepted baseline for MVP
 
-Last updated: 2026-06-09
+Last updated: 2026-06-13
 
 ## Purpose
 
@@ -347,6 +347,8 @@ Required `counts` fields:
 | `flatgeobuf_records` | integer |
 
 For formats not generated in a conversion, the corresponding output count should be `0`.
+`warning_count` should equal the number of entries in `warnings`, including
+normalization warnings and non-fatal writer warnings.
 
 Required `type_conversion_failures[]` fields:
 
@@ -379,16 +381,23 @@ Required `warnings[]` fields:
 | --- | --- | --- |
 | `code` | string | Stable machine-readable warning code. |
 | `message` | string | Human-readable warning message. |
-| `field` | string | Normalized field or source term affected. |
-| `reason_code` | string | Stable conversion failure reason that caused the warning. |
-| `failure_count` | integer | Number of parsed records affected. |
-| `failure_rate` | number | Failure count divided by parsed record count. |
+| `stage` | string | Processing stage that emitted the warning, such as `normalization` or `flatgeobuf_writer`. |
+| `field` | string or null | Normalized field or source term affected when applicable. |
+| `reason_code` | string or null | Stable conversion failure reason that caused the warning when applicable. |
+| `failure_count` | integer or null | Number of parsed records affected when applicable. |
+| `failure_rate` | number or null | Failure count divided by parsed record count when applicable. |
 
-Initial warning code:
+Initial warning codes:
 
 | Warning code | Meaning |
 | --- | --- |
 | `optional_conversion_failure_rate` | Optional-field conversion failures for a field reached the warning threshold of `>= 5%` of parsed records. |
+| `large_indexed_flatgeobuf_write` | A default indexed FlatGeobuf write may require substantial spatial-index construction memory. |
+
+FlatGeobuf writer warnings should also include `feature_count` and
+`estimated_spatial_index_bytes` when available. Conversion-specific fields
+such as `field`, `reason_code`, `failure_count` and `failure_rate` should be
+`null` for writer warnings that are not caused by a source field conversion.
 
 Recommended `validation` fields:
 

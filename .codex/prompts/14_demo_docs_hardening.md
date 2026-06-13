@@ -104,6 +104,21 @@
   both selected, both writers should receive the same accepted
   `NormalizedOccurrenceRecord` set unless processing metadata documents an
   explicit export filter.
+- Prompt 08 bundle metadata writer API:
+  `dwca_cloud_geospatial.bundle.write_bundle_metadata`,
+  `build_source_metadata`, `build_processing_metadata`,
+  `write_rejected_records_csv`, `BundleWriterOptions`,
+  `BundleMetadataWriteResult`, and path constants for `manifest.json`,
+  `metadata/source.json`, `metadata/processing.json` and
+  `reports/rejected_records.csv`. Prompt 08 writes the rejected-record report
+  only when rejected records exist, inventories only generated files in
+  `manifest.files`, includes size and SHA-256 checksums where practical, and
+  preserves FlatGeobuf writer warning `large_indexed_flatgeobuf_write` in
+  `metadata/processing.json.warnings`.
+- Prompt 08 EML/source metadata limitation to preserve: source metadata reads
+  the declared `ArchiveMetadata.metadata_file` when safely available and
+  extracts common EML dataset/rights values, but missing GBIF/OBIS values stay
+  null and are not invented.
 - Post-Prompt-07 large-archive decision to preserve in final docs: before the
   converter claims support for tens of millions of records, it must provide a
   bounded-memory pipeline with streaming/chunked occurrence reading, chunked

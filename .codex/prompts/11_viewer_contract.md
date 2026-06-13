@@ -17,16 +17,27 @@
 - Prompts `01` through `10`, plus `10b`
 - Latest session logs for prompts `01` through `10`, plus `10b` when present
 - Current generated bundle examples/tests.
+- Prompt 08 generated metadata contract: bundle metadata is written by
+  `dwca_cloud_geospatial.bundle.write_bundle_metadata` to `manifest.json`,
+  `metadata/source.json`, `metadata/processing.json`, and conditional
+  `reports/rejected_records.csv`. `manifest.files` only lists generated files
+  and includes file size and SHA-256 checksums where present.
+- Prompt 08 viewer defaults: `manifest.viewer.display_fields` and
+  `manifest.viewer.filter_fields` are intersected with the selected generated
+  projection columns, so the viewer should trust absent fields as intentionally
+  omitted rather than treating them as errors.
+- Prompt 08 processing warnings include FlatGeobuf writer warning
+  `large_indexed_flatgeobuf_write` with `stage="flatgeobuf_writer"`,
+  `feature_count` and `estimated_spatial_index_bytes`.
 - Prompt 06 FlatGeobuf output path and projection:
   `exports/occurrences.fgb` from `DEFAULT_FLATGEOBUF_RELATIVE_PATH`, required
   columns from `FLATGEOBUF_PROJECTION_COLUMNS`, point geometry in
   longitude/latitude order, CRS assumption `OGC:CRS84`, and default indexed
   writes with dependency-specific validation when Pyogrio/PyArrow/GDAL are
   available.
-- Prompt 06 large-output behavior: FlatGeobuf spatial indexing is requested by
-  default and large indexed writes produce metadata-worthy warnings rather than
-  automatically disabling the index. Viewer contract work should define how
-  processing warnings are displayed if Prompt 08 exposes them in
+- Prompt 06/08 large-output behavior: FlatGeobuf spatial indexing is requested
+  by default and large indexed writes produce metadata-worthy warnings rather
+  than automatically disabling the index. Prompt 08 exposes those warnings in
   `metadata/processing.json`.
 - Prompt 04 normalized field model for accepted/rejected occurrence records,
   especially `NormalizedOccurrenceRecord.to_dict()` exporting the Python

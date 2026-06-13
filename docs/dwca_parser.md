@@ -179,8 +179,10 @@ Deferred parser-adjacent work should not block normalization:
 
 - Multi-file occurrence-core streaming remains deferred until a real sample or
   user need requires it.
-- EML content extraction remains deferred to the source metadata writer, which
-  will read the declared `ArchiveMetadata.metadata_file` when available.
+- EML content extraction is handled by the output bundle source metadata
+  writer. Inspection and row reading preserve the declared
+  `ArchiveMetadata.metadata_file` path so `metadata/source.json` can read it
+  when safely available.
 - Optional-field warning thresholds and critical-field rejection policy belong
   to the quality-rule stage, not the row reader.
 
@@ -192,12 +194,12 @@ rejected records. It returns an `OccurrenceNormalizationResult` with:
 
 - `accepted_records`, a tuple of `NormalizedOccurrenceRecord` values.
 - `rejected_records`, a tuple of `RejectedOccurrenceRecord` values aligned
-  with the future `reports/rejected_records.csv` schema.
+  with the conditional `reports/rejected_records.csv` schema.
 - `counts`, an `OccurrenceNormalizationCounts` value with `source_records`,
   `parsed_records`, `accepted_records`, `rejected_records` and
   `warning_count`.
 - `type_conversion_failures`, a tuple of `TypeConversionFailure` values
-  counted by field, reason code and action for later `metadata/processing.json`
+  counted by field, reason code and action for `metadata/processing.json`
   serialization.
 - `warnings`, a tuple of `OccurrenceNormalizationWarning` values. Optional
   conversion failures warn when the field failure rate is `>= 5%` of parsed
@@ -279,7 +281,8 @@ These decisions are accepted for the current MVP sequence:
   should keep reporting a clear diagnostic instead of guessing behavior.
 - EML content extraction is not required for row iteration. Inspection
   preserves the declared metadata file path, and source metadata extraction
-  should be implemented with the output metadata/source writer work.
+  is implemented in the output bundle metadata writer for
+  `metadata/source.json`.
 - Occurrence row reading intentionally does not normalize coordinates, dates
   or Darwin Core terms into the final occurrence schema. Those responsibilities
   are handled by the normalization API documented above and later quality-rule

@@ -21,6 +21,18 @@
 - Prompts `01` through `10`
 - Latest session logs for prompts `01` through `10`
 - Current parser, normalization, rejected-record, writer, metadata, validator, core API and CLI implementations.
+- Prompt 08 metadata writer APIs:
+  `dwca_cloud_geospatial.bundle.write_bundle_metadata`,
+  `build_source_metadata`, `build_processing_metadata`,
+  `write_rejected_records_csv`, `BundleWriterOptions` and
+  `BundleMetadataWriteResult`. Current Prompt 08 inputs still use collected
+  `OccurrenceReadResult` and `OccurrenceNormalizationResult`; this prompt may
+  need to add a chunked-compatible adapter or summary object rather than
+  requiring fully materialized accepted/rejected tuples for large archives.
+- Prompt 08 processing metadata already records non-large-output GeoParquet
+  mode declarations for `covering_bbox_column`, `spatial_sorting` and
+  `partitioned_dataset` as disabled/null until this prompt implements those
+  modes.
 - Prompt 03 occurrence row reader API:
   `dwca_cloud_geospatial.occurrence.read_occurrence_rows`,
   `iter_occurrence_rows`, `OccurrenceReadResult` and

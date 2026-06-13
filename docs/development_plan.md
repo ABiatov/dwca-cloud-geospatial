@@ -2,7 +2,7 @@
 
 Status: Accepted MVP plan
 
-Last updated: 2026-06-09
+Last updated: 2026-06-13
 
 ## Purpose
 
@@ -310,8 +310,9 @@ Deliverables:
 - `meta.xml` parser for core files, field mappings, delimiters, headers and row types.
 - Occurrence core detection.
 - Streaming or chunked row reader for occurrence records.
-- Source metadata file discovery from `meta.xml`; full EML content extraction
-  is deferred to the metadata/source writer work.
+- Source metadata file discovery from `meta.xml`; EML content extraction is
+  performed by the output bundle metadata writer when the declared metadata
+  file is safely available.
 - Parser diagnostics for missing files, malformed metadata and row parse failures.
 
 Acceptance criteria:
@@ -353,7 +354,8 @@ Deliverables:
 - `manifest.json` writer.
 - `metadata/source.json` writer, including EML content extraction from the
   declared DwC-A metadata file where available.
-- `metadata/processing.json` writer.
+- `metadata/processing.json` writer, including normalization warnings and
+  FlatGeobuf writer warnings.
 - Conditional `reports/rejected_records.csv` writer for rejected or skipped records.
 - Bundle validation command or API.
 
@@ -477,7 +479,8 @@ No open questions remain for the accepted MVP plan.
 
 ## Immediate Next Actions
 
-1. Implement bundle metadata and validation checks.
-2. Implement EML content extraction during the metadata/source writer work.
+1. Implement bundle validation checks.
+2. Implement the core conversion API and CLI handoff that calls the parser,
+   normalizer, selected geospatial writers and bundle metadata writer.
 3. Plan the chunked large-archive pipeline before MVP hardening so the
    converter does not lock in fully materialized parser/normalizer handoffs.

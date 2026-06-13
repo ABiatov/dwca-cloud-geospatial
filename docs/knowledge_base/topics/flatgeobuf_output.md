@@ -69,9 +69,9 @@ Accepted MVP override: FlatGeobuf is the default viewer/exchange output, not opt
 - Dependency behavior: if Pyogrio/PyArrow/GDAL support is unavailable, the
   writer raises `FlatGeobufDependencyError`; tests can still validate
   projection and guardrails through the isolated backend seam.
-- Verification evidence: `tests/test_flatgeobuf_writer.py` passes with
-  `6 passed` when the optional writer stack is installed, and the full suite
-  passed with `27 passed`.
+- Prompt 06 verification evidence: `tests/test_flatgeobuf_writer.py` passed
+  with `6 passed` when the optional writer stack was installed, and the then
+  current full suite passed with `27 passed`.
 
 ## Spatial Index And Large Outputs
 
