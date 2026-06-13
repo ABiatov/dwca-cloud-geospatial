@@ -1,6 +1,6 @@
 ---
 id: implement-geoparquet-writer-playbook
-status: candidate
+status: accepted
 applies_to:
   - geospatial conversion
   - GeoParquet outputs
@@ -35,8 +35,16 @@ GeoParquet file while preserving project fields and provenance.
 8. Record accepted/rejected counts from `OccurrenceNormalizationResult`.
 9. Preserve nullable `quality_flags` and `has_quality_flags` from accepted
    normalized records.
-10. Validate output with at least one GeoParquet-aware tool or reader.
-11. Add tests for accepted coordinates, rejected coordinates, projection
+10. For large GeoParquet 1.1 outputs, add a default-on `bbox` struct covering
+    column with `xmin`, `ymin`, `xmax` and `ymax`.
+11. For large GeoParquet outputs, apply a default-on spatial sort using the
+    configured strategy so row-group bboxes stay useful for predicate pushdown.
+12. Keep partitioned GeoParquet dataset output as an explicit large-dataset
+    mode enabled by configuration or threshold.
+13. Validate output with required PyArrow checks and optional GeoParquet-aware
+    tools when installed, preferring `geoparquet-io`, then DuckDB, then
+    Pyogrio/GDAL as a best-effort reader check.
+14. Add tests for accepted coordinates, rejected coordinates, projection
     fields, `quality_flags`, `has_quality_flags`, `class_` to `class` output
     naming, row counts and metadata.
 
@@ -47,6 +55,22 @@ GeoParquet file while preserving project fields and provenance.
 - CRS: explicit WGS84/CRS84 decision in accepted output spec.
 - Compression: ZSTD.
 - Publishing version: GeoParquet 1.1 unless a later accepted decision chooses 2.0.
+- Row group size: default around 100,000 rows.
+- Large-output bbox covering: default-on for GeoParquet 1.1.
+- Large-output spatial sorting: default-on, strategy configurable.
+- Partitioned dataset output: optional large-dataset mode by configuration or
+  threshold.
+
+## Large Archive Handoff
+
+The large-archive converter path should not materialize full accepted or
+rejected record sets. Future implementation should connect:
+
+1. streaming/chunked occurrence reader;
+2. chunked normalization result handoff;
+3. streaming GeoParquet accepted-record writer;
+4. streaming rejected-record/report writer;
+5. bounded-memory counts and warning aggregation.
 
 ## Acceptance Evidence
 
@@ -54,6 +78,16 @@ GeoParquet file while preserving project fields and provenance.
 - File is recognized as GeoParquet by a geospatial reader.
 - Metadata includes a `geo` key for the chosen version.
 - Bounds and row counts match conversion summary.
+- Large-output tests or benchmarks demonstrate bounded memory and useful
+  row-group spatial pruning behavior.
+
+Prompt 07 implemented this playbook with
+`dwca_cloud_geospatial.geoparquet.write_geoparquet_occurrences`. PyArrow
+validation is required for the test suite when PyArrow is installed.
+GeoParquet-aware reader validation remains dependency-dependent. The preferred
+optional order is `geoparquet-io`, then DuckDB, then Pyogrio/GDAL as a
+best-effort reader check. Missing optional tools should skip or warn when
+required PyArrow validation passes.
 
 ## Related Topics
 

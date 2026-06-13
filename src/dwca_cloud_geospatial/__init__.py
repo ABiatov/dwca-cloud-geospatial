@@ -14,6 +14,15 @@ from dwca_cloud_geospatial.flatgeobuf import (
     project_flatgeobuf_record,
     write_flatgeobuf_occurrences,
 )
+from dwca_cloud_geospatial.geoparquet import (
+    DEFAULT_GEOPARQUET_RELATIVE_PATH,
+    GEOPARQUET_PROJECTION_COLUMNS,
+    GeoParquetDependencyError,
+    GeoParquetWriteResult,
+    GeoParquetWriterOptions,
+    project_geoparquet_record,
+    write_geoparquet_occurrences,
+)
 from dwca_cloud_geospatial.inspection import inspect_dwca
 from dwca_cloud_geospatial.occurrence import (
     OccurrenceReadResult,
@@ -40,12 +49,17 @@ except PackageNotFoundError:
 __all__ = [
     "__version__",
     "DEFAULT_FLATGEOBUF_RELATIVE_PATH",
+    "DEFAULT_GEOPARQUET_RELATIVE_PATH",
     "FLATGEOBUF_PROJECTION_COLUMNS",
+    "GEOPARQUET_PROJECTION_COLUMNS",
     "FlatGeobufDependencyError",
     "FlatGeobufLargeOutputWarning",
     "FlatGeobufWriteResult",
     "FlatGeobufWriterOptions",
     "FlatGeobufWriterWarning",
+    "GeoParquetDependencyError",
+    "GeoParquetWriteResult",
+    "GeoParquetWriterOptions",
     "estimate_spatial_index_memory_bytes",
     "inspect_dwca",
     "OccurrenceReadResult",
@@ -60,6 +74,8 @@ __all__ = [
     "normalize_occurrence_record",
     "normalize_occurrence_records",
     "project_flatgeobuf_record",
+    "project_geoparquet_record",
     "read_occurrence_rows",
     "write_flatgeobuf_occurrences",
+    "write_geoparquet_occurrences",
 ]

@@ -15,8 +15,8 @@
 - `docs/developer_setup.md`
 - `docs/viewer_contract.md`
 - `docs/converter.md` if it exists.
-- Prompts `01` through `11`
-- Latest session logs for prompts `01` through `11`
+- Prompts `01` through `11`, including `10b`
+- Latest session logs for prompts `01` through `11`, including `10b` when present
 - Current sample output bundle generation path.
 - Prompt 06 FlatGeobuf writer output contract: MVP bundles load
   `exports/occurrences.fgb`, with required fields from
@@ -34,6 +34,11 @@
 - Prompt 05 quality flag semantics: split nullable `|`-delimited
   `quality_flags` strings and match exact tokens; use `has_quality_flags`
   when present for show/hide controls.
+- Prompt 10b large-output handoff when present: if manifest or processing
+  metadata declares partitioned GeoParquet, covering bbox, spatial sorting or
+  large-output warnings, display or preserve those declarations consistently
+  with `docs/viewer_contract.md`. The MVP map display may continue to use
+  FlatGeobuf unless the viewer contract explicitly changes.
 
 ## Goal
 

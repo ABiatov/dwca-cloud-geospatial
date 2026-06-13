@@ -38,6 +38,41 @@
   `spatial_index=True`, it warns before writing when feature count is high or
   estimated index memory is high, but still attempts the indexed write unless a
   later core-conversion policy changes that behavior.
+- Prompt 07 GeoParquet writer API:
+  `dwca_cloud_geospatial.geoparquet.write_geoparquet_occurrences`,
+  `GeoParquetWriteResult`, `GeoParquetWriterOptions`,
+  `GeoParquetDependencyError`, `DEFAULT_GEOPARQUET_RELATIVE_PATH` and
+  `GEOPARQUET_PROJECTION_COLUMNS`.
+- Prompt 07 writes accepted records under `data/occurrences.parquet`, uses a
+  streaming PyArrow `ParquetWriter`, stores WKB point geometry in `geometry`,
+  writes GeoParquet `1.1.0` metadata with `OGC:CRS84` PROJJSON,
+  longitude-latitude axis order, geometry bbox, ZSTD compression and default
+  `row_group_size=100_000`.
+- Prompt 07 dependency behavior: GeoParquet production writes require
+  `pyarrow>=24`. `pyproject.toml` provides a `geoparquet` optional extra, and
+  the documented full writer-capable `.venv/` install
+  `python -m pip install -e "${REPO}[dev,flatgeobuf]"` also provides PyArrow.
+- Prompt 07 projection behavior: GeoParquet uses the broad normalized
+  analytical projection from `NormalizedOccurrenceRecord.to_dict()`, including
+  `class` instead of Python attribute `class_`, required GeoParquet fields,
+  optional source-preservation fields, `quality_flags`, `has_quality_flags`
+  and the `geometry` column. When FlatGeobuf and GeoParquet are both selected,
+  they should receive the same accepted normalized record set unless
+  processing metadata documents an export filter.
+- Post-Prompt-07 large-archive decision: before claiming support for tens of
+  millions of records, the converter must provide a chunked large-archive
+  pipeline with streaming/chunked occurrence reading, chunked normalization
+  handoff, streaming GeoParquet accepted-record writing, streaming
+  rejected-record/report writing and bounded-memory counts/warnings
+  aggregation. Processing metadata should be shaped so it can summarize this
+  chunked path without requiring fully materialized records.
+- Post-Prompt-07 large GeoParquet output decision: for large GeoParquet 1.1
+  outputs, a covering `bbox` struct column is default-on; for large
+  GeoParquet outputs, spatial sorting is default-on and strategy-configurable;
+  partitioned GeoParquet dataset output is an optional large-dataset mode
+  enabled by configuration or threshold. Processing metadata must record
+  whether these modes were used, including strategy, threshold or partition key
+  when applicable.
 - Prompt 04/05 normalization API, quality and count/rejection models:
   `normalize_occurrence_records`, `OccurrenceNormalizationResult`,
   `OccurrenceNormalizationCounts`, `NormalizedOccurrenceRecord` and

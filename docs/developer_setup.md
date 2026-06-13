@@ -76,6 +76,102 @@ pyarrow 24.0.0
 FlatGeobuf rw
 ```
 
+## GeoParquet Writer Dependencies
+
+The Prompt 07 GeoParquet writer production path uses PyArrow directly. Install
+the GeoParquet writer dependency into the same in-repository `.venv/` with:
+
+```bash
+source "${REPO}/.venv/bin/activate"
+python -m pip install -e "${REPO}[dev,geoparquet]"
+```
+
+The full writer-capable development install remains:
+
+```bash
+source "${REPO}/.venv/bin/activate"
+python -m pip install -e "${REPO}[dev,flatgeobuf]"
+```
+
+The `flatgeobuf` extra includes PyArrow because the FlatGeobuf production
+backend also writes Arrow tables, so the documented Prompt 06 full install is
+enough to run the Prompt 07 GeoParquet writer tests as well.
+
+Verify the installed GeoParquet writer stack with:
+
+```bash
+"${REPO}/.venv/bin/python" -c "import pyarrow; print('pyarrow', pyarrow.__version__)"
+```
+
+This repository has been verified with PyArrow `24.0.0`.
+
+## Optional Validation Dependencies
+
+The Prompt 09 bundle validator should always run required GeoParquet checks
+through PyArrow when GeoParquet files are declared. Additional GeoParquet-aware
+checks use optional tools when installed:
+
+- `geoparquet-io` for spec-aware inspection/validation.
+- DuckDB for analytical Parquet reads, metadata inspection and future
+  row-group/bbox checks.
+- Pyogrio/GDAL as a best-effort geospatial reader check when the local GDAL
+  build supports Parquet/GeoParquet.
+
+The `validation` extra pins `pyproj==3.7.0` for the verified local Python
+3.13/macOS `.venv/` workflow. During validation setup, newer `pyproj` releases
+may fall back to a source build and fail with `proj executable not found` when
+a system PROJ installation is unavailable.
+
+Install the optional validation toolchain into the same `.venv/` with:
+
+```bash
+source "${REPO}/.venv/bin/activate"
+python -m pip install -e "${REPO}[dev,validation]"
+```
+
+For the full local writer and validation workflow, use:
+
+```bash
+source "${REPO}/.venv/bin/activate"
+python -m pip install -e "${REPO}[dev,flatgeobuf,validation]"
+```
+
+Verify the optional validation tools with:
+
+```bash
+"${REPO}/.venv/bin/python" -c "import pyarrow, duckdb, pyproj; print('pyarrow', pyarrow.__version__); print('duckdb', duckdb.__version__); print('pyproj', pyproj.__version__)"
+gpio --version
+```
+
+If `gpio` is unavailable or a local GDAL build cannot read GeoParquet, the
+validator should report the affected check as dependency-dependent instead of
+failing a bundle whose required PyArrow validation passes.
+
+If validation installation still tries to build `pyproj` from source and fails
+with a missing PROJ executable, install the verified binary wheel first and
+then rerun the full extra install:
+
+```bash
+"${REPO}/.venv/bin/python" -m pip install --only-binary=:all: "pyproj==3.7.0"
+"${REPO}/.venv/bin/python" -m pip install -e "${REPO}[dev,flatgeobuf,validation]"
+```
+
+The local validation stack has been verified with:
+
+```text
+geoparquet-io 1.3.0
+duckdb 1.5.1
+pyproj 3.7.0
+pyarrow 24.0.0
+pyogrio 0.12.1
+GDAL 3.11.4
+```
+
+The Prompt 07 Pyogrio/GDAL GeoParquet reader test still skips in this local
+stack because GDAL does not recognize GeoParquet/Parquet as a supported vector
+read format. This is expected; Prompt 09 should use `geoparquet-io` and DuckDB
+for optional GeoParquet-aware validation when available.
+
 ## Tests
 
 Run the test suite with:
@@ -111,6 +207,18 @@ tests, install the FlatGeobuf writer dependencies above and run:
 
 Expected result when Pyogrio, GDAL and PyArrow are available: all FlatGeobuf
 writer tests pass with no dependency skip.
+
+To verify Prompt 07 GeoParquet behavior, including a real
+`data/occurrences.parquet` write, install PyArrow with either writer extra
+above and run:
+
+```bash
+"${REPO}/.venv/bin/python" -m pytest "${REPO}/tests/test_geoparquet_writer.py" -q
+```
+
+Expected result when PyArrow is available: the PyArrow GeoParquet tests pass.
+The GeoParquet-aware Pyogrio/GDAL reader check may skip when the local GDAL
+build does not provide Parquet/GeoParquet read support.
 
 ## CLI Help
 

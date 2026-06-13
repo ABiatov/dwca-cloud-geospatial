@@ -60,7 +60,14 @@ Do not hide behavior in working-directory assumptions.
 
 ## Resolved By Accepted Docs
 
-- DuckDB may be evaluated only as an optional development, inspection or validation helper. It must not become a required runtime dependency for the baseline converter, per `.codex/AGENTS.md` and the accepted GeoParquet writer stack in `docs/development_plan.md`.
+- DuckDB is an accepted optional validation and analytical-reader helper. It
+  must not become a required runtime dependency for the baseline converter, per
+  `.codex/AGENTS.md` and the accepted GeoParquet validation toolchain in
+  `docs/development_plan.md`.
+- `geoparquet-io` is the preferred optional spec-aware GeoParquet validator
+  when installed. Missing optional validation tools should surface as skipped
+  checks or warnings, not baseline validation failures, when PyArrow checks
+  pass.
 - Output generation should have a primary `convert <archive> <output>` workflow with explicit options, plus a separate `validate <bundle>` workflow. `docs/development_plan.md` M4 requires a conversion command and a CLI command for validating an existing output bundle; M3 also allows a bundle validation command or API.
 - The MVP CLI should use the Python standard library `argparse`. Command handlers should remain thin wrappers around core functions and structured configuration/result objects. Click or Typer should not be added unless the CLI grows enough that `argparse` becomes burdensome to maintain.
 - `inspect <archive>` should ship in the MVP CLI as a lightweight archive/schema inspection command. It should parse DwC-A structure through `meta.xml`, report core/extension files, row types, declared fields, coordinate field presence and parser warnings, and avoid full occurrence normalization, geospatial conversion or output bundle writing. Human-readable text output is sufficient for MVP; `--json` is useful but optional.

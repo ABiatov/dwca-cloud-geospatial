@@ -410,6 +410,38 @@ Geometry:
 - Coordinate order: longitude, latitude.
 - CRS: `OGC:CRS84` for unambiguous lon/lat order.
 - Source coordinates must be preserved in separate numeric columns.
+- File-level bounds must be preserved in GeoParquet metadata for metadata
+  handoff and bundle manifests.
+
+Large-output behavior:
+
+- The converter must support a bounded-memory large-archive path before it is
+  considered ready for DwC-A archives with tens of millions of occurrence
+  records.
+- Required large-archive pipeline shape:
+  - streaming/chunked occurrence reader;
+  - chunked normalization result handoff;
+  - streaming GeoParquet accepted-record writer;
+  - streaming rejected-record/report writer;
+  - bounded-memory counts and warning aggregation.
+- For large GeoParquet 1.1 outputs, a covering bbox column is default-on. The
+  column should be named `bbox` and encoded as a struct with numeric fields
+  `xmin`, `ymin`, `xmax` and `ymax`, matching GeoParquet 1.1 covering bbox
+  conventions for point geometries in `OGC:CRS84`.
+- For large GeoParquet outputs, spatial sorting is default-on and
+  strategy-configurable. The initial bounded strategy may be longitude/latitude
+  or bbox min-corner sorting; later implementations may use Hilbert sorting via
+  DuckDB, geoparquet-io or an equivalent helper. The purpose is to keep
+  row-group bboxes tight enough for spatial predicate pushdown.
+- Partitioned GeoParquet dataset output is an optional large-dataset mode,
+  enabled by explicit configuration or a documented threshold when a single
+  `data/occurrences.parquet` file is impractical for publishing, updating or
+  querying. Candidate partition keys include useful source attributes,
+  administrative attributes or a coarse spatial grid when spatial queries
+  dominate.
+- Processing metadata must record whether covering bbox, spatial sorting or
+  partitioned output was used, including the selected strategy, threshold or
+  partition key when applicable.
 
 Required GeoParquet projection fields:
 
@@ -672,6 +704,24 @@ Bundle validation should check:
 - `reports/rejected_records.csv` has the required columns when rejected records exist.
 - Viewer-required fields are either present in the data or omitted from `manifest.viewer.display_fields` and `manifest.viewer.filter_fields`.
 - `quality_flags` is nullable string data when present, uses `|` as its delimiter, and does not contain flag codes with the delimiter.
+
+GeoParquet validation is layered:
+
+- Required checks use PyArrow. A declared GeoParquet file must open as Parquet,
+  expose required projection columns, reconcile row counts, include
+  GeoParquet `geo` metadata, declare the expected geometry column, geometry
+  type, encoding and CRS, and preserve `quality_flags` /
+  `has_quality_flags` consistency.
+- Optional GeoParquet-aware checks should run when tools are installed:
+  `geoparquet-io` for spec-aware validation, DuckDB for analytical reader and
+  row-group/metadata checks, and Pyogrio/GDAL as a best-effort geospatial
+  reader check.
+- Missing optional validation tools or unavailable local GDAL Parquet support
+  should be reported as warnings or skipped checks, not as bundle failures,
+  when required PyArrow validation passes.
+- Large-output validation should check covering bbox, spatial sorting and
+  partitioned-output declarations when those modes are implemented or
+  declared.
 
 ## Compatibility Notes
 

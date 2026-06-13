@@ -14,8 +14,8 @@
 - `docs/output_format.md`
 - `docs/developer_setup.md`
 - `docs/converter.md` if it exists.
-- Prompts `01` through `10`
-- Latest session logs for prompts `01` through `10`
+- Prompts `01` through `10`, plus `10b`
+- Latest session logs for prompts `01` through `10`, plus `10b` when present
 - Current generated bundle examples/tests.
 - Prompt 06 FlatGeobuf output path and projection:
   `exports/occurrences.fgb` from `DEFAULT_FLATGEOBUF_RELATIVE_PATH`, required
@@ -35,6 +35,11 @@
   `|`-delimited text, no flags are null, `has_quality_flags` is boolean, and
   viewers must split on `|` for exact-token matching instead of substring
   matching.
+- Prompt 10b large-output handoff when present: preserve any implemented
+  large-archive metadata fields, partitioned GeoParquet declarations and
+  large-output warnings in the viewer contract. The MVP static viewer may
+  still prefer FlatGeobuf for map display, but it should not contradict the
+  accepted large-output GeoParquet metadata contract.
 
 ## Goal
 

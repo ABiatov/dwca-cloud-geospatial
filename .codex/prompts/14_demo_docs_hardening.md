@@ -19,8 +19,8 @@
 - `docs/converter.md` if it exists.
 - `docs/viewer_contract.md` if it exists.
 - `docs/deployment.md` if it exists.
-- All prompts `01` through `13`
-- Latest session logs for prompts `01` through `13`
+- All prompts `01` through `13`, including `10b`
+- Latest session logs for prompts `01` through `13`, including `10b` when present
 - Current tests, examples and generated sample bundle instructions.
 - Prompt 02 inspection API and docs:
   `dwca_cloud_geospatial.inspection.inspect_dwca`,
@@ -68,6 +68,59 @@
   `SPATIAL_INDEX=YES` by default, and attempts the write. It may take a long
   time, consume substantial memory, or fail; it does not auto-switch to
   `SPATIAL_INDEX=NO` unless a future accepted change introduces that behavior.
+- Prompt 07 GeoParquet writer API:
+  `dwca_cloud_geospatial.geoparquet.write_geoparquet_occurrences`,
+  `GeoParquetWriteResult`, `GeoParquetWriterOptions`,
+  `GeoParquetDependencyError`, `DEFAULT_GEOPARQUET_RELATIVE_PATH`,
+  `GEOPARQUET_PROJECTION_COLUMNS`, and tests in
+  `tests/test_geoparquet_writer.py`. The writer produces
+  `data/occurrences.parquet`, uses streaming PyArrow `ParquetWriter` batches,
+  stores WKB point geometry in `geometry`, writes GeoParquet `1.1.0` metadata
+  with `OGC:CRS84` PROJJSON longitude-latitude axis order, stores file-level
+  bbox metadata, uses ZSTD compression, and defaults to
+  `row_group_size=100_000`.
+- Prompt 07 dependency follow-up: `pyproject.toml` includes the `geoparquet`
+  optional extra for `pyarrow>=24`; `docs/developer_setup.md` documents
+  `python -m pip install -e "${REPO}[dev,geoparquet]"`, while the full
+  writer-capable `.venv/` workflow can continue using
+  `python -m pip install -e "${REPO}[dev,flatgeobuf]"` because that extra also
+  provides PyArrow. Local verification used PyArrow `24.0.0`; PyArrow
+  GeoParquet writer tests passed, and the dependency-dependent
+  Pyogrio/GDAL GeoParquet-aware reader check skipped when local GDAL Parquet
+  read support was unavailable.
+- Post-Prompt-07 validation toolchain decision to preserve in final docs:
+  PyArrow is the required baseline GeoParquet validator; `geoparquet-io` and
+  DuckDB are preferred optional validation tools; Pyogrio/GDAL remains a
+  best-effort reader check. Missing optional validation tools should be
+  reported as warnings or skipped checks, not as failures when PyArrow
+  validation passes. The full local writer and validation install is
+  `python -m pip install -e "${REPO}[dev,flatgeobuf,validation]"`.
+- Validation installation evidence to preserve: the local Python 3.13/macOS
+  `.venv/` uses `pyproj==3.7.0` in the `validation` extra because newer
+  `pyproj` releases may require a source build with system PROJ. The verified
+  optional validation stack included `geoparquet-io 1.3.0`, DuckDB `1.5.1`,
+  PyProj `3.7.0`, PyArrow `24.0.0`, Pyogrio `0.12.1` and GDAL `3.11.4`.
+- Prompt 07 record-set rule to preserve: when FlatGeobuf and GeoParquet are
+  both selected, both writers should receive the same accepted
+  `NormalizedOccurrenceRecord` set unless processing metadata documents an
+  explicit export filter.
+- Post-Prompt-07 large-archive decision to preserve in final docs: before the
+  converter claims support for tens of millions of records, it must provide a
+  bounded-memory pipeline with streaming/chunked occurrence reading, chunked
+  normalization handoff, streaming GeoParquet accepted-record writing,
+  streaming rejected-record/report writing and bounded-memory counts/warnings
+  aggregation.
+- Post-Prompt-07 large GeoParquet output decision to preserve in final docs:
+  covering `bbox` is default-on for large GeoParquet 1.1 outputs; spatial
+  sorting is default-on for large GeoParquet outputs with a configurable
+  strategy; partitioned GeoParquet dataset output is an optional large-dataset
+  mode enabled by configuration or threshold.
+- Prompt 10b large-archive implementation when present: preserve its public
+  API names, large-output options, metadata fields, validation coverage,
+  benchmark or synthetic large-output evidence, and remaining limitations in
+  final docs. If Prompt 10b is not completed before hardening, final docs must
+  clearly state that support for tens of millions of records is not yet
+  claimed.
 - Post-Prompt-03 handoff clarification: the Prompt 03 `Open Issues Affecting
   Normalization` were confirmed to be scope boundaries, not blockers before
   Prompt 04. Final docs should preserve that split: source row reading in
@@ -99,6 +152,9 @@ Make the MVP understandable, repeatable and ready for external review.
 - Document the current large-DwC-A limitation clearly: full-record
   materialization remains a risk until chunked parser/normalizer/writer
   handoff is implemented.
+- If Prompt 10b has been completed, replace the generic materialization
+  limitation with the actual implemented bounded-memory behavior, test
+  evidence and remaining scale limits.
 - Document the checklist limitation clearly: checklist/Taxon DwC-A archives can
   be inspected, but the MVP converter only produces geospatial outputs from
   occurrence archives with coordinate terms.

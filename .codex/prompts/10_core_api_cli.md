@@ -42,6 +42,47 @@
   Future core/CLI options may expose `FlatGeobufWriterOptions(spatial_index=False)`
   for users who explicitly want `SPATIAL_INDEX=NO`; do not silently auto-disable
   the index without updating `docs/output_format.md` and downstream prompts.
+- Prompt 07 GeoParquet writer API:
+  `dwca_cloud_geospatial.geoparquet.write_geoparquet_occurrences`,
+  `GeoParquetWriteResult`, `GeoParquetWriterOptions`,
+  `GeoParquetDependencyError`, `DEFAULT_GEOPARQUET_RELATIVE_PATH` and
+  `GEOPARQUET_PROJECTION_COLUMNS`.
+- Prompt 07 GeoParquet dependency behavior: explicit GeoParquet conversion
+  should use the writer for `data/occurrences.parquet`; if PyArrow is not
+  installed, surface `GeoParquetDependencyError` as an actionable conversion
+  error instead of failing with an import traceback.
+- Prompt 07 GeoParquet options to preserve unless deliberately changed:
+  WKB point geometry column `geometry`, GeoParquet `1.1.0`, `OGC:CRS84`
+  longitude-latitude CRS metadata, file-level bbox metadata, ZSTD compression
+  and configurable `row_group_size` with default `100_000`.
+- Prompt 07 dependency follow-up: the documented PyArrow-only install is
+  `python -m pip install -e "${REPO}[dev,geoparquet]"`; the documented full
+  writer-capable install remains
+  `python -m pip install -e "${REPO}[dev,flatgeobuf]"` because the
+  FlatGeobuf extra also includes PyArrow.
+- Post-Prompt-07 validation toolchain decision:
+  `planning/decisions/ADR-003-geoparquet-validation-toolchain.md` accepts
+  layered GeoParquet validation. CLI/core validation should treat PyArrow
+  checks as required for declared GeoParquet files and optional
+  `geoparquet-io`, DuckDB and Pyogrio/GDAL checks as dependency-dependent.
+  Validation results should expose skipped optional checks and warnings without
+  failing bundles whose required PyArrow validation passes.
+- Validation dependency setup: `pyproject.toml` provides the `validation`
+  optional extra. The full local writer and validation install is
+  `python -m pip install -e "${REPO}[dev,flatgeobuf,validation]"`.
+- Post-Prompt-07 large-archive pipeline decision: before claiming support for
+  tens of millions of records, the core conversion API should support a
+  bounded-memory path with streaming/chunked occurrence reading, chunked
+  normalization handoff, streaming GeoParquet accepted-record writing,
+  streaming rejected-record/report writing and bounded-memory counts/warnings
+  aggregation. Avoid public API shapes that require fully materialized accepted
+  or rejected record tuples when an iterator or chunked result can preserve the
+  same semantics.
+- Post-Prompt-07 large GeoParquet output decision: expose configuration for
+  large-output behavior. Covering bbox is default-on for large GeoParquet 1.1
+  outputs; spatial sorting is default-on for large GeoParquet outputs with a
+  configurable strategy; partitioned GeoParquet dataset output is an optional
+  large-dataset mode enabled by config or threshold.
 - Prompt 04/05 normalization API:
   `dwca_cloud_geospatial.normalization.normalize_occurrence_records`,
   `OccurrenceNormalizationResult`, `OccurrenceNormalizationCounts`,

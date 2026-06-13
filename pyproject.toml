@@ -31,8 +31,20 @@ dependencies = []
 dev = [
   "pytest>=8"
 ]
+geoparquet = [
+  "pyarrow>=24"
+]
 flatgeobuf = [
   "pyogrio>=0.12",
+  "pyarrow>=24"
+]
+validation = [
+  "duckdb>=1.0",
+  "geoparquet-io",
+  # Keep validation installs on a binary wheel in the verified Python 3.13
+  # macOS .venv; newer pyproj releases may fall back to source builds that
+  # require a system PROJ installation.
+  "pyproj==3.7.0",
   "pyarrow>=24"
 ]
 

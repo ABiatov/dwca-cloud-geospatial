@@ -1,6 +1,6 @@
 ---
 id: geoparquet-output
-status: candidate
+status: accepted
 applies_to:
   - geospatial conversion
   - GeoParquet outputs
@@ -54,30 +54,63 @@ Useful practices from GeoParquet tooling and cookbooks:
 - ZSTD compression for cloud or network-bound reads.
 - Reasonable row group sizes for query pruning.
 - Spatial sorting, such as Hilbert ordering or bbox ordering, before writing large files.
-- Bbox metadata or bbox columns when supported by the chosen GeoParquet version and writer.
-- Attribute partitioning only when it matches common query filters and does not overcomplicate the static output bundle.
+- GeoParquet 1.1 covering bbox columns for large WKB outputs so readers can
+  prune row groups using Parquet statistics.
+- Attribute or coarse-grid partitioning for large datasets when it matches
+  common query filters, publishing constraints or update workflows.
 
 ## Validation
 
-GeoParquet outputs should be validated with a spec-aware tool when possible:
+GeoParquet outputs should use layered validation:
 
-- `gpq validate`
-- GDAL/OGR GeoParquet validation tools
-- `geoparquet-io` inspection/check commands, if adopted as a dev dependency or external tool
-
-Validation should check both metadata and actual data where possible.
+- PyArrow is the required baseline validator for Parquet readability,
+  GeoParquet footer metadata, schema, projection fields and row counts.
+- `geoparquet-io` is the preferred optional spec-aware validator when
+  installed.
+- DuckDB is the preferred optional analytical reader for query access, row
+  groups, metadata inspection and future bbox/spatial-pruning checks.
+- GDAL/OGR or Pyogrio checks are useful best-effort reader checks when the
+  local build supports Parquet/GeoParquet.
+- Missing optional validation tools should be reported as skipped checks or
+  warnings, not failures, when required PyArrow validation passes.
 
 ## Resolved By Accepted Docs
 
 - The accepted baseline GeoParquet version is `1.1.0`, with `OGC:CRS84`, WKB point geometry, ZSTD compression, enabled statistics and configurable row group size. This is recorded in the accepted GeoParquet writer stack in `docs/development_plan.md`.
+- Prompt 07 implemented `dwca_cloud_geospatial.geoparquet.write_geoparquet_occurrences`
+  for explicit analytical output at `data/occurrences.parquet`. The writer
+  streams accepted normalized records into PyArrow `ParquetWriter` row groups,
+  defaults to `row_group_size=100_000`, writes ZSTD-compressed Parquet and
+  stores GeoParquet metadata in the footer under the `geo` key.
+- The production dependency is PyArrow. Install with the `geoparquet` optional
+  extra, or with the full writer-capable `flatgeobuf` extra, which also
+  includes PyArrow.
+- The accepted optional validation toolchain is documented in
+  `planning/decisions/ADR-003-geoparquet-validation-toolchain.md`. Install the
+  `validation` extra to get PyArrow, DuckDB and `geoparquet-io` for Prompt 09
+  validator work.
 - GeoParquet writing should start from accepted `NormalizedOccurrenceRecord`
   values produced by normalization after Prompt 05 quality rules, not
   parser-level `OccurrenceSourceRecord` rows. Rejected coordinate rows belong
   in `reports/rejected_records.csv` and processing metadata.
 - GeoParquet must preserve the accepted nullable `quality_flags` string and
   `has_quality_flags` boolean from the normalized records.
-- File-level bbox metadata should be included in GeoParquet metadata. A GeoParquet 1.1 covering bbox column is only something to evaluate for large outputs, not a required MVP project schema column.
-- Spatial sorting is not mandatory for all MVP outputs. It is a large-data extension to evaluate after the first writer works, using simple lon/lat sorting first or optional DuckDB/geoparquet-io Hilbert-sort workflows.
+- File-level bbox metadata is included in GeoParquet metadata.
+- For large GeoParquet 1.1 outputs, a covering `bbox` struct column with
+  `xmin`, `ymin`, `xmax` and `ymax` is default-on. Small fixtures and small
+  local outputs may omit it until the covering-bbox implementation exists, but
+  large-output conversion must not rely only on file-level bbox metadata.
+- For large GeoParquet outputs, spatial sorting is default-on and
+  strategy-configurable. Start with a bounded local strategy such as
+  longitude/latitude or bbox min-corner sorting, and allow later Hilbert
+  sorting through DuckDB, geoparquet-io or an equivalent helper.
+- Partitioned GeoParquet dataset output remains an optional large-dataset mode
+  enabled by configuration or threshold when a single
+  `data/occurrences.parquet` file is impractical.
+- The accepted large-archive pipeline direction is streaming/chunked
+  occurrence reading, chunked normalization handoff, streaming GeoParquet
+  accepted-record writing, streaming rejected-record/report writing and
+  bounded-memory counts/warnings aggregation.
 - GeoParquet 2.0 support is deferred to post-MVP. The MVP and default output remain GeoParquet `1.1.0` for broad reader compatibility. GeoParquet 2.0 may be added later as an explicit opt-in output option only after target downstream readers and validation tools demonstrate reliable support. Adding 2.0 must not change the default GeoParquet version without a separate accepted decision.
 
 ## Open Questions

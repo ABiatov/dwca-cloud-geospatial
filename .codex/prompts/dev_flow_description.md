@@ -28,6 +28,7 @@ Purpose: this directory contains ordered prompts for building the DwC-A to cloud
 8. `08_manifest_metadata_writers.md`: write manifest, source metadata and processing metadata.
 9. `09_bundle_validation.md`: validate output bundles and reconcile counts/files/schema.
 10. `10_core_api_cli.md`: expose conversion, inspection and validation through a thin core API and `argparse` CLI.
+10b. `10b_large_archive_streaming_and_geoparquet_optimization.md`: implement bounded-memory large-archive conversion and GeoParquet large-output optimizations.
 11. `11_viewer_contract.md`: document the static viewer contract.
 12. `12_static_viewer.md`: implement the minimal static MapLibre viewer.
 13. `13_tkinter_gui.md`: implement the primitive desktop GUI over the same core API.
@@ -47,6 +48,7 @@ Purpose: this directory contains ordered prompts for building the DwC-A to cloud
 | 08 | Output bundle metadata writers | 09-14 |
 | 09 | Bundle validator | 10, 14 |
 | 10 | Public core API and CLI docs draft | 11-14 |
+| 10b | Bounded-memory large-archive pipeline and GeoParquet optimization | 11-14 |
 | 11 | Viewer contract document | 12, 14 |
 | 12 | Static viewer files and smoke checks | 13-14 |
 | 13 | GUI entry point | 14 |
@@ -65,4 +67,4 @@ At the end of each prompt:
 
 ## Current next work item
 
-`07_geoparquet_writer.md`
+`08_manifest_metadata_writers.md`

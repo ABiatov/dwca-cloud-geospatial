@@ -15,8 +15,8 @@
 - `docs/developer_setup.md`
 - `docs/converter.md` if it exists.
 - `docs/viewer_contract.md` if it exists.
-- Prompts `01` through `12`
-- Latest session logs for prompts `01` through `12`
+- Prompts `01` through `12`, including `10b`
+- Latest session logs for prompts `01` through `12`, including `10b` when present
 - Current core conversion API, CLI and viewer launch instructions.
 - Prompt 04 normalization result boundaries so GUI status/count displays use
   accepted/rejected counts from the core workflow rather than re-normalizing
@@ -33,6 +33,10 @@
   `python -m pip install -e "${REPO}[dev,flatgeobuf]"`. If the core API
   raises `FlatGeobufDependencyError`, GUI errors should preserve its actionable
   dependency message.
+- Prompt 10b large-output handoff when present: GUI options should expose only
+  large-output controls implemented by the core API, preserve actionable
+  errors for unsupported modes and show non-fatal large-output warnings
+  separately from conversion failures.
 
 ## Goal
 
