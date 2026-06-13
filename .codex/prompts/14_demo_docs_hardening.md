@@ -119,6 +119,23 @@
   the declared `ArchiveMetadata.metadata_file` when safely available and
   extracts common EML dataset/rights values, but missing GBIF/OBIS values stay
   null and are not invented.
+- Prompt 09 bundle validation API:
+  `dwca_cloud_geospatial.validation.validate_output_bundle`,
+  `BundleValidationResult`, `BundleValidationIssue` and
+  `BundleValidationCheck`, exported from `dwca_cloud_geospatial`.
+- Prompt 09 validation behavior to preserve in final docs and demo evidence:
+  status values are `passed`, `passed_with_warnings` and `failed`; required
+  failures populate `errors`; optional geospatial reader gaps and other
+  dependency-dependent checks populate structured warnings/skipped checks; the
+  result exposes `has_errors`, `skipped_checks`, `to_dict()` and `to_json()`.
+- Prompt 09 validation coverage to preserve: required bundle JSON files and
+  schema versions, manifest inventory paths/sizes/checksums, required PyArrow
+  GeoParquet metadata and projection checks, optional `geoparquet-io`,
+  DuckDB and Pyogrio/GDAL checks, dependency-dependent FlatGeobuf inspection,
+  row-count reconciliation, rejected CSV columns, viewer field presence,
+  `quality_flags` exact-token and `has_quality_flags` consistency, processing
+  warning/type-conversion failure structure, and nullable GBIF/OBIS provenance
+  acceptance.
 - Post-Prompt-07 large-archive decision to preserve in final docs: before the
   converter claims support for tens of millions of records, it must provide a
   bounded-memory pipeline with streaming/chunked occurrence reading, chunked

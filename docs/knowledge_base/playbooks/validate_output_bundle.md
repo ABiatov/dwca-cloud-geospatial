@@ -19,6 +19,12 @@ sources:
 
 Confirm that generated files are internally consistent, readable by expected tools, and safe to publish as static assets.
 
+The implemented core entry point is
+`dwca_cloud_geospatial.validation.validate_output_bundle(bundle_root)`. It
+returns `BundleValidationResult` with `status`, `errors`, `warnings`,
+`checks`, `checked_files`, `has_errors`, `skipped_checks`, `to_dict()` and
+`to_json()`.
+
 ## Steps
 
 1. Read the output manifest.
@@ -52,8 +58,21 @@ Confirm that generated files are internally consistent, readable by expected too
 16. Reconcile FlatGeobuf writer warnings recorded in processing metadata,
     including non-fatal `large_indexed_flatgeobuf_write` warnings for indexed
     writes over large accepted record sets.
-17. Write a validation report with errors, warnings, skipped checks and tool
-    versions.
+17. Return or save a validation result with errors, warnings, skipped checks
+    and tool versions.
+
+Current implementation notes:
+
+- Single-file GeoParquet output at `data/occurrences.parquet` is validated
+  with required PyArrow checks.
+- Partitioned GeoParquet dataset validation remains future work if partitioned
+  output is implemented.
+- FlatGeobuf validation checks projection fields and counts through
+  Pyogrio/GDAL when available. Row-level FlatGeobuf `quality_flags` validation
+  depends on local geospatial table reader support.
+- Optional `geoparquet-io`, DuckDB and Pyogrio/GDAL checks should be treated
+  as structured warnings or skipped checks when required PyArrow validation
+  passes.
 
 ## Acceptance Evidence
 
@@ -70,7 +89,8 @@ Confirm that generated files are internally consistent, readable by expected too
 - Validation reconciles warning counts with processing warnings.
 - Validation treats `large_indexed_flatgeobuf_write` as a non-fatal processing
   warning unless a later accepted core-conversion policy changes it.
-- Validation report is saved as a portable JSON or text artifact.
+- Validation result is available as portable JSON through
+  `BundleValidationResult.to_json()` and can later be surfaced by CLI or GUI.
 
 ## Related Topics
 

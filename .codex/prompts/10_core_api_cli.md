@@ -34,6 +34,25 @@
 - Prompt 08 preserves FlatGeobuf writer warnings such as
   `large_indexed_flatgeobuf_write` in `metadata/processing.json.warnings`
   with `stage="flatgeobuf_writer"`.
+- Prompt 09 bundle validation API:
+  `dwca_cloud_geospatial.validation.validate_output_bundle`,
+  `BundleValidationResult`, `BundleValidationIssue` and
+  `BundleValidationCheck`.
+- Prompt 09 validation result behavior: `BundleValidationResult.status` is
+  `passed`, `passed_with_warnings` or `failed`; required validation failures
+  appear in `.errors`, dependency-dependent optional-reader skips and
+  non-fatal optional-reader issues appear in `.warnings` and `.checks`, and
+  `.has_errors`, `.skipped_checks`, `.to_dict()` and `.to_json()` are
+  available for CLI/GUI consumers. The CLI `validate` command should call this
+  core API directly and return non-zero only when `.has_errors` is true.
+- Prompt 09 implemented validation coverage includes required JSON parsing,
+  supported schema versions, manifest file existence, safe relative paths,
+  file sizes and SHA-256 checksums, required PyArrow GeoParquet validation,
+  optional `geoparquet-io`/DuckDB/Pyogrio checks, dependency-dependent
+  FlatGeobuf inspection, count reconciliation, rejected CSV columns, viewer
+  field presence, `quality_flags` token and `has_quality_flags` consistency,
+  processing warning counts/type-conversion failures, and nullable GBIF/OBIS
+  provenance acceptance.
 - Prompt 06 FlatGeobuf writer API:
   `dwca_cloud_geospatial.flatgeobuf.write_flatgeobuf_occurrences`,
   `FlatGeobufWriteResult`, `FlatGeobufWriterOptions`,

@@ -27,6 +27,15 @@
   when rejected records exist, and `metadata/processing.json.warnings`
   preserves FlatGeobuf writer warnings such as
   `large_indexed_flatgeobuf_write`.
+- Prompt 09 validation API:
+  `dwca_cloud_geospatial.validation.validate_output_bundle`,
+  `BundleValidationResult`, `BundleValidationIssue` and
+  `BundleValidationCheck`. GUI validation status should consume the core
+  validator result instead of reimplementing bundle checks.
+- Prompt 09 validation result behavior: `BundleValidationResult.status` is
+  `passed`, `passed_with_warnings` or `failed`; `.has_errors` determines
+  whether validation failed, while dependency-dependent optional-reader skips
+  are surfaced through `.warnings`, `.checks` and `.skipped_checks`.
 - Prompt 04 normalization result boundaries so GUI status/count displays use
   accepted/rejected counts from the core workflow rather than re-normalizing
   occurrence rows.
@@ -60,6 +69,8 @@ Implement a primitive `tkinter` desktop entry point for non-CLI users while reus
 - Show progress/status and actionable errors.
 - Show non-fatal conversion warnings, including large FlatGeobuf indexed-write
   warnings, separately from conversion failures.
+- When exposing validation in the GUI, display required validation errors
+  separately from dependency-dependent skipped checks and warnings.
 - Provide a way to open the generated output directory or show viewer instructions.
 - Add tests for GUI-adjacent logic where possible without requiring an interactive display.
 - Document GUI usage in `docs/converter.md` or another accepted docs path.

@@ -74,6 +74,21 @@
   GeoParquet-aware checks use `geoparquet-io`, DuckDB and Pyogrio/GDAL when
   available, and missing optional tools should be recorded as warnings or
   skipped checks when PyArrow validation passes.
+- Prompt 09 bundle validator API:
+  `dwca_cloud_geospatial.validation.validate_output_bundle`,
+  `BundleValidationResult`, `BundleValidationIssue` and
+  `BundleValidationCheck`.
+- Prompt 09 current validator scope: single-file GeoParquet outputs are
+  validated with required PyArrow checks; optional `geoparquet-io`, DuckDB and
+  Pyogrio/GDAL checks are recorded as structured checks/skips; FlatGeobuf
+  inspection is dependency-dependent through Pyogrio/GDAL; FlatGeobuf
+  attribute-level `quality_flags` validation depends on readable geospatial
+  table support. Partitioned GeoParquet dataset validation is not implemented
+  yet and belongs to this prompt if partitioned output is implemented.
+- Prompt 09 validation result behavior: `BundleValidationResult.status` is
+  `passed`, `passed_with_warnings` or `failed`; required failures appear in
+  `.errors`, optional/dependency skips appear in `.warnings` and `.checks`,
+  and `.to_dict()` / `.to_json()` are available for CLI/GUI consumers.
 - Local GeoParquet cookbook references:
   - `examples/code/geomermaids-GeoParquet_Writing_cookbook.md`
   - `examples/code/geomermaids-GeoParquet_Reading_Cookbook.md`
@@ -127,6 +142,12 @@ conversion format away from FlatGeobuf.
 - Add or update validation tests so large-output bbox covering and spatial
   sorting metadata are checked with required PyArrow validation and optional
   `geoparquet-io`/DuckDB checks when installed.
+- If partitioned GeoParquet dataset output is implemented, extend
+  `validate_output_bundle` and its tests to validate partition manifests,
+  file inventory, aggregate row counts, GeoParquet metadata and required
+  projection columns across all declared partition files. If partitioned
+  output remains deferred, preserve an explicit unsupported-mode validation
+  warning or failure path.
 - Update `docs/development_plan.md`, `docs/output_format.md`,
   `docs/converter.md` if present, GeoParquet knowledge-base docs and
   downstream prompts when implementation details are accepted.

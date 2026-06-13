@@ -66,6 +66,13 @@ The MVP excludes:
   `taxon.txt` as occurrence data.
 - DwC-A defaults and row numbering: apply `meta.xml` field defaults only when the declared field has no source column index or the source column is not present in the row shape. Do not use defaults to replace explicit empty strings or invalid source values in present columns. Store `source_row_number` as the physical 1-based row number in the source data file, including skipped header rows, and store `source_data_row_number` as the logical 1-based data-record number after declared header rows when available.
 - Type conversion failure policy: for MVP, type conversion failures should be counted by field and reason in processing metadata. Optional-field conversion failures should set normalized values to null and emit warnings when the failure rate for a field is `>= 5%` of parsed records. Critical-field failures, including coordinate parsing failures, should reject affected records with stable reason codes. The conversion should fail only when no accepted occurrence records remain, required provenance fields cannot be produced, or parser/metadata structure prevents reliable row interpretation. Future releases may add configurable warning/failure thresholds.
+- Bundle validation API: the core bundle validator is
+  `dwca_cloud_geospatial.validation.validate_output_bundle`. It returns
+  `BundleValidationResult` with status `passed`, `passed_with_warnings` or
+  `failed`, required validation failures in `errors`, dependency-dependent
+  optional-reader issues in `warnings` and structured per-check details in
+  `checks`. CLI and GUI validation surfaces should consume this core result
+  instead of reimplementing bundle checks.
 - Future raw table export: full Parquet-family export of DwC-A core and extension tables is deferred until after MVP. The MVP parser should preserve the design path for that mode by reading core/extensions through `meta.xml`, retaining field metadata, relationship keys such as `_id` and `_coreid`, source files and row-number provenance.
 - Future PMTiles generation: PMTiles remains deferred to MVP+ and should use Tippecanoe as the preferred tiler when available. Tippecanoe is an optional external dependency, not an MVP runtime requirement; requested PMTiles generation should fail gracefully with an actionable message when `tippecanoe` is not installed. PMTiles point attributes should default to the same compact normalized occurrence field set as FlatGeobuf, with a smaller PMTiles-specific attribute profile allowed later for large datasets if tile size or browser performance requires it.
 
@@ -187,6 +194,58 @@ Development install:
 
 Validation results should separate required errors from optional checks that
 were skipped because a local tool or driver is unavailable.
+
+## Accepted Bundle Validator API
+
+Status: Accepted
+
+The bundle validator validates generated static output bundles through the
+core Python API `dwca_cloud_geospatial.validation.validate_output_bundle`.
+
+Structured result objects:
+
+- `BundleValidationResult`
+- `BundleValidationIssue`
+- `BundleValidationCheck`
+
+Result behavior:
+
+- `status` is `passed`, `passed_with_warnings` or `failed`.
+- Required failures populate `errors` and make `has_errors` true.
+- Optional dependency-dependent checks, such as missing optional readers or
+  unavailable GDAL GeoParquet support, populate `warnings`, `checks` and
+  `skipped_checks` without failing the bundle when required checks pass.
+- `to_dict()` and `to_json()` provide portable output for CLI and future GUI
+  consumers.
+
+Implemented validation coverage:
+
+- required bundle JSON files and supported schema versions;
+- manifest file inventory, safe relative paths, byte sizes and SHA-256
+  checksums;
+- required PyArrow checks for declared single-file GeoParquet outputs;
+- optional `geoparquet-io`, DuckDB and Pyogrio/GDAL checks when available;
+- dependency-dependent FlatGeobuf inspection through Pyogrio/GDAL;
+- row-count reconciliation across manifest, processing metadata, geospatial
+  outputs and rejected-record reports;
+- rejected CSV required columns;
+- viewer field presence in inspected generated data;
+- `quality_flags` exact-token representation and `has_quality_flags`
+  consistency where row-level data are readable;
+- processing warning counts and type conversion failure structures;
+- nullable GBIF and OBIS provenance values.
+
+Current limitations:
+
+- The validator covers the implemented single-file GeoParquet output
+  `data/occurrences.parquet`. Partitioned GeoParquet dataset validation
+  remains future work for the large-archive Prompt 10b path if partitioned
+  output is implemented.
+- FlatGeobuf attribute-level `quality_flags` validation depends on readable
+  geospatial table support. The current validator checks FlatGeobuf projection
+  fields and counts through Pyogrio/GDAL when available.
+- The CLI `validate` command remains an M4 integration task; it should call
+  `validate_output_bundle` directly.
 
 ## Accepted FlatGeobuf Writer Stack
 
@@ -479,8 +538,7 @@ No open questions remain for the accepted MVP plan.
 
 ## Immediate Next Actions
 
-1. Implement bundle validation checks.
-2. Implement the core conversion API and CLI handoff that calls the parser,
+1. Implement the core conversion API and CLI handoff that calls the parser,
    normalizer, selected geospatial writers and bundle metadata writer.
-3. Plan the chunked large-archive pipeline before MVP hardening so the
+2. Plan the chunked large-archive pipeline before MVP hardening so the
    converter does not lock in fully materialized parser/normalizer handoffs.

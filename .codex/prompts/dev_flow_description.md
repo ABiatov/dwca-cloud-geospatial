@@ -67,4 +67,4 @@ At the end of each prompt:
 
 ## Current next work item
 
-`09_bundle_validation.md`
+`10_core_api_cli.md`

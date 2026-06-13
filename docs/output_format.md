@@ -714,6 +714,14 @@ Bundle validation should check:
 - Viewer-required fields are either present in the data or omitted from `manifest.viewer.display_fields` and `manifest.viewer.filter_fields`.
 - `quality_flags` is nullable string data when present, uses `|` as its delimiter, and does not contain flag codes with the delimiter.
 
+The implemented core validation API is
+`dwca_cloud_geospatial.validation.validate_output_bundle`. It returns a
+`BundleValidationResult` with status `passed`, `passed_with_warnings` or
+`failed`, required failures in `errors`, dependency-dependent optional-reader
+warnings/skips in `warnings` and per-check details in `checks`. CLI and GUI
+surfaces should consume this result object rather than duplicating validation
+logic.
+
 GeoParquet validation is layered:
 
 - Required checks use PyArrow. A declared GeoParquet file must open as Parquet,
@@ -731,6 +739,17 @@ GeoParquet validation is layered:
 - Large-output validation should check covering bbox, spatial sorting and
   partitioned-output declarations when those modes are implemented or
   declared.
+
+Current validator scope and limitations:
+
+- Implemented GeoParquet validation covers the single-file output
+  `data/occurrences.parquet`.
+- Partitioned GeoParquet dataset validation is deferred until partitioned
+  output is implemented.
+- FlatGeobuf inspection is dependency-dependent through Pyogrio/GDAL. When
+  readable, validation checks projection fields, point geometry and feature
+  counts. Row-level FlatGeobuf `quality_flags` validation depends on local
+  geospatial table reader support.
 
 ## Compatibility Notes
 

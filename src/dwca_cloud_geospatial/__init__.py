@@ -55,6 +55,12 @@ from dwca_cloud_geospatial.normalization import (
     normalize_occurrence_record,
     normalize_occurrence_records,
 )
+from dwca_cloud_geospatial.validation import (
+    BundleValidationCheck,
+    BundleValidationIssue,
+    BundleValidationResult,
+    validate_output_bundle,
+)
 
 try:
     __version__ = version("dwca-cloud-geospatial")
@@ -75,6 +81,9 @@ __all__ = [
     "SOURCE_METADATA_RELATIVE_PATH",
     "VIEWER_CONTRACT_VERSION",
     "BundleMetadataWriteResult",
+    "BundleValidationCheck",
+    "BundleValidationIssue",
+    "BundleValidationResult",
     "BundleWriterOptions",
     "FlatGeobufDependencyError",
     "FlatGeobufLargeOutputWarning",
@@ -106,4 +115,5 @@ __all__ = [
     "write_bundle_metadata",
     "write_geoparquet_occurrences",
     "write_rejected_records_csv",
+    "validate_output_bundle",
 ]

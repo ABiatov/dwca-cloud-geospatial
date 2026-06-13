@@ -107,9 +107,9 @@ This repository has been verified with PyArrow `24.0.0`.
 
 ## Optional Validation Dependencies
 
-The Prompt 09 bundle validator should always run required GeoParquet checks
-through PyArrow when GeoParquet files are declared. Additional GeoParquet-aware
-checks use optional tools when installed:
+The bundle validator runs required GeoParquet checks through PyArrow when
+GeoParquet files are declared. Additional GeoParquet-aware checks use optional
+tools when installed:
 
 - `geoparquet-io` for spec-aware inspection/validation.
 - DuckDB for analytical Parquet reads, metadata inspection and future
@@ -136,16 +136,23 @@ source "${REPO}/.venv/bin/activate"
 python -m pip install -e "${REPO}[dev,flatgeobuf,validation]"
 ```
 
-Verify the optional validation tools with:
+Verify the validation-only optional tools with:
 
 ```bash
-"${REPO}/.venv/bin/python" -c "import pyarrow, duckdb, pyproj; print('pyarrow', pyarrow.__version__); print('duckdb', duckdb.__version__); print('pyproj', pyproj.__version__)"
-gpio --version
+"${REPO}/.venv/bin/python" -c "import importlib.metadata as m, pyarrow, duckdb; print('pyarrow', pyarrow.__version__); print('duckdb', duckdb.__version__); print('geoparquet-io', m.version('geoparquet-io')); print('pyproj', m.version('pyproj'))"
 ```
 
-If `gpio` is unavailable or a local GDAL build cannot read GeoParquet, the
-validator should report the affected check as dependency-dependent instead of
-failing a bundle whose required PyArrow validation passes.
+For the full writer and validation workflow, verify Pyogrio/GDAL as well:
+
+```bash
+"${REPO}/.venv/bin/python" -c "import pyogrio; print('pyogrio', pyogrio.__version__); print('gdal', pyogrio.__gdal_version_string__); print('FlatGeobuf', pyogrio.list_drivers().get('FlatGeobuf'))"
+```
+
+The validator uses the `geoparquet-io` Python API when available; it does not
+require a `gpio` executable to be present on `PATH`. If `geoparquet-io` is
+unavailable or a local GDAL build cannot read GeoParquet, the validator should
+report the affected check as dependency-dependent instead of failing a bundle
+whose required PyArrow validation passes.
 
 If validation installation still tries to build `pyproj` from source and fails
 with a missing PROJ executable, install the verified binary wheel first and
@@ -156,7 +163,7 @@ then rerun the full extra install:
 "${REPO}/.venv/bin/python" -m pip install -e "${REPO}[dev,flatgeobuf,validation]"
 ```
 
-The local validation stack has been verified with:
+The full local writer and validation stack has been verified with:
 
 ```text
 geoparquet-io 1.3.0
@@ -169,8 +176,8 @@ GDAL 3.11.4
 
 The Prompt 07 Pyogrio/GDAL GeoParquet reader test still skips in this local
 stack because GDAL does not recognize GeoParquet/Parquet as a supported vector
-read format. This is expected; Prompt 09 should use `geoparquet-io` and DuckDB
-for optional GeoParquet-aware validation when available.
+read format. This is expected; the Prompt 09 validator uses `geoparquet-io`
+and DuckDB for optional GeoParquet-aware validation when available.
 
 ## Tests
 
@@ -219,6 +226,17 @@ above and run:
 Expected result when PyArrow is available: the PyArrow GeoParquet tests pass.
 The GeoParquet-aware Pyogrio/GDAL reader check may skip when the local GDAL
 build does not provide Parquet/GeoParquet read support.
+
+To verify Prompt 09 bundle validation behavior, install the validation extra
+above and run:
+
+```bash
+"${REPO}/.venv/bin/python" -m pytest "${REPO}/tests/test_bundle_validation.py" -q
+```
+
+Expected result in the verified local stack: all bundle validation tests pass.
+The full suite may still include dependency-dependent skips from older writer
+tests when local GDAL cannot read GeoParquet.
 
 ## CLI Help
 

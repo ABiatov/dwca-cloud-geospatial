@@ -87,8 +87,12 @@ GeoParquet outputs should use layered validation:
   includes PyArrow.
 - The accepted optional validation toolchain is documented in
   `planning/decisions/ADR-003-geoparquet-validation-toolchain.md`. Install the
-  `validation` extra to get PyArrow, DuckDB and `geoparquet-io` for Prompt 09
-  validator work.
+  `validation` extra to get PyArrow, DuckDB and `geoparquet-io`.
+- Prompt 09 implemented required PyArrow GeoParquet validation for declared
+  single-file `data/occurrences.parquet` outputs inside
+  `validate_output_bundle`. Optional `geoparquet-io`, DuckDB and
+  Pyogrio/GDAL checks are recorded as structured checks, warnings or skips
+  depending on local dependency support.
 - GeoParquet writing should start from accepted `NormalizedOccurrenceRecord`
   values produced by normalization after Prompt 05 quality rules, not
   parser-level `OccurrenceSourceRecord` rows. Rejected coordinate rows belong
@@ -106,7 +110,8 @@ GeoParquet outputs should use layered validation:
   sorting through DuckDB, geoparquet-io or an equivalent helper.
 - Partitioned GeoParquet dataset output remains an optional large-dataset mode
   enabled by configuration or threshold when a single
-  `data/occurrences.parquet` file is impractical.
+  `data/occurrences.parquet` file is impractical. Partitioned dataset
+  validation remains future work with that mode.
 - The accepted large-archive pipeline direction is streaming/chunked
   occurrence reading, chunked normalization handoff, streaming GeoParquet
   accepted-record writing, streaming rejected-record/report writing and
