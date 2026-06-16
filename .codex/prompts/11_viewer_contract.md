@@ -17,6 +17,19 @@
 - Prompts `01` through `10`, plus `10b`
 - Latest session logs for prompts `01` through `10`, plus `10b` when present
 - Current generated bundle examples/tests.
+- Prompt 10 core conversion API:
+  `dwca_cloud_geospatial.conversion.convert_dwca_archive`,
+  `ConversionOptions`, `ConversionResult`, `ConversionError`,
+  `FLATGEOBUF_FORMAT`, `GEOPARQUET_FORMAT` and
+  `SUPPORTED_OUTPUT_FORMATS`.
+- Prompt 10 CLI syntax: default FlatGeobuf conversion is
+  `dwca-cloud-geospatial convert <archive> <output>`, explicit GeoParquet is
+  `dwca-cloud-geospatial convert <archive> <output> --format geoparquet`,
+  both outputs are selected by repeating `--format`, existing output paths
+  require `--overwrite`, and validation is
+  `dwca-cloud-geospatial validate [--json] <bundle>`.
+- Prompt 10 docs path: converter usage and failure behavior are documented in
+  `docs/converter.md`.
 - Prompt 08 generated metadata contract: bundle metadata is written by
   `dwca_cloud_geospatial.bundle.write_bundle_metadata` to `manifest.json`,
   `metadata/source.json`, `metadata/processing.json`, and conditional

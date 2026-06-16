@@ -136,6 +136,23 @@
   `quality_flags` exact-token and `has_quality_flags` consistency, processing
   warning/type-conversion failure structure, and nullable GBIF/OBIS provenance
   acceptance.
+- Prompt 10 core conversion API:
+  `dwca_cloud_geospatial.conversion.convert_dwca_archive`,
+  `ConversionOptions`, `ConversionResult`, `ConversionError`,
+  `FLATGEOBUF_FORMAT`, `GEOPARQUET_FORMAT` and
+  `SUPPORTED_OUTPUT_FORMATS`, exported from `dwca_cloud_geospatial`.
+- Prompt 10 CLI behavior to preserve in final docs and demo evidence:
+  `dwca-cloud-geospatial convert <archive> <output>` writes default
+  FlatGeobuf output, `--format geoparquet` selects explicit GeoParquet,
+  repeated `--format` selects both outputs, existing output paths are rejected
+  unless `--overwrite` is passed, `inspect --json` succeeds for valid
+  checklist/Taxon DwC-A archives, `convert` rejects checklist/Taxon archives
+  with a clear non-occurrence input error, and
+  `dwca-cloud-geospatial validate [--json] <bundle>` returns non-zero only
+  when `BundleValidationResult.has_errors` is true.
+- Prompt 10 docs path: converter command syntax, public API names, output
+  paths, overwrite behavior and failure behavior are documented in
+  `docs/converter.md`.
 - Post-Prompt-07 large-archive decision to preserve in final docs: before the
   converter claims support for tens of millions of records, it must provide a
   bounded-memory pipeline with streaming/chunked occurrence reading, chunked

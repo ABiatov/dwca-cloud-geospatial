@@ -56,6 +56,17 @@ The MVP excludes:
 - Rejected records report: `reports/rejected_records.csv` should be written only when at least one source record is rejected or skipped.
 - Overwrite behavior: CLI conversions must not overwrite an existing output path unless the user passes `--overwrite`.
 - GUI overwrite behavior: GUI conversions must not overwrite an existing output path unless the user selects an overwrite checkbox.
+- Core conversion API: the public conversion entry point is
+  `dwca_cloud_geospatial.conversion.convert_dwca_archive`, configured with
+  `ConversionOptions` and returning `ConversionResult`. Conversion failures
+  use `ConversionError` with actionable messages and parser diagnostics when
+  available. CLI and future GUI code should call this API rather than
+  duplicating parser, normalization, writer, manifest or rejected-report
+  logic.
+- MVP conversion CLI: default FlatGeobuf conversion is
+  `dwca-cloud-geospatial convert <archive> <output>`. Explicit GeoParquet is
+  selected with `--format geoparquet`, both formats are selected by repeating
+  `--format`, and existing output paths require `--overwrite`.
 - MVP CLI framework: use the Python standard library `argparse` for the MVP CLI. Command handlers should remain thin wrappers around core functions and structured configuration/result objects. Do not add Click or Typer unless the CLI grows enough that `argparse` becomes burdensome to maintain.
 - MVP inspect command: include `inspect <archive>` in the MVP CLI as a lightweight archive/schema inspection command. It should parse DwC-A structure through `meta.xml`, report core/extension files, row types, declared fields, coordinate field presence and parser warnings. It must not perform full occurrence normalization, geospatial conversion or output bundle writing. Full data-quality validation remains part of conversion and `validate <output-dir>`. Human-readable text output is sufficient for MVP; `--json` is useful but optional.
 - Checklist/Taxon DwC-A handling: valid checklist archives with a `Taxon` core
@@ -71,8 +82,11 @@ The MVP excludes:
   `BundleValidationResult` with status `passed`, `passed_with_warnings` or
   `failed`, required validation failures in `errors`, dependency-dependent
   optional-reader issues in `warnings` and structured per-check details in
-  `checks`. CLI and GUI validation surfaces should consume this core result
-  instead of reimplementing bundle checks.
+  `checks`. The CLI command
+  `dwca-cloud-geospatial validate [--json] <bundle>` consumes this core
+  result directly and exits non-zero only when `.has_errors` is true. GUI
+  validation surfaces should consume the same core result instead of
+  reimplementing bundle checks.
 - Future raw table export: full Parquet-family export of DwC-A core and extension tables is deferred until after MVP. The MVP parser should preserve the design path for that mode by reading core/extensions through `meta.xml`, retaining field metadata, relationship keys such as `_id` and `_coreid`, source files and row-number provenance.
 - Future PMTiles generation: PMTiles remains deferred to MVP+ and should use Tippecanoe as the preferred tiler when available. Tippecanoe is an optional external dependency, not an MVP runtime requirement; requested PMTiles generation should fail gracefully with an actionable message when `tippecanoe` is not installed. PMTiles point attributes should default to the same compact normalized occurrence field set as FlatGeobuf, with a smaller PMTiles-specific attribute profile allowed later for large datasets if tile size or browser performance requires it.
 
@@ -244,8 +258,8 @@ Current limitations:
 - FlatGeobuf attribute-level `quality_flags` validation depends on readable
   geospatial table support. The current validator checks FlatGeobuf projection
   fields and counts through Pyogrio/GDAL when available.
-- The CLI `validate` command remains an M4 integration task; it should call
-  `validate_output_bundle` directly.
+- The CLI `validate` command calls `validate_output_bundle` directly and
+  exits non-zero only when required validation errors are present.
 
 ## Accepted FlatGeobuf Writer Stack
 

@@ -47,7 +47,7 @@ Purpose: this directory contains ordered prompts for building the DwC-A to cloud
 | 07 | GeoParquet writer and projection tests | 08-10, 14 |
 | 08 | Output bundle metadata writers | 09-14 |
 | 09 | Bundle validator | 10, 14 |
-| 10 | Public core API and CLI docs draft | 11-14 |
+| 10 | Public core API and CLI docs draft | 10b-14 |
 | 10b | Bounded-memory large-archive pipeline and GeoParquet optimization | 11-14 |
 | 11 | Viewer contract document | 12, 14 |
 | 12 | Static viewer files and smoke checks | 13-14 |
@@ -67,4 +67,4 @@ At the end of each prompt:
 
 ## Current next work item
 
-`10_core_api_cli.md`
+`10b_large_archive_streaming_and_geoparquet_optimization.md`

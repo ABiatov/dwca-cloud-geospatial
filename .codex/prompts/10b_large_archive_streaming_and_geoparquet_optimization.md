@@ -21,6 +21,33 @@
 - Prompts `01` through `10`
 - Latest session logs for prompts `01` through `10`
 - Current parser, normalization, rejected-record, writer, metadata, validator, core API and CLI implementations.
+- Prompt 10 core conversion API:
+  `dwca_cloud_geospatial.conversion.convert_dwca_archive`,
+  `ConversionOptions`, `ConversionResult`, `ConversionError`,
+  `FLATGEOBUF_FORMAT`, `GEOPARQUET_FORMAT` and
+  `SUPPORTED_OUTPUT_FORMATS`, exported from `dwca_cloud_geospatial`.
+- Prompt 10 conversion orchestration: core conversion accepts explicit input
+  and output paths, rejects existing output paths unless
+  `ConversionOptions(overwrite=True)` is set, reads occurrence rows through
+  `read_occurrence_rows`, normalizes with `normalize_occurrence_records`,
+  calls selected geospatial writers, then calls `write_bundle_metadata`.
+  Do not duplicate manifest or rejected-report writing in large-archive CLI
+  handlers.
+- Prompt 10 CLI syntax: default FlatGeobuf conversion is
+  `dwca-cloud-geospatial convert <archive> <output>`, explicit GeoParquet is
+  `dwca-cloud-geospatial convert <archive> <output> --format geoparquet`,
+  both outputs are selected by repeating `--format`, replacement requires
+  `--overwrite`, and validation is
+  `dwca-cloud-geospatial validate [--json] <bundle>`.
+- Prompt 10 failure behavior: checklist/Taxon archives remain inspectable but
+  `convert` rejects them using the occurrence row reader's
+  `missing_occurrence_core` diagnostic; missing coordinate terms and zero
+  accepted normalized records are conversion failures; optional warnings,
+  including `large_indexed_flatgeobuf_write`, do not fail conversion by
+  themselves.
+- Prompt 10 docs path: converter command syntax, public API names, output
+  paths, overwrite behavior and failure behavior are documented in
+  `docs/converter.md`.
 - Prompt 08 metadata writer APIs:
   `dwca_cloud_geospatial.bundle.write_bundle_metadata`,
   `build_source_metadata`, `build_processing_metadata`,
@@ -103,6 +130,11 @@ conversion format away from FlatGeobuf.
 
 - Design and implement a chunked occurrence conversion handoff that avoids
   materializing all source, accepted or rejected records for large archives.
+- Preserve the Prompt 10 public API boundary where practical. If large-archive
+  work changes `convert_dwca_archive`, `ConversionOptions`,
+  `ConversionResult`, CLI `--format` behavior, overwrite semantics or
+  validation invocation, update `docs/converter.md`, prompts `11` through
+  `14` and this prompt flow description in the same session.
 - Add or adapt a streaming/chunked occurrence reader API while preserving the
   existing Prompt 03 reader behavior for small tests and backwards-compatible
   callers where practical.

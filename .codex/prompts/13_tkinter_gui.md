@@ -18,6 +18,22 @@
 - Prompts `01` through `12`, including `10b`
 - Latest session logs for prompts `01` through `12`, including `10b` when present
 - Current core conversion API, CLI and viewer launch instructions.
+- Prompt 10 core conversion API:
+  `dwca_cloud_geospatial.conversion.convert_dwca_archive`,
+  `ConversionOptions`, `ConversionResult`, `ConversionError`,
+  `FLATGEOBUF_FORMAT`, `GEOPARQUET_FORMAT` and
+  `SUPPORTED_OUTPUT_FORMATS`. GUI conversion must call this API instead of
+  parsing, normalizing, writing geospatial files or writing bundle metadata
+  directly.
+- Prompt 10 output and overwrite behavior: default conversion writes
+  FlatGeobuf, explicit GeoParquet uses output format `geoparquet`, both
+  formats can be requested together, and existing output paths are rejected
+  unless `ConversionOptions(overwrite=True)` is set by the GUI overwrite
+  checkbox.
+- Prompt 10 CLI reference syntax for docs/UI copy:
+  `dwca-cloud-geospatial convert <archive> <output> [--format flatgeobuf]
+  [--format geoparquet] [--overwrite]` and
+  `dwca-cloud-geospatial validate [--json] <bundle>`.
 - Prompt 08 bundle metadata writer APIs used by core conversion:
   `dwca_cloud_geospatial.bundle.write_bundle_metadata`,
   `BundleWriterOptions` and `BundleMetadataWriteResult`. GUI code should use

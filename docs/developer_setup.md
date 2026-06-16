@@ -262,4 +262,6 @@ Without activating `.venv/`, use:
 ```
 
 The `inspect` command parses local DwC-A `meta.xml` structure. The `convert`
-and `validate` commands remain stubs until later MVP milestones.
+command writes local output bundles and the `validate` command checks
+generated bundle structure and geospatial outputs. Converter usage is
+documented in `docs/converter.md`.

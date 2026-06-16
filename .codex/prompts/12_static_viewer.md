@@ -18,6 +18,17 @@
 - Prompts `01` through `11`, including `10b`
 - Latest session logs for prompts `01` through `11`, including `10b` when present
 - Current sample output bundle generation path.
+- Prompt 10 sample bundle generation path: use
+  `dwca-cloud-geospatial convert <archive> <output>` for default
+  FlatGeobuf bundles, `--format geoparquet` for explicit GeoParquet bundles,
+  repeated `--format` for both outputs, and `--overwrite` only when replacing
+  an existing output path.
+- Prompt 10 validation command: use
+  `dwca-cloud-geospatial validate [--json] <bundle>`, which calls
+  `dwca_cloud_geospatial.validation.validate_output_bundle` and exits
+  non-zero only for required validation errors.
+- Prompt 10 docs path: converter commands, public API names and failure
+  behavior are documented in `docs/converter.md`.
 - Prompt 08 bundle metadata writer output: generated bundles expose
   `manifest.json`, `metadata/source.json`, `metadata/processing.json`, and
   optionally `reports/rejected_records.csv` only when rejected records exist.

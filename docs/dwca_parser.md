@@ -116,9 +116,10 @@ They declare `http://rs.tdwg.org/dwc/terms/Taxon` cores, have no occurrence
 core and do not declare `decimalLatitude` or `decimalLongitude` terms.
 
 The occurrence row reader fails fast for these archives with the
-`missing_occurrence_core` parser diagnostic. Later conversion commands should
-preserve the same boundary: checklist archives remain inspectable, but
-conversion should reject them with an actionable non-occurrence input error.
+`missing_occurrence_core` parser diagnostic. The Prompt 10 core conversion
+API and CLI preserve the same boundary: checklist archives remain inspectable,
+but `dwca-cloud-geospatial convert` rejects them with an actionable
+non-occurrence input error that includes the row-reader diagnostic.
 
 ## Row Reading Behavior
 

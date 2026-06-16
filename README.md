@@ -40,12 +40,19 @@ python -m pytest "${REPO}/tests"
 dwca-cloud-geospatial --help
 ```
 
+Default FlatGeobuf conversion requires the optional writer dependencies:
+
+```bash
+python -m pip install -e "${REPO}[dev,flatgeobuf]"
+```
+
 The Python import package is `dwca_cloud_geospatial`; the console command is
 `dwca-cloud-geospatial`. The `inspect` command parses local DwC-A `meta.xml`
-structure. The `convert` and `validate` commands are still stubs for later MVP
-milestones.
+structure, `convert` writes local output bundles, and `validate` checks
+generated bundle structure and geospatial outputs.
 
 More setup details are documented in [docs/developer_setup.md](docs/developer_setup.md).
+Converter usage is documented in [docs/converter.md](docs/converter.md).
 
 ## MVP Outputs
 

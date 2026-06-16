@@ -78,6 +78,11 @@ Accepted MVP override: FlatGeobuf is the default viewer/exchange output, not opt
 - Prompt 06 requests `SPATIAL_INDEX=YES` by default.
 - `FlatGeobufWriterOptions(spatial_index=False)` requests
   `SPATIAL_INDEX=NO` and suppresses spatial-index memory warnings.
+- Prompt 10 exposes FlatGeobuf writer options through the public core
+  conversion API:
+  `ConversionOptions(flatgeobuf=FlatGeobufWriterOptions(...))`. The MVP CLI
+  does not expose a `SPATIAL_INDEX=NO` flag yet, so CLI default conversion
+  keeps indexed FlatGeobuf writes.
 - Initial warning code: `large_indexed_flatgeobuf_write`.
 - Initial warning thresholds: indexed writes at `>= 1,000,000` accepted
   features or estimated spatial-index memory `>= 256 MiB`.
@@ -86,6 +91,8 @@ Accepted MVP override: FlatGeobuf is the default viewer/exchange output, not opt
 - Large-output warnings are non-fatal. The writer warns before the backend
   write but still attempts the indexed write unless conversion options
   explicitly disable the index.
+- Core conversion preserves these writer warnings in
+  `metadata/processing.json.warnings` with `stage="flatgeobuf_writer"`.
 - Example: 5 million accepted features estimate about 320,000,000 bytes for
   spatial-index construction, so the writer emits
   `large_indexed_flatgeobuf_write` and still attempts the indexed write by
@@ -100,6 +107,5 @@ memory or fail until chunked parser/normalizer/writer handoff is implemented.
 
 ## Open Questions
 
-- When Prompt 10 exposes conversion options, decide whether users can request
-  `SPATIAL_INDEX=NO` from CLI/core configuration and how large indexed-write
-  warnings are displayed.
+- Whether to expose `SPATIAL_INDEX=NO` as an MVP CLI flag remains deferred.
+  The core API can already request it through `FlatGeobufWriterOptions`.

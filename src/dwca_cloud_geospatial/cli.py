@@ -7,6 +7,12 @@ from collections.abc import Sequence
 import sys
 
 from dwca_cloud_geospatial import __version__
+from dwca_cloud_geospatial.conversion import (
+    SUPPORTED_OUTPUT_FORMATS,
+    ConversionError,
+    ConversionOptions,
+    convert_dwca_archive,
+)
 from dwca_cloud_geospatial.inspection import (
     DECIMAL_LATITUDE_TERM,
     DECIMAL_LONGITUDE_TERM,
@@ -14,11 +20,7 @@ from dwca_cloud_geospatial.inspection import (
     ArchiveTable,
     inspect_dwca,
 )
-
-
-COMMAND_NOT_IMPLEMENTED = (
-    "This command is part of the planned MVP interface but is not implemented yet."
-)
+from dwca_cloud_geospatial.validation import BundleValidationResult, validate_output_bundle
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -66,8 +68,8 @@ def build_parser() -> argparse.ArgumentParser:
         "convert",
         help="Convert a local DwC-A archive into a static output bundle.",
         description=(
-            "Convert a local Darwin Core Archive to geospatial outputs. "
-            "Conversion behavior will be implemented in a later MVP milestone."
+            "Convert a local Darwin Core Archive to geospatial outputs and "
+            "bundle metadata."
         ),
     )
     convert_parser.add_argument(
@@ -81,29 +83,39 @@ def build_parser() -> argparse.ArgumentParser:
     convert_parser.add_argument(
         "--overwrite",
         action="store_true",
-        help="Allow replacing an existing output path when conversion is implemented.",
+        help="Allow replacing an existing output path.",
     )
-    convert_parser.set_defaults(handler=_not_implemented)
+    convert_parser.add_argument(
+        "--format",
+        dest="formats",
+        action="append",
+        choices=SUPPORTED_OUTPUT_FORMATS,
+        help=(
+            "Output format to generate. May be passed more than once. "
+            "Defaults to flatgeobuf."
+        ),
+    )
+    convert_parser.set_defaults(handler=_convert_archive)
 
     validate_parser = subparsers.add_parser(
         "validate",
         help="Validate an existing output bundle.",
         description=(
-            "Validate a generated output bundle. Validation behavior will be "
-            "implemented in a later MVP milestone."
+            "Validate a generated output bundle and report structured checks."
         ),
     )
     validate_parser.add_argument(
         "bundle",
         help="Explicit path to an output bundle directory.",
     )
-    validate_parser.set_defaults(handler=_not_implemented)
+    validate_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print structured validation JSON instead of human-readable text.",
+    )
+    validate_parser.set_defaults(handler=_validate_bundle)
 
     return parser
-
-
-def _not_implemented(args: argparse.Namespace) -> int:
-    raise NotImplementedError(COMMAND_NOT_IMPLEMENTED)
 
 
 def _inspect_archive(args: argparse.Namespace) -> int:
@@ -121,6 +133,43 @@ def _inspect_archive(args: argparse.Namespace) -> int:
                 )
         return 1
     return 0
+
+
+def _convert_archive(args: argparse.Namespace) -> int:
+    try:
+        result = convert_dwca_archive(
+            args.archive,
+            args.output,
+            options=ConversionOptions(
+                output_formats=tuple(args.formats or ()),
+                overwrite=args.overwrite,
+            ),
+        )
+    except ConversionError as exc:
+        print(f"Conversion failed: {exc.message}", file=sys.stderr)
+        for diagnostic in exc.diagnostics:
+            if diagnostic.severity == "error":
+                print(
+                    f"{diagnostic.source}: {diagnostic.code}: {diagnostic.message}",
+                    file=sys.stderr,
+                )
+        return 1
+
+    print(f"Converted {result.input_path} -> {result.output_directory}")
+    print(f"Formats: {', '.join(result.output_formats)}")
+    print(f"Accepted records: {result.accepted_record_count}")
+    print(f"Rejected records: {result.rejected_record_count}")
+    print(f"Manifest: {result.metadata_result.manifest_path}")
+    return 0
+
+
+def _validate_bundle(args: argparse.Namespace) -> int:
+    result = validate_output_bundle(args.bundle)
+    if args.json:
+        print(result.to_json())
+    else:
+        print(_format_validation(result))
+    return 1 if result.has_errors else 0
 
 
 def _format_inspection(inspection: ArchiveInspection) -> str:
@@ -177,6 +226,27 @@ def _format_table(table: ArchiveTable, label: str) -> str:
     )
 
 
+def _format_validation(result: BundleValidationResult) -> str:
+    lines = [
+        f"Bundle: {result.bundle_root}",
+        f"Status: {result.status}",
+        f"Errors: {len(result.errors)}",
+        f"Warnings: {len(result.warnings)}",
+        f"Checks: {len(result.checks)}",
+    ]
+    if result.errors:
+        lines.append("Validation errors:")
+        for issue in result.errors:
+            path = f" ({issue.path})" if issue.path else ""
+            lines.append(f"  - {issue.code}: {issue.message}{path}")
+    if result.warnings:
+        lines.append("Validation warnings:")
+        for issue in result.warnings:
+            path = f" ({issue.path})" if issue.path else ""
+            lines.append(f"  - {issue.code}: {issue.message}{path}")
+    return "\n".join(lines)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the CLI and return a process exit code."""
 
@@ -188,7 +258,4 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.print_help()
         return 0
 
-    try:
-        return int(handler(args))
-    except NotImplementedError as exc:
-        parser.exit(2, f"{parser.prog}: error: {exc}\n")
+    return int(handler(args))
