@@ -19,8 +19,9 @@
 - `docs/converter.md` if it exists.
 - `docs/viewer_contract.md` if it exists.
 - `docs/deployment.md` if it exists.
-- All prompts `01` through `13`, including `10b`
-- Latest session logs for prompts `01` through `13`, including `10b` when present
+- All prompts `01` through `13`, including `10b` and `10c`
+- Latest session logs for prompts `01` through `13`, including `10b` and
+  `10c` when present
 - Current tests, examples and generated sample bundle instructions.
 - Prompt 02 inspection API and docs:
   `dwca_cloud_geospatial.inspection.inspect_dwca`,
@@ -168,6 +169,13 @@
   Viewer and final docs should describe the accepted no-FlatGeobuf behavior
   from `docs/viewer_contract.md` instead of assuming every valid bundle has a
   FlatGeobuf map layer.
+- Prompt 10c optimized FlatGeobuf implementation when present: preserve the
+  persistent GeoPackage staging artifact at `data/occurrences.gpkg`,
+  indexed FlatGeobuf output at `exports/occurrences.fgb`, manifest inventory
+  role/media type/checksum/record count for GeoPackage, processing metadata
+  describing the GeoPackage staging and GDAL/OGR helper strategy, validation
+  checks for GeoPackage and FlatGeobuf count reconciliation, and dependency
+  setup for required helper tooling installed into `.venv`.
 - Post-Prompt-03 handoff clarification: the Prompt 03 `Open Issues Affecting
   Normalization` were confirmed to be scope boundaries, not blockers before
   Prompt 04. Final docs should preserve that split: source row reading in
@@ -194,6 +202,9 @@ Make the MVP understandable, repeatable and ready for external review.
 - Confirm `docs/output_format.md` matches implemented bundle behavior.
 - Confirm docs and viewer guidance distinguish default FlatGeobuf bundles,
   explicit GeoParquet-only bundles and GeoParquet-only large-output bundles.
+- If Prompt 10c has been completed, confirm docs describe
+  `data/occurrences.gpkg` as a retained bundle artifact and not a temporary
+  file.
 - Confirm `docs/developer_setup.md` still documents the FlatGeobuf optional
   dependency stack and real writer verification command.
 - Add regression tests for parser behavior, normalization, output writing and bundle validation where gaps remain.

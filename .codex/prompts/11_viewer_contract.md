@@ -14,8 +14,9 @@
 - `docs/output_format.md`
 - `docs/developer_setup.md`
 - `docs/converter.md` if it exists.
-- Prompts `01` through `10`, plus `10b`
-- Latest session logs for prompts `01` through `10`, plus `10b` when present
+- Prompts `01` through `10`, plus `10b` and `10c`
+- Latest session logs for prompts `01` through `10`, plus `10b` and `10c`
+  when present
 - Current generated bundle examples/tests.
 - Prompt 10 core conversion API:
   `dwca_cloud_geospatial.conversion.convert_dwca_archive`,
@@ -75,6 +76,13 @@
   no-FlatGeobuf state, such as metadata/provenance display plus an unsupported
   map-layer message, unless Prompt 11 explicitly accepts GeoParquet browser
   loading.
+- Prompt 10c optimized FlatGeobuf handoff when present: default indexed
+  FlatGeobuf generation may use persistent GeoPackage staging at
+  `data/occurrences.gpkg`, retained in `manifest.files` with role
+  `geopackage`, while `exports/occurrences.fgb` remains the preferred MVP map
+  layer. The viewer contract should describe whether to expose the GeoPackage
+  artifact as downloadable/source metadata only; do not make GeoPackage the
+  default browser map layer unless explicitly accepted.
 
 ## Goal
 
@@ -85,6 +93,8 @@ Create `docs/viewer_contract.md` as the accepted contract for the minimal static
 - Define how the viewer discovers data through `manifest.json`.
 - Define required and optional metadata files read by the viewer.
 - Define FlatGeobuf point layer loading behavior.
+- Define how the viewer presents or ignores persistent GeoPackage artifacts
+  such as `data/occurrences.gpkg`.
 - Define behavior when a valid bundle has no FlatGeobuf layer, including
   GeoParquet-only bundles.
 - Define dataset provenance panel fields.

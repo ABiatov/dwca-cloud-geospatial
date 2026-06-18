@@ -15,8 +15,9 @@
 - `docs/developer_setup.md`
 - `docs/converter.md` if it exists.
 - `docs/viewer_contract.md` if it exists.
-- Prompts `01` through `12`, including `10b`
-- Latest session logs for prompts `01` through `12`, including `10b` when present
+- Prompts `01` through `12`, including `10b` and `10c`
+- Latest session logs for prompts `01` through `12`, including `10b` and `10c`
+  when present
 - Current core conversion API, CLI and viewer launch instructions.
 - Prompt 10 core conversion API:
   `dwca_cloud_geospatial.conversion.convert_dwca_archive`,
@@ -77,6 +78,11 @@
   large-output conversion because the current FlatGeobuf writer still
   materializes accepted rows. Show non-fatal large-output warnings separately
   from conversion failures.
+- Prompt 10c optimized FlatGeobuf handoff when present: default FlatGeobuf
+  conversion may create both `exports/occurrences.fgb` and persistent
+  `data/occurrences.gpkg`. GUI status should show both artifacts when present
+  and preserve actionable dependency errors for missing `.venv` GDAL/OGR,
+  Pyogrio or GeoPackage helper tooling.
 
 ## Goal
 
@@ -93,6 +99,8 @@ Implement a primitive `tkinter` desktop entry point for non-CLI users while reus
 - Show progress/status and actionable errors.
 - Show non-fatal conversion warnings, including large FlatGeobuf indexed-write
   warnings, separately from conversion failures.
+- Show generated GeoPackage staging artifact paths when core conversion
+  returns them.
 - When exposing validation in the GUI, display required validation errors
   separately from dependency-dependent skipped checks and warnings.
 - Provide a way to open the generated output directory or show viewer instructions.

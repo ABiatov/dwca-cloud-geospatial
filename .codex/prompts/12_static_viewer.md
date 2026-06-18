@@ -15,8 +15,9 @@
 - `docs/developer_setup.md`
 - `docs/viewer_contract.md`
 - `docs/converter.md` if it exists.
-- Prompts `01` through `11`, including `10b`
-- Latest session logs for prompts `01` through `11`, including `10b` when present
+- Prompts `01` through `11`, including `10b` and `10c`
+- Latest session logs for prompts `01` through `11`, including `10b` and `10c`
+  when present
 - Current sample output bundle generation path.
 - Prompt 10 sample bundle generation path: use
   `dwca-cloud-geospatial convert <archive> <output>` for default
@@ -69,6 +70,11 @@
   `partitioned_dataset.enabled=false`. Display or preserve those declarations
   consistently with `docs/viewer_contract.md`. The MVP map display may
   continue to use FlatGeobuf unless the viewer contract explicitly changes.
+- Prompt 10c optimized FlatGeobuf handoff when present: bundles may include
+  persistent `data/occurrences.gpkg` alongside `exports/occurrences.fgb`.
+  Unless `docs/viewer_contract.md` explicitly accepts browser loading from
+  GeoPackage, treat the GeoPackage as a downloadable/source artifact or
+  metadata item, not as the default map layer.
 
 ## Goal
 
@@ -82,6 +88,8 @@ Implement the minimal static MapLibre viewer for generated MVP bundles.
 - Load a generated bundle from `manifest.json`.
 - Read `metadata/source.json` and `metadata/processing.json`.
 - Display `exports/occurrences.fgb` as a point layer.
+- Preserve/display declared `data/occurrences.gpkg` metadata according to
+  `docs/viewer_contract.md` without attempting unsupported browser loading.
 - Handle valid bundles that do not include `exports/occurrences.fgb` without
   crashing.
 - Show dataset provenance fields when available.
