@@ -194,6 +194,7 @@ class OccurrenceNormalizationResult:
     counts: OccurrenceNormalizationCounts
     type_conversion_failures: tuple[TypeConversionFailure, ...] = ()
     warnings: tuple[OccurrenceNormalizationWarning, ...] = ()
+    first_accepted_values: Mapping[str, str] | None = None
 
 
 @dataclass(frozen=True)
@@ -272,6 +273,7 @@ def normalize_occurrence_records(
     rejected: list[RejectedOccurrenceRecord] = []
     conversion_failure_events: list[_ConversionFailureEvent] = []
     source_count = 0
+    first_accepted_values: dict[str, str] = {}
 
     for record in records:
         source_count += 1
@@ -281,6 +283,7 @@ def normalize_occurrence_records(
             rejected.append(normalized)
         else:
             accepted.append(normalized)
+            _capture_first_accepted_values(first_accepted_values, normalized)
 
     type_conversion_failures = _type_conversion_failures(
         conversion_failure_events, source_count
@@ -299,7 +302,21 @@ def normalize_occurrence_records(
         ),
         type_conversion_failures=type_conversion_failures,
         warnings=warnings,
+        first_accepted_values=first_accepted_values,
     )
+
+
+def normalize_occurrence_record_batch(
+    records: Iterable[OccurrenceSourceRecord],
+) -> OccurrenceNormalizationResult:
+    """Normalize one bounded source-record batch.
+
+    The returned counts and failure rates are scoped to the batch; callers that
+    process multiple chunks should aggregate ``failure_count`` values and
+    recompute final rates against total parsed records.
+    """
+
+    return normalize_occurrence_records(records)
 
 
 def normalize_occurrence_record(
@@ -676,6 +693,18 @@ def _format_quality_flags(flags: tuple[str, ...]) -> str | None:
         if "|" in flag or _QUALITY_FLAG_PATTERN.fullmatch(flag) is None:
             raise ValueError(f"Invalid quality flag code: {flag}")
     return "|".join(flags)
+
+
+def _capture_first_accepted_values(
+    first_accepted_values: dict[str, str],
+    record: NormalizedOccurrenceRecord,
+) -> None:
+    for field in ("publisher", "license", "rights_holder"):
+        if field in first_accepted_values:
+            continue
+        value = getattr(record, field)
+        if isinstance(value, str) and value.strip():
+            first_accepted_values[field] = value.strip()
 
 
 def _type_conversion_failures(

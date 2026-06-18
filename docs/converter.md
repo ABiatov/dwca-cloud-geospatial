@@ -2,7 +2,7 @@
 
 Status: Accepted MVP behavior
 
-Last updated: 2026-06-16
+Last updated: 2026-06-18
 
 ## Purpose
 
@@ -68,6 +68,30 @@ normalized occurrence record set:
 ```python
 ConversionOptions(output_formats=("flatgeobuf", "geoparquet"))
 ```
+
+Large GeoParquet output is enabled through `GeoParquetWriterOptions` on the
+core API. It keeps the CLI default unchanged and writes single-file
+GeoParquet with a `bbox` covering column, grid-based spatial ordering,
+streamed rejected reports and bounded count/warning aggregation:
+
+```python
+from dwca_cloud_geospatial.geoparquet import GeoParquetWriterOptions
+
+ConversionOptions(
+    output_formats=("geoparquet",),
+    geoparquet=GeoParquetWriterOptions(large_output_mode=True),
+    chunk_size=10_000,
+)
+```
+
+The bounded-memory large-output path currently applies to GeoParquet-only
+conversion. Combined FlatGeobuf+GeoParquet conversion still uses the existing
+FlatGeobuf writer handoff, which materializes accepted rows for the current
+GDAL/Pyogrio backend.
+
+Partitioned GeoParquet configuration fields exist on `GeoParquetWriterOptions`
+for forward compatibility, but `partitioned_dataset=True` is rejected until the
+manifest and validator contracts support partition file inventories.
 
 ## CLI Commands
 
@@ -146,6 +170,8 @@ Conversion also fails when:
 - no accepted normalized occurrence records remain after quality rules;
 - required writer dependencies are unavailable for the selected output format;
 - metadata or output files cannot be written reliably.
+- partitioned GeoParquet output is requested before the partitioned dataset
+  contract is implemented.
 
 Non-fatal warnings do not fail conversion by themselves. FlatGeobuf
 `large_indexed_flatgeobuf_write` warnings are preserved in

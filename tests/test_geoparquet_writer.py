@@ -11,6 +11,7 @@ import pytest
 
 from dwca_cloud_geospatial.flatgeobuf import project_flatgeobuf_record
 from dwca_cloud_geospatial.geoparquet import (
+    BBOX_COLUMN,
     DEFAULT_GEOPARQUET_RELATIVE_PATH,
     GEOPARQUET_CRS,
     GEOPARQUET_DEFAULT_ROW_GROUP_SIZE,
@@ -236,3 +237,54 @@ def test_geo_metadata_is_available_for_geoparquet_aware_validators(
 
     assert geo["version"] == GEOPARQUET_VERSION
     assert geo["columns"][GEOMETRY_COLUMN]["crs"]["id"]["authority"] == "OGC"
+
+
+def test_large_geoparquet_writes_bbox_column_and_grid_spatial_order(
+    tmp_path: Path,
+) -> None:
+    pq = pytest.importorskip("pyarrow.parquet", reason="PyArrow is required.")
+    accepted_records, _rejected_records = _accepted_records()
+    options = GeoParquetWriterOptions(
+        large_output_mode=True,
+        row_group_size=1,
+        spatial_sort_grid_degrees=1,
+    )
+
+    result = write_geoparquet_occurrences(
+        reversed(accepted_records),
+        tmp_path,
+        options=options,
+    )
+
+    assert result.large_output_mode is True
+    assert result.covering_bbox_column is True
+    assert result.spatial_sorting is True
+    assert result.spatial_sort_strategy == "grid"
+    assert result.columns == (
+        *GEOPARQUET_PROJECTION_COLUMNS[:-1],
+        BBOX_COLUMN,
+        GEOMETRY_COLUMN,
+    )
+
+    table = pq.read_table(result.path)
+    rows = table.to_pylist()
+    assert tuple(table.column_names) == result.columns
+    bucket_keys = [
+        (int((row["decimal_longitude"] + 180) // 1), int((row["decimal_latitude"] + 90) // 1))
+        for row in rows
+    ]
+    assert bucket_keys == sorted(bucket_keys)
+    assert rows[0][BBOX_COLUMN] == {
+        "xmin": -9.1393,
+        "ymin": 38.7223,
+        "xmax": -9.1393,
+        "ymax": 38.7223,
+    }
+
+    geo = _geo_metadata(result.path)
+    assert geo["columns"][GEOMETRY_COLUMN]["covering"]["bbox"] == {
+        "xmin": [BBOX_COLUMN, "xmin"],
+        "ymin": [BBOX_COLUMN, "ymin"],
+        "xmax": [BBOX_COLUMN, "xmax"],
+        "ymax": [BBOX_COLUMN, "ymax"],
+    }

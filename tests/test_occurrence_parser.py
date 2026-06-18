@@ -5,7 +5,10 @@ from dwca_cloud_geospatial.inspection import (
     DECIMAL_LATITUDE_TERM,
     DECIMAL_LONGITUDE_TERM,
 )
-from dwca_cloud_geospatial.occurrence import read_occurrence_rows
+from dwca_cloud_geospatial.occurrence import (
+    read_occurrence_rows,
+    stream_occurrence_row_batches,
+)
 
 
 VALID_FIXTURE_DIR = MINIMAL_OCCURRENCE_FIXTURE_DIR / "valid"
@@ -81,3 +84,16 @@ def test_multi_file_occurrence_core_is_deferred() -> None:
     diagnostic_codes = {diagnostic.code for diagnostic in result.diagnostics}
     assert "unsupported_multiple_table_files" in diagnostic_codes
     assert "unsupported_multiple_occurrence_core_files" in diagnostic_codes
+
+
+def test_occurrence_rows_can_be_streamed_in_bounded_batches() -> None:
+    stream = stream_occurrence_row_batches(VALID_FIXTURE_DIR, batch_size=1)
+
+    assert not stream.has_errors
+    assert stream.source_file == "occurrence.txt"
+    batches = list(stream.batches)
+
+    assert len(batches) == 1
+    assert batches[0].rows_read == 1
+    assert batches[0].parse_failures == 0
+    assert batches[0].records[0].source_record_id == "occ-1"

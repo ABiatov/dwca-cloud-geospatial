@@ -46,6 +46,12 @@
   `FLATGEOBUF_PROJECTION_COLUMNS`, point geometry in longitude/latitude order,
   CRS assumption `OGC:CRS84`, nullable `quality_flags`, and
   `has_quality_flags`.
+- Prompt 10/10b GeoParquet-only bundle behavior: explicit GeoParquet
+  conversion, including large-output mode, may produce a valid bundle without
+  `exports/occurrences.fgb`. If `docs/viewer_contract.md` does not accept
+  GeoParquet browser loading, the viewer should handle this as a graceful
+  no-map-layer state while still showing manifest, source and processing
+  metadata.
 - Prompt 06 large-output behavior: generated FlatGeobuf files are indexed by
   default unless conversion explicitly used `SPATIAL_INDEX=NO`. If processing
   metadata exposes writer warning code `large_indexed_flatgeobuf_write`, the
@@ -57,11 +63,12 @@
 - Prompt 05 quality flag semantics: split nullable `|`-delimited
   `quality_flags` strings and match exact tokens; use `has_quality_flags`
   when present for show/hide controls.
-- Prompt 10b large-output handoff when present: if manifest or processing
-  metadata declares partitioned GeoParquet, covering bbox, spatial sorting or
-  large-output warnings, display or preserve those declarations consistently
-  with `docs/viewer_contract.md`. The MVP map display may continue to use
-  FlatGeobuf unless the viewer contract explicitly changes.
+- Prompt 10b large-output handoff: processing metadata may declare
+  GeoParquet `large_output_mode`, `covering_bbox_column.enabled`,
+  `spatial_sorting.enabled`, `spatial_sorting.strategy="grid"` and
+  `partitioned_dataset.enabled=false`. Display or preserve those declarations
+  consistently with `docs/viewer_contract.md`. The MVP map display may
+  continue to use FlatGeobuf unless the viewer contract explicitly changes.
 
 ## Goal
 
@@ -75,6 +82,8 @@ Implement the minimal static MapLibre viewer for generated MVP bundles.
 - Load a generated bundle from `manifest.json`.
 - Read `metadata/source.json` and `metadata/processing.json`.
 - Display `exports/occurrences.fgb` as a point layer.
+- Handle valid bundles that do not include `exports/occurrences.fgb` without
+  crashing.
 - Show dataset provenance fields when available.
 - Show feature details for viewer-required fields.
 - Implement browser-side filters for fields present in the bundle: text contains search for `scientific_name`, categorical filters, year filtering and show/hide records with `quality_flags`.
@@ -93,6 +102,8 @@ Implement the minimal static MapLibre viewer for generated MVP bundles.
 ## Acceptance Criteria
 
 - The viewer opens a generated sample bundle from static files.
+- GeoParquet-only bundles without FlatGeobuf are handled gracefully according
+  to `docs/viewer_contract.md`.
 - Missing optional metadata is handled gracefully.
 - Missing filter fields are omitted without errors.
 - No live GBIF or OBIS API access is required.

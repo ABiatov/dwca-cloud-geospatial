@@ -101,21 +101,20 @@ GeoParquet outputs should use layered validation:
   `has_quality_flags` boolean from the normalized records.
 - File-level bbox metadata is included in GeoParquet metadata.
 - For large GeoParquet 1.1 outputs, a covering `bbox` struct column with
-  `xmin`, `ymin`, `xmax` and `ymax` is default-on. Small fixtures and small
-  local outputs may omit it until the covering-bbox implementation exists, but
-  large-output conversion must not rely only on file-level bbox metadata.
+  `xmin`, `ymin`, `xmax` and `ymax` is implemented and default-on when
+  `GeoParquetWriterOptions.large_output_mode=True`.
 - For large GeoParquet outputs, spatial sorting is default-on and
-  strategy-configurable. Start with a bounded local strategy such as
-  longitude/latitude or bbox min-corner sorting, and allow later Hilbert
-  sorting through DuckDB, geoparquet-io or an equivalent helper.
+  strategy-configurable. The implemented `grid` strategy writes temporary
+  coarse lon/lat buckets and emits them in sorted bucket order without a full
+  Python in-memory sort.
 - Partitioned GeoParquet dataset output remains an optional large-dataset mode
-  enabled by configuration or threshold when a single
-  `data/occurrences.parquet` file is impractical. Partitioned dataset
-  validation remains future work with that mode.
-- The accepted large-archive pipeline direction is streaming/chunked
-  occurrence reading, chunked normalization handoff, streaming GeoParquet
-  accepted-record writing, streaming rejected-record/report writing and
-  bounded-memory counts/warnings aggregation.
+  but is deferred. `partitioned_dataset=True` is rejected until manifest and
+  validator support are implemented.
+- The accepted large-archive pipeline is implemented for GeoParquet-only
+  large-output conversion through streaming/chunked occurrence reading,
+  chunked normalization handoff, streaming GeoParquet accepted-record writing,
+  streaming rejected-record/report writing and bounded-memory counts/warnings
+  aggregation.
 - GeoParquet 2.0 support is deferred to post-MVP. The MVP and default output remain GeoParquet `1.1.0` for broad reader compatibility. GeoParquet 2.0 may be added later as an explicit opt-in output option only after target downstream readers and validation tools demonstrate reliable support. Adding 2.0 must not change the default GeoParquet version without a separate accepted decision.
 
 ## Open Questions

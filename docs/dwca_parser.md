@@ -38,8 +38,9 @@ value and per-field delimiter.
 
 ## Occurrence Row Reader API
 
-Use `dwca_cloud_geospatial.occurrence.read_occurrence_rows(path)` to read the
-declared occurrence core. It returns an `OccurrenceReadResult` with:
+Use `dwca_cloud_geospatial.occurrence.read_occurrence_rows(path)` to read and
+collect the declared occurrence core for small fixtures and compatibility
+callers. It returns an `OccurrenceReadResult` with:
 
 - `inspection`, the `ArchiveInspection` produced by `inspect_dwca`.
 - `records`, a tuple of `OccurrenceSourceRecord` entries.
@@ -47,6 +48,16 @@ declared occurrence core. It returns an `OccurrenceReadResult` with:
 - `source_file`, the single occurrence core file location when row reading
   starts.
 - `rows_read` and `parse_failures` counts.
+- `first_source_values`, optional summary provenance captured for streaming
+  metadata writers.
+
+Use `dwca_cloud_geospatial.occurrence.stream_occurrence_row_batches(path,
+batch_size=...)` for bounded large-output conversion. It returns an
+`OccurrenceRowStream` with the same inspection context and an iterator of
+`OccurrenceRowBatch` values. Each batch contains a bounded tuple of
+`OccurrenceSourceRecord` rows plus batch diagnostics and row counts. This
+keeps the existing `read_occurrence_rows` behavior while avoiding full source
+row materialization for large archives.
 
 `OccurrenceSourceRecord` preserves parser-level source evidence for later
 normalization:
@@ -143,10 +154,10 @@ Delimited text reading honors the occurrence core settings declared in
 - `fieldsEnclosedBy`, including no quote character when blank.
 - `ignoreHeaderLines`.
 
-Rows are streamed from the source file and collected into
-`OccurrenceReadResult.records` for the current parser handoff. This keeps the
-source-file read bounded to one row at a time while giving Prompt 04
-normalization a simple result object to consume.
+Rows are streamed from the source file. `read_occurrence_rows` collects them
+into `OccurrenceReadResult.records`; `stream_occurrence_row_batches` emits
+bounded `OccurrenceRowBatch` objects without retaining the whole occurrence
+table.
 
 Defaults from `meta.xml` are applied only when a declared `ArchiveField` has
 no source column index or when its source column index is outside the row
@@ -205,6 +216,14 @@ rejected records. It returns an `OccurrenceNormalizationResult` with:
 - `warnings`, a tuple of `OccurrenceNormalizationWarning` values. Optional
   conversion failures warn when the field failure rate is `>= 5%` of parsed
   records.
+- `first_accepted_values`, optional summary values used by metadata writers
+  when accepted rows were streamed rather than retained.
+
+For chunked conversion, use
+`dwca_cloud_geospatial.normalization.normalize_occurrence_record_batch(records)`.
+It returns the same result type for one bounded batch; callers aggregate counts,
+failure counts and warning rates across batches before writing
+`metadata/processing.json`.
 
 `NormalizedOccurrenceRecord` uses project-owned snake_case field names from
 `docs/output_format.md`. The Python attribute for the Darwin Core class field

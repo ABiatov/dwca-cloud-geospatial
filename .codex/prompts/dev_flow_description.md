@@ -67,4 +67,4 @@ At the end of each prompt:
 
 ## Current next work item
 
-`10b_large_archive_streaming_and_geoparquet_optimization.md`
+`11_viewer_contract.md`

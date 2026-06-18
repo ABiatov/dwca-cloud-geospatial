@@ -8,6 +8,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 import hashlib
 from importlib.metadata import PackageNotFoundError, version
+from itertools import chain
 import json
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -148,6 +149,7 @@ def write_bundle_metadata(
     normalization_result: OccurrenceNormalizationResult,
     flatgeobuf_result: FlatGeobufWriteResult | None = None,
     geoparquet_result: GeoParquetWriteResult | None = None,
+    rejected_records_path: str | Path | None = None,
     options: BundleWriterOptions | None = None,
 ) -> BundleMetadataWriteResult:
     """Write manifest, metadata JSON and optional rejected-record report."""
@@ -187,9 +189,13 @@ def write_bundle_metadata(
     _write_json(source_path, source_metadata)
     _write_json(processing_path, processing_metadata)
 
-    rejected_path = write_rejected_records_csv(
-        normalization_result.rejected_records,
-        output_root / REJECTED_RECORDS_RELATIVE_PATH,
+    rejected_path = (
+        Path(rejected_records_path)
+        if rejected_records_path is not None
+        else write_rejected_records_csv(
+            normalization_result.rejected_records,
+            output_root / REJECTED_RECORDS_RELATIVE_PATH,
+        )
     )
 
     inventory = _file_inventory(
@@ -202,7 +208,10 @@ def write_bundle_metadata(
     layers = _layers(
         flatgeobuf_result=flatgeobuf_result,
         geoparquet_result=geoparquet_result,
-        bounds=_accepted_bounds(normalization_result.accepted_records),
+        bounds=(
+            _accepted_bounds(normalization_result.accepted_records)
+            or (geoparquet_result.bounds if geoparquet_result else None)
+        ),
     )
     viewer = _viewer_defaults(layers=layers, flatgeobuf_result=flatgeobuf_result)
     manifest = {
@@ -269,15 +278,15 @@ def build_source_metadata(
         "rights": eml["rights"],
     }
     gbif = {
-        "dataset_key": _first_source_value(records, _GBIF_DATASET_KEY_TERMS),
-        "download_key": _first_source_value(records, _GBIF_DOWNLOAD_KEY_TERMS),
+        "dataset_key": _first_source_value(occurrence_result, _GBIF_DATASET_KEY_TERMS),
+        "download_key": _first_source_value(occurrence_result, _GBIF_DOWNLOAD_KEY_TERMS),
         "doi": None,
         "citation": None,
         "license": None,
     }
     obis = {
-        "dataset_id": _first_source_value(records, _OBIS_DATASET_ID_TERMS),
-        "resource_id": _first_source_value(records, _OBIS_RESOURCE_ID_TERMS),
+        "dataset_id": _first_source_value(occurrence_result, _OBIS_DATASET_ID_TERMS),
+        "resource_id": _first_source_value(occurrence_result, _OBIS_RESOURCE_ID_TERMS),
         "doi": None,
         "citation": None,
         "license": None,
@@ -365,8 +374,9 @@ def write_rejected_records_csv(
 ) -> Path | None:
     """Write ``reports/rejected_records.csv`` when rejected rows exist."""
 
-    rows = [record.to_dict() for record in rejected_records]
-    if not rows:
+    iterator = iter(rejected_records)
+    first_record = next(iterator, None)
+    if first_record is None:
         return None
 
     csv_path = Path(path)
@@ -374,9 +384,49 @@ def write_rejected_records_csv(
     with csv_path.open("w", encoding="utf-8", newline="") as file_obj:
         writer = csv.DictWriter(file_obj, fieldnames=REJECTED_RECORD_COLUMNS)
         writer.writeheader()
-        for row in rows:
+        for record in chain((first_record,), iterator):
+            row = record.to_dict()
             writer.writerow({column: row.get(column) for column in REJECTED_RECORD_COLUMNS})
     return csv_path
+
+
+class RejectedRecordsCsvWriter:
+    """Lazy CSV writer for rejected records emitted by chunked normalization."""
+
+    def __init__(self, path: str | Path) -> None:
+        self.path = Path(path)
+        self.record_count = 0
+        self._file_obj: Any | None = None
+        self._writer: csv.DictWriter | None = None
+
+    @property
+    def written_path(self) -> Path | None:
+        return self.path if self.record_count else None
+
+    def write_many(self, rejected_records: Iterable[RejectedOccurrenceRecord]) -> None:
+        for record in rejected_records:
+            self.write(record)
+
+    def write(self, record: RejectedOccurrenceRecord) -> None:
+        if self._writer is None:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            self._file_obj = self.path.open("w", encoding="utf-8", newline="")
+            self._writer = csv.DictWriter(
+                self._file_obj,
+                fieldnames=REJECTED_RECORD_COLUMNS,
+            )
+            self._writer.writeheader()
+        row = record.to_dict()
+        self._writer.writerow(
+            {column: row.get(column) for column in REJECTED_RECORD_COLUMNS}
+        )
+        self.record_count += 1
+
+    def close(self) -> None:
+        if self._file_obj is not None:
+            self._file_obj.close()
+            self._file_obj = None
+            self._writer = None
 
 
 def _created_at(value: datetime | str | None) -> str:
@@ -630,12 +680,37 @@ def _effective_configuration(
             if geoparquet_result
             else None,
             "compression": geoparquet_result.compression if geoparquet_result else None,
-            "covering_bbox_column": {"enabled": False, "strategy": None, "threshold": None},
-            "spatial_sorting": {"enabled": False, "strategy": None, "threshold": None},
-            "partitioned_dataset": {
-                "enabled": False,
-                "partition_key": None,
+            "large_output_mode": geoparquet_result.large_output_mode
+            if geoparquet_result
+            else False,
+            "covering_bbox_column": {
+                "enabled": geoparquet_result.covering_bbox_column
+                if geoparquet_result
+                else False,
+                "strategy": "point_bbox_struct"
+                if geoparquet_result and geoparquet_result.covering_bbox_column
+                else None,
                 "threshold": None,
+            },
+            "spatial_sorting": {
+                "enabled": geoparquet_result.spatial_sorting
+                if geoparquet_result
+                else False,
+                "strategy": geoparquet_result.spatial_sort_strategy
+                if geoparquet_result
+                else None,
+                "threshold": None,
+            },
+            "partitioned_dataset": {
+                "enabled": geoparquet_result.partitioned_dataset
+                if geoparquet_result
+                else False,
+                "partition_key": geoparquet_result.partition_key
+                if geoparquet_result
+                else None,
+                "threshold": geoparquet_result.partition_threshold
+                if geoparquet_result
+                else None,
             },
         },
     }
@@ -857,6 +932,10 @@ def _doi_from_dataset(dataset: ET.Element) -> str | None:
 def _first_accepted_value(
     normalization_result: OccurrenceNormalizationResult, field: str
 ) -> str | None:
+    summary_values = normalization_result.first_accepted_values or {}
+    value = summary_values.get(field)
+    if value:
+        return value
     for record in normalization_result.accepted_records:
         value = getattr(record, field)
         if isinstance(value, str) and value.strip():
@@ -865,10 +944,15 @@ def _first_accepted_value(
 
 
 def _first_source_value(
-    records: Iterable[OccurrenceSourceRecord],
+    occurrence_result: OccurrenceReadResult,
     terms: Iterable[str],
 ) -> str | None:
-    for record in records:
+    summary_values = occurrence_result.first_source_values or {}
+    for term in terms:
+        value = summary_values.get(term)
+        if value:
+            return value
+    for record in occurrence_result.records:
         for term in terms:
             value = record.value_for_term(term)
             if value and value.strip():

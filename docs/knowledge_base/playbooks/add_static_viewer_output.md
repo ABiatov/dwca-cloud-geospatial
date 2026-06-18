@@ -21,7 +21,11 @@ Generate static viewer-facing files from converted occurrence data without addin
 ## Steps
 
 1. Start from validated geospatial occurrence output.
-2. For MVP, use `exports/occurrences.fgb` as the viewer artifact. PMTiles is MVP+ and should be added only when requested by accepted docs or user scope.
+2. For MVP map display, use `exports/occurrences.fgb` when a FlatGeobuf layer
+   is generated. GeoParquet-only bundles are valid without FlatGeobuf; handle
+   them with the accepted no-map-layer behavior from `docs/viewer_contract.md`
+   unless GeoParquet browser loading is accepted later. PMTiles is MVP+ and
+   should be added only when requested by accepted docs or user scope.
 3. Generate bounds, center, layer metadata, and field list.
 4. Write a manifest JSON that declares all viewer-facing paths.
 5. Ensure paths are relative and static-host friendly.

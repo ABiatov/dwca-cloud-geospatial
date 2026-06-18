@@ -153,23 +153,21 @@
 - Prompt 10 docs path: converter command syntax, public API names, output
   paths, overwrite behavior and failure behavior are documented in
   `docs/converter.md`.
-- Post-Prompt-07 large-archive decision to preserve in final docs: before the
-  converter claims support for tens of millions of records, it must provide a
-  bounded-memory pipeline with streaming/chunked occurrence reading, chunked
-  normalization handoff, streaming GeoParquet accepted-record writing,
-  streaming rejected-record/report writing and bounded-memory counts/warnings
-  aggregation.
-- Post-Prompt-07 large GeoParquet output decision to preserve in final docs:
-  covering `bbox` is default-on for large GeoParquet 1.1 outputs; spatial
-  sorting is default-on for large GeoParquet outputs with a configurable
-  strategy; partitioned GeoParquet dataset output is an optional large-dataset
-  mode enabled by configuration or threshold.
-- Prompt 10b large-archive implementation when present: preserve its public
-  API names, large-output options, metadata fields, validation coverage,
-  benchmark or synthetic large-output evidence, and remaining limitations in
-  final docs. If Prompt 10b is not completed before hardening, final docs must
-  clearly state that support for tens of millions of records is not yet
-  claimed.
+- Prompt 10b large-archive implementation to preserve in final docs:
+  `stream_occurrence_row_batches`, `OccurrenceRowBatch`,
+  `OccurrenceRowStream`, `normalize_occurrence_record_batch`,
+  `ConversionOptions.chunk_size`, GeoParquet-only
+  `GeoParquetWriterOptions.large_output_mode`, default-on `bbox` covering,
+  default-on bounded `grid` spatial sorting, streaming rejected-report
+  writing, bounded count/warning aggregation and PyArrow validation of bbox
+  schema/content. Partitioned GeoParquet dataset output remains deferred and
+  is rejected when requested. Combined FlatGeobuf+GeoParquet conversion still
+  uses the existing FlatGeobuf materialized writer handoff.
+- Prompt 10/10b viewer/docs implication to preserve: valid GeoParquet-only
+  bundles, including large-output bundles, may omit `exports/occurrences.fgb`.
+  Viewer and final docs should describe the accepted no-FlatGeobuf behavior
+  from `docs/viewer_contract.md` instead of assuming every valid bundle has a
+  FlatGeobuf map layer.
 - Post-Prompt-03 handoff clarification: the Prompt 03 `Open Issues Affecting
   Normalization` were confirmed to be scope boundaries, not blockers before
   Prompt 04. Final docs should preserve that split: source row reading in
@@ -194,6 +192,8 @@ Make the MVP understandable, repeatable and ready for external review.
   installation, CLI, GUI and viewer usage.
 - Complete or update `docs/dwca_parser.md`, `docs/converter.md`, `docs/viewer_contract.md` and `docs/deployment.md`.
 - Confirm `docs/output_format.md` matches implemented bundle behavior.
+- Confirm docs and viewer guidance distinguish default FlatGeobuf bundles,
+  explicit GeoParquet-only bundles and GeoParquet-only large-output bundles.
 - Confirm `docs/developer_setup.md` still documents the FlatGeobuf optional
   dependency stack and real writer verification command.
 - Add regression tests for parser behavior, normalization, output writing and bundle validation where gaps remain.

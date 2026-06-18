@@ -14,7 +14,10 @@ from dwca_cloud_geospatial.conversion import (
     convert_dwca_archive,
 )
 from dwca_cloud_geospatial.flatgeobuf import DEFAULT_FLATGEOBUF_RELATIVE_PATH
-from dwca_cloud_geospatial.geoparquet import DEFAULT_GEOPARQUET_RELATIVE_PATH
+from dwca_cloud_geospatial.geoparquet import (
+    DEFAULT_GEOPARQUET_RELATIVE_PATH,
+    GeoParquetWriterOptions,
+)
 from dwca_cloud_geospatial.validation import validate_output_bundle
 
 
@@ -126,3 +129,49 @@ def test_core_conversion_rejects_checklist_archive_with_occurrence_error(
     assert [diagnostic.code for diagnostic in excinfo.value.diagnostics] == [
         "missing_occurrence_core"
     ]
+
+
+def test_large_geoparquet_conversion_streams_chunks_and_rejected_report(
+    tmp_path: Path,
+) -> None:
+    pytest.importorskip("pyarrow")
+
+    result = convert_dwca_archive(
+        NORMALIZATION_FIXTURE_DIR,
+        tmp_path / "bundle",
+        options=ConversionOptions(
+            output_formats=("geoparquet",),
+            geoparquet=GeoParquetWriterOptions(large_output_mode=True),
+            chunk_size=2,
+        ),
+    )
+
+    assert result.occurrence_result.records == ()
+    assert result.normalization_result.accepted_records == ()
+    assert result.normalization_result.rejected_records == ()
+    assert result.accepted_record_count == 2
+    assert result.rejected_record_count == 5
+    assert result.geoparquet_result is not None
+    assert result.geoparquet_result.covering_bbox_column is True
+    assert result.geoparquet_result.spatial_sorting is True
+    assert result.metadata_result.rejected_records_path is not None
+    assert result.metadata_result.rejected_records_path.exists()
+
+    processing = json.loads(
+        (tmp_path / "bundle" / "metadata" / "processing.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert processing["configuration"]["geoparquet"]["large_output_mode"] is True
+    assert processing["configuration"]["geoparquet"]["covering_bbox_column"]["enabled"] is True
+    assert processing["configuration"]["geoparquet"]["spatial_sorting"] == {
+        "enabled": True,
+        "strategy": "grid",
+        "threshold": None,
+    }
+    assert processing["counts"]["source_records"] == 7
+    assert processing["counts"]["accepted_records"] == 2
+    assert processing["counts"]["rejected_records"] == 5
+
+    validation = validate_output_bundle(tmp_path / "bundle")
+    assert not validation.has_errors

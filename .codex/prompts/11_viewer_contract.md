@@ -59,11 +59,22 @@
   `|`-delimited text, no flags are null, `has_quality_flags` is boolean, and
   viewers must split on `|` for exact-token matching instead of substring
   matching.
-- Prompt 10b large-output handoff when present: preserve any implemented
-  large-archive metadata fields, partitioned GeoParquet declarations and
-  large-output warnings in the viewer contract. The MVP static viewer may
-  still prefer FlatGeobuf for map display, but it should not contradict the
-  accepted large-output GeoParquet metadata contract.
+- Prompt 10b large-output handoff: GeoParquet-only large-output conversion can
+  stream occurrence batches through normalization, GeoParquet writing and
+  rejected-report writing without retaining full accepted/rejected tuples.
+  Large GeoParquet mode writes a `bbox` struct covering column, applies
+  bounded `grid` spatial sorting and records `large_output_mode`,
+  `covering_bbox_column`, `spatial_sorting` and `partitioned_dataset`
+  configuration in `metadata/processing.json`. Partitioned GeoParquet output
+  remains deferred and is rejected if requested. The MVP static viewer may
+  still prefer FlatGeobuf for map display, but it should not contradict these
+  GeoParquet metadata declarations.
+- Prompt 10/10b GeoParquet-only bundle behavior: explicit GeoParquet
+  conversion, including large-output mode, may produce a valid bundle without
+  `exports/occurrences.fgb`. The viewer contract must define a graceful
+  no-FlatGeobuf state, such as metadata/provenance display plus an unsupported
+  map-layer message, unless Prompt 11 explicitly accepts GeoParquet browser
+  loading.
 
 ## Goal
 
@@ -74,6 +85,8 @@ Create `docs/viewer_contract.md` as the accepted contract for the minimal static
 - Define how the viewer discovers data through `manifest.json`.
 - Define required and optional metadata files read by the viewer.
 - Define FlatGeobuf point layer loading behavior.
+- Define behavior when a valid bundle has no FlatGeobuf layer, including
+  GeoParquet-only bundles.
 - Define dataset provenance panel fields.
 - Define feature details panel fields.
 - Define MVP filters: `scientific_name`, `kingdom`, `event_year`, `basis_of_record`, `iucn_red_list_category`, `quality_flags`.

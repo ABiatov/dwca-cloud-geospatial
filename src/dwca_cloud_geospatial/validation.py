@@ -26,6 +26,7 @@ from dwca_cloud_geospatial.flatgeobuf import (
     GEOMETRY_COLUMN as FLATGEOBUF_GEOMETRY_COLUMN,
 )
 from dwca_cloud_geospatial.geoparquet import (
+    BBOX_COLUMN,
     GEOPARQUET_CRS,
     GEOPARQUET_PROJECTION_COLUMNS,
     GEOPARQUET_VERSION,
@@ -707,6 +708,7 @@ def _validate_geoparquet(
     _validate_geoparquet_schema(columns, table_schema, metadata, relative, collector, pa)
     _validate_file_record_count(entry, row_count, collector, check="geoparquet_pyarrow")
     _validate_geoparquet_quality_fields(path, relative, columns, collector, pq)
+    _validate_geoparquet_bbox_values(path, relative, columns, collector, pq)
     collector.check(
         name="geoparquet_pyarrow",
         status=FAILED if any(error.path == relative and error.check == "geoparquet_pyarrow" for error in collector.errors) else PASSED,
@@ -843,7 +845,14 @@ def _validate_geoparquet_schema(
             details={"bbox": bbox},
         )
     covering = geometry_metadata.get("covering")
-    if covering and "bbox" in columns:
+    if BBOX_COLUMN in columns and not covering:
+        collector.error(
+            code="geoparquet_covering_bbox_metadata_missing",
+            message="GeoParquet bbox column must be declared in geometry covering metadata.",
+            path=relative,
+            check="geoparquet_pyarrow",
+        )
+    if covering and BBOX_COLUMN in columns:
         _validate_bbox_column_declaration(covering, schema, relative, collector)
 
 
@@ -863,7 +872,7 @@ def _validate_bbox_column_declaration(
         return
     bbox_field_names = {"xmin", "ymin", "xmax", "ymax"}
     try:
-        bbox_field = schema.field("bbox")
+        bbox_field = schema.field(BBOX_COLUMN)
     except KeyError:
         collector.error(
             code="geoparquet_covering_bbox_column_missing",
@@ -925,6 +934,64 @@ def _validate_geoparquet_quality_fields(
             "geoparquet_pyarrow",
             collector,
         )
+
+
+def _validate_geoparquet_bbox_values(
+    path: Path,
+    relative: str,
+    columns: set[str],
+    collector: _ValidationCollector,
+    pq: Any,
+) -> None:
+    required = {BBOX_COLUMN, "decimal_longitude", "decimal_latitude"}
+    if not required.issubset(columns):
+        return
+    try:
+        table = pq.read_table(
+            path,
+            columns=[BBOX_COLUMN, "decimal_longitude", "decimal_latitude"],
+        )
+    except Exception as exc:
+        collector.error(
+            code="geoparquet_bbox_read_failed",
+            message=f"Could not read GeoParquet bbox fields: {exc}",
+            path=relative,
+            check="geoparquet_pyarrow",
+        )
+        return
+    for row_index, row in enumerate(table.to_pylist()):
+        bbox = row.get(BBOX_COLUMN)
+        lon = _float_or_none(row.get("decimal_longitude"))
+        lat = _float_or_none(row.get("decimal_latitude"))
+        if not isinstance(bbox, dict):
+            collector.error(
+                code="geoparquet_bbox_value_invalid",
+                message="GeoParquet bbox values must be structs.",
+                path=relative,
+                check="geoparquet_pyarrow",
+                details={"row_index": row_index},
+            )
+            return
+        expected = {"xmin": lon, "xmax": lon, "ymin": lat, "ymax": lat}
+        for field, expected_value in expected.items():
+            actual = _float_or_none(bbox.get(field))
+            if actual != expected_value:
+                collector.error(
+                    code="geoparquet_bbox_point_mismatch",
+                    message=(
+                        "Point GeoParquet bbox values must equal the row "
+                        "longitude and latitude."
+                    ),
+                    path=relative,
+                    check="geoparquet_pyarrow",
+                    details={
+                        "row_index": row_index,
+                        "field": field,
+                        "actual": actual,
+                        "expected": expected_value,
+                    },
+                )
+                return
 
 
 def _validate_quality_flag_value(

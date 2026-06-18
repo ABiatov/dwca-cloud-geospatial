@@ -39,7 +39,9 @@ from dwca_cloud_geospatial.flatgeobuf import (
     write_flatgeobuf_occurrences,
 )
 from dwca_cloud_geospatial.geoparquet import (
+    BBOX_COLUMN,
     DEFAULT_GEOPARQUET_RELATIVE_PATH,
+    GEOPARQUET_LARGE_PROJECTION_COLUMNS,
     GEOPARQUET_PROJECTION_COLUMNS,
     GeoParquetDependencyError,
     GeoParquetWriteResult,
@@ -49,10 +51,13 @@ from dwca_cloud_geospatial.geoparquet import (
 )
 from dwca_cloud_geospatial.inspection import inspect_dwca
 from dwca_cloud_geospatial.occurrence import (
+    OccurrenceRowBatch,
+    OccurrenceRowStream,
     OccurrenceReadResult,
     OccurrenceSourceRecord,
     iter_occurrence_rows,
     read_occurrence_rows,
+    stream_occurrence_row_batches,
 )
 from dwca_cloud_geospatial.normalization import (
     NormalizedOccurrenceRecord,
@@ -62,6 +67,7 @@ from dwca_cloud_geospatial.normalization import (
     RejectedOccurrenceRecord,
     TypeConversionFailure,
     normalize_occurrence_record,
+    normalize_occurrence_record_batch,
     normalize_occurrence_records,
 )
 from dwca_cloud_geospatial.validation import (
@@ -79,11 +85,13 @@ except PackageNotFoundError:
 __all__ = [
     "__version__",
     "BUNDLE_SCHEMA_VERSION",
+    "BBOX_COLUMN",
     "DEFAULT_FLATGEOBUF_RELATIVE_PATH",
     "DEFAULT_GEOPARQUET_RELATIVE_PATH",
     "FLATGEOBUF_FORMAT",
     "FLATGEOBUF_PROJECTION_COLUMNS",
     "GEOPARQUET_FORMAT",
+    "GEOPARQUET_LARGE_PROJECTION_COLUMNS",
     "GEOPARQUET_PROJECTION_COLUMNS",
     "MANIFEST_RELATIVE_PATH",
     "OCCURRENCE_SCHEMA_VERSION",
@@ -111,6 +119,8 @@ __all__ = [
     "estimate_spatial_index_memory_bytes",
     "inspect_dwca",
     "OccurrenceReadResult",
+    "OccurrenceRowBatch",
+    "OccurrenceRowStream",
     "OccurrenceSourceRecord",
     "NormalizedOccurrenceRecord",
     "OccurrenceNormalizationCounts",
@@ -123,10 +133,12 @@ __all__ = [
     "convert_dwca_archive",
     "iter_occurrence_rows",
     "normalize_occurrence_record",
+    "normalize_occurrence_record_batch",
     "normalize_occurrence_records",
     "project_flatgeobuf_record",
     "project_geoparquet_record",
     "read_occurrence_rows",
+    "stream_occurrence_row_batches",
     "write_flatgeobuf_occurrences",
     "write_bundle_metadata",
     "write_geoparquet_occurrences",

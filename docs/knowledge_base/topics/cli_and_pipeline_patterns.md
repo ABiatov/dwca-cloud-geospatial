@@ -57,6 +57,17 @@ Implemented Prompt 10 core API:
 - `ConversionError` for actionable conversion failures with parser
   diagnostics when available.
 
+Implemented Prompt 10b core-only large-output options:
+
+- `ConversionOptions.chunk_size` controls streaming occurrence batch size.
+- `GeoParquetWriterOptions.large_output_mode=True` selects the bounded
+  GeoParquet-only large-output path.
+- The large-output path writes GeoParquet `bbox` covering metadata and uses
+  the bounded `grid` spatial sort. It is not exposed as a dedicated CLI flag
+  yet; CLI `--format geoparquet` keeps the Prompt 10 syntax.
+- Partitioned GeoParquet options are rejected until the manifest and validator
+  contract support partitioned datasets.
+
 ## Configuration
 
 Keep configuration file-based and optional:

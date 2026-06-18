@@ -64,9 +64,10 @@ returns `BundleValidationResult` with `status`, `errors`, `warnings`,
 Current implementation notes:
 
 - Single-file GeoParquet output at `data/occurrences.parquet` is validated
-  with required PyArrow checks.
-- Partitioned GeoParquet dataset validation remains future work if partitioned
-  output is implemented.
+  with required PyArrow checks, including `bbox` covering schema/content when
+  that large-output column is present.
+- Partitioned GeoParquet dataset validation remains future work because
+  partitioned output is deferred and rejected when requested.
 - FlatGeobuf validation checks projection fields and counts through
   Pyogrio/GDAL when available. Row-level FlatGeobuf `quality_flags` validation
   depends on local geospatial table reader support.

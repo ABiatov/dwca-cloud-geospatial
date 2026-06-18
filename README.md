@@ -19,6 +19,11 @@ APIs, file layouts and command-line interfaces should be treated as experimental
 Checklist DwC-A archives with `Taxon` cores can be inspected, but the MVP
 conversion workflow targets occurrence archives that declare coordinate terms.
 
+Default conversion writes FlatGeobuf. Explicit GeoParquet conversion can also
+run in a core-API large-output mode that streams occurrence batches, writes a
+GeoParquet `bbox` covering column and applies bounded grid spatial ordering.
+That bounded-memory mode currently applies to GeoParquet-only bundles.
+
 The accepted MVP development plan is documented in [docs/development_plan.md](docs/development_plan.md).
 
 ## Developer Quick Start
@@ -58,6 +63,8 @@ Converter usage is documented in [docs/converter.md](docs/converter.md).
 
 - FlatGeobuf for the default lightweight geospatial exchange and viewer output.
 - GeoParquet for analytical workflows when explicitly selected.
+- GeoParquet-only large-output bundles through the core API for bounded
+  parser/normalizer/writer handoff.
 - Metadata describing source files, processing parameters and generated outputs.
 - A minimal static MapLibre viewer.
 

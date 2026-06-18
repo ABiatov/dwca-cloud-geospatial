@@ -2,7 +2,7 @@
 
 Status: Accepted baseline for MVP
 
-Last updated: 2026-06-13
+Last updated: 2026-06-18
 
 ## Purpose
 
@@ -93,7 +93,7 @@ MVP outputs are projections of the canonical occurrence schema:
 | Output | Projection role | Required relationship to canonical schema |
 | --- | --- | --- |
 | `data/occurrences.parquet` | Analytical GeoParquet projection. | Should carry the broad normalized field set needed for analysis, provenance and GeoParquet geometry metadata. |
-| `exports/occurrences.fgb` | Compact viewer and exchange projection. | May omit analytical-only fields, but must include stable provenance fields, point geometry, viewer display fields, accepted filter fields, parsed coordinates, `quality_flags` and `has_quality_flags`. |
+| `exports/occurrences.fgb` | Compact viewer and exchange projection when FlatGeobuf is generated. | May omit analytical-only fields, but must include stable provenance fields, point geometry, viewer display fields, accepted filter fields, parsed coordinates, `quality_flags` and `has_quality_flags` when generated. |
 | Future `tiles/occurrences.pmtiles` | MVP+ tiled visualization projection. | Should derive from the same accepted records and default to the FlatGeobuf compact field set unless a later accepted decision defines a smaller tile attribute profile. |
 
 When both GeoParquet and FlatGeobuf are generated, they must represent the same accepted occurrence record set unless `metadata/processing.json` documents a deliberate export filter. Rejected, skipped, missing-coordinate or invalid-coordinate rows are not part of the accepted occurrence projections; they belong in `reports/rejected_records.csv` and processing metadata.
@@ -424,10 +424,9 @@ Geometry:
 
 Large-output behavior:
 
-- The converter must support a bounded-memory large-archive path before it is
-  considered ready for DwC-A archives with tens of millions of occurrence
-  records.
-- Required large-archive pipeline shape:
+- The implemented bounded-memory large-archive path applies to GeoParquet-only
+  conversions with `GeoParquetWriterOptions.large_output_mode=True`.
+- Implemented large-archive pipeline shape:
   - streaming/chunked occurrence reader;
   - chunked normalization result handoff;
   - streaming GeoParquet accepted-record writer;
@@ -438,19 +437,30 @@ Large-output behavior:
   `xmin`, `ymin`, `xmax` and `ymax`, matching GeoParquet 1.1 covering bbox
   conventions for point geometries in `OGC:CRS84`.
 - For large GeoParquet outputs, spatial sorting is default-on and
-  strategy-configurable. The initial bounded strategy may be longitude/latitude
-  or bbox min-corner sorting; later implementations may use Hilbert sorting via
-  DuckDB, geoparquet-io or an equivalent helper. The purpose is to keep
-  row-group bboxes tight enough for spatial predicate pushdown.
+  strategy-configurable. The implemented `grid` strategy streams rows into
+  temporary coarse longitude/latitude buckets and emits buckets in sorted
+  spatial order. It avoids a full Python in-memory sort.
 - Partitioned GeoParquet dataset output is an optional large-dataset mode,
-  enabled by explicit configuration or a documented threshold when a single
-  `data/occurrences.parquet` file is impractical for publishing, updating or
-  querying. Candidate partition keys include useful source attributes,
-  administrative attributes or a coarse spatial grid when spatial queries
-  dominate.
+  but remains deferred. Enabling partitioned mode is rejected until the
+  manifest and validator contract can represent partition file inventories and
+  aggregate counts cleanly.
 - Processing metadata must record whether covering bbox, spatial sorting or
   partitioned output was used, including the selected strategy, threshold or
   partition key when applicable.
+
+Large-output processing configuration fields under
+`metadata/processing.json.configuration.geoparquet`:
+
+| Field | Meaning |
+| --- | --- |
+| `large_output_mode` | Whether large-output GeoParquet behavior was requested. |
+| `covering_bbox_column.enabled` | Whether the `bbox` struct column was written. |
+| `covering_bbox_column.strategy` | `point_bbox_struct` when enabled. |
+| `spatial_sorting.enabled` | Whether spatial sorting was applied before writing. |
+| `spatial_sorting.strategy` | `grid` for the implemented bounded strategy. |
+| `partitioned_dataset.enabled` | Always `false` until partitioned output is implemented. |
+| `partitioned_dataset.partition_key` | Requested partition key, or `null`. |
+| `partitioned_dataset.threshold` | Requested threshold, or `null`. |
 
 Required GeoParquet projection fields:
 
@@ -586,7 +596,11 @@ Required FlatGeobuf projection columns:
 
 Full source/raw Darwin Core core and extension table preservation belongs in future raw Parquet-family exports, not in the MVP FlatGeobuf layer.
 
-The static viewer should prefer `exports/occurrences.fgb` for MVP map display.
+The static viewer should prefer `exports/occurrences.fgb` for MVP map display
+when a FlatGeobuf layer is generated. Explicit GeoParquet-only bundles,
+including GeoParquet large-output bundles, may omit FlatGeobuf and remain
+valid output bundles; viewer contracts must define a graceful no-FlatGeobuf
+state unless GeoParquet browser loading is accepted later.
 
 ## `reports/rejected_records.csv`
 
@@ -628,9 +642,15 @@ Initial reason codes:
 
 The converter may add more reason codes, but they must be documented in `metadata/processing.json`.
 
-## Viewer-Required Fields
+## Viewer-Required Files And Fields
 
-The thin static viewer must be able to read `manifest.json`, `metadata/source.json`, `metadata/processing.json` and `exports/occurrences.fgb`.
+The thin static viewer must be able to read `manifest.json`,
+`metadata/source.json` and `metadata/processing.json`. For map display, it
+should use `exports/occurrences.fgb` when that layer is generated and declared
+in `manifest.layers`. GeoParquet-only bundles are valid without
+`exports/occurrences.fgb`; the viewer should handle them without crashing and
+show metadata/provenance plus the accepted no-map-layer state from
+`docs/viewer_contract.md`.
 
 The viewer must display these dataset/provenance fields when available:
 
@@ -728,7 +748,9 @@ GeoParquet validation is layered:
   expose required projection columns, reconcile row counts, include
   GeoParquet `geo` metadata, declare the expected geometry column, geometry
   type, encoding and CRS, and preserve `quality_flags` /
-  `has_quality_flags` consistency.
+  `has_quality_flags` consistency. When a `bbox` column is present, PyArrow
+  validation checks the struct schema, GeoParquet covering declaration and
+  point bbox values.
 - Optional GeoParquet-aware checks should run when tools are installed:
   `geoparquet-io` for spec-aware validation, DuckDB for analytical reader and
   row-group/metadata checks, and Pyogrio/GDAL as a best-effort geospatial
@@ -736,9 +758,9 @@ GeoParquet validation is layered:
 - Missing optional validation tools or unavailable local GDAL Parquet support
   should be reported as warnings or skipped checks, not as bundle failures,
   when required PyArrow validation passes.
-- Large-output validation should check covering bbox, spatial sorting and
-  partitioned-output declarations when those modes are implemented or
-  declared.
+- Large-output validation checks covering bbox schema/content when present.
+  Spatial sorting is recorded in processing metadata. Partitioned-output
+  validation remains deferred because partitioned output is not implemented.
 
 Current validator scope and limitations:
 

@@ -67,10 +67,16 @@
   `python -m pip install -e "${REPO}[dev,flatgeobuf]"`. If the core API
   raises `FlatGeobufDependencyError`, GUI errors should preserve its actionable
   dependency message.
-- Prompt 10b large-output handoff when present: GUI options should expose only
-  large-output controls implemented by the core API, preserve actionable
-  errors for unsupported modes and show non-fatal large-output warnings
-  separately from conversion failures.
+- Prompt 10b large-output handoff: GUI options should expose only large-output
+  controls implemented by the core API. Implemented controls are GeoParquet
+  `large_output_mode`, chunk size and the default `grid` spatial sort through
+  `GeoParquetWriterOptions`; partitioned GeoParquet mode is not implemented
+  and should preserve the core actionable error if requested. Large-output
+  bounded-memory mode applies to GeoParquet-only conversion; if the user also
+  selects FlatGeobuf, the GUI must not describe that run as bounded-memory
+  large-output conversion because the current FlatGeobuf writer still
+  materializes accepted rows. Show non-fatal large-output warnings separately
+  from conversion failures.
 
 ## Goal
 
@@ -81,6 +87,8 @@ Implement a primitive `tkinter` desktop entry point for non-CLI users while reus
 - Add a GUI module or entry point using `tkinter`.
 - Let users choose input archive and output directory.
 - Provide output format options consistent with the CLI: FlatGeobuf default and explicit GeoParquet when supported.
+- If exposing a large-output option, constrain or label it as GeoParquet-only
+  according to `docs/converter.md`.
 - Add an overwrite checkbox required before replacing an existing output path.
 - Show progress/status and actionable errors.
 - Show non-fatal conversion warnings, including large FlatGeobuf indexed-write

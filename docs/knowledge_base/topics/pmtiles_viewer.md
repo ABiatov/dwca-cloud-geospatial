@@ -53,7 +53,12 @@ Likely manifest sections:
 ## Resolved By Accepted Docs
 
 - PMTiles is deferred to MVP+. The first prototype should start with FlatGeobuf viewer loading: `planning/decisions/ADR-001-mvp-boundaries-and-interfaces.md` moves PMTiles to MVP+, and `docs/development_plan.md` excludes PMTiles generation from the MVP except as documented MVP+ work.
-- The MVP static viewer should read `manifest.json`, metadata files and `exports/occurrences.fgb`, with browser-side filters over generated bundle fields. This is accepted in `docs/development_plan.md` M5 and `docs/output_format.md`.
+- The MVP static viewer should read `manifest.json` and metadata files, and
+  use `exports/occurrences.fgb` for map display when a FlatGeobuf layer is
+  generated. GeoParquet-only bundles may omit FlatGeobuf and should be handled
+  through the no-map-layer behavior accepted in `docs/viewer_contract.md`.
+  Browser-side filters apply over generated bundle fields when a readable
+  viewer layer is available.
 - PMTiles generation is deferred to MVP+ and should use Tippecanoe as the preferred tiler when available. Tippecanoe remains an optional external dependency, not an MVP runtime requirement. The converter should fail gracefully with an actionable message when PMTiles generation is requested but `tippecanoe` is not installed.
 - PMTiles point attributes should default to the same compact normalized occurrence field set as FlatGeobuf. A smaller PMTiles-specific attribute profile may be introduced later for large datasets if tile size or browser performance requires it.
 

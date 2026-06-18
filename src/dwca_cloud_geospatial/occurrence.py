@@ -17,6 +17,16 @@ from dwca_cloud_geospatial.inspection import (
     inspect_dwca,
 )
 
+SUMMARY_SOURCE_TERMS: tuple[str, ...] = (
+    "http://rs.gbif.org/terms/1.0/datasetKey",
+    "http://rs.gbif.org/terms/1.0/dataset_key",
+    "http://rs.gbif.org/terms/1.0/downloadKey",
+    "http://rs.gbif.org/terms/1.0/download_key",
+    "http://rs.iobis.org/obis/terms/dataset_id",
+    "http://rs.iobis.org/obis/terms/datasetID",
+    "http://rs.iobis.org/obis/terms/resource_id",
+)
+
 
 @dataclass(frozen=True)
 class OccurrenceSourceRecord:
@@ -47,6 +57,31 @@ class OccurrenceReadResult:
     source_file: str | None
     rows_read: int
     parse_failures: int
+    first_source_values: Mapping[str, str] | None = None
+
+    @property
+    def has_errors(self) -> bool:
+        return any(diagnostic.severity == "error" for diagnostic in self.diagnostics)
+
+
+@dataclass(frozen=True)
+class OccurrenceRowBatch:
+    """One bounded batch of occurrence source rows and parse diagnostics."""
+
+    records: tuple[OccurrenceSourceRecord, ...]
+    diagnostics: tuple[ParserDiagnostic, ...] = ()
+    rows_read: int = 0
+    parse_failures: int = 0
+
+
+@dataclass(frozen=True)
+class OccurrenceRowStream:
+    """Inspectable occurrence row stream for chunked conversion."""
+
+    inspection: ArchiveInspection
+    diagnostics: tuple[ParserDiagnostic, ...]
+    source_file: str | None
+    batches: Iterator[OccurrenceRowBatch]
 
     @property
     def has_errors(self) -> bool:
@@ -114,6 +149,7 @@ def read_occurrence_rows(path: str | Path) -> OccurrenceReadResult:
     source_file = table.files[0]
     records: list[OccurrenceSourceRecord] = []
     parse_failures = 0
+    first_source_values: dict[str, str] = {}
 
     try:
         with _open_declared_text_file(inspection, source_file) as text_file:
@@ -154,15 +190,15 @@ def read_occurrence_rows(path: str | Path) -> OccurrenceReadResult:
                     break
 
                 source_row_number = reader.line_num
-                records.append(
-                    _record_from_row(
-                        table=table,
-                        source_file=source_file,
-                        source_row_number=source_row_number,
-                        source_data_row_number=source_data_row_number,
-                        row=row,
-                    )
+                record = _record_from_row(
+                    table=table,
+                    source_file=source_file,
+                    source_row_number=source_row_number,
+                    source_data_row_number=source_data_row_number,
+                    row=row,
                 )
+                records.append(record)
+                _capture_first_source_values(first_source_values, record)
                 source_data_row_number += 1
     except (KeyError, OSError) as exc:
         diagnostics.append(
@@ -182,6 +218,85 @@ def read_occurrence_rows(path: str | Path) -> OccurrenceReadResult:
         source_file=source_file,
         rows_read=len(records),
         parse_failures=parse_failures,
+        first_source_values=first_source_values,
+    )
+
+
+def stream_occurrence_row_batches(
+    path: str | Path,
+    *,
+    batch_size: int = 10_000,
+) -> OccurrenceRowStream:
+    """Return a chunked occurrence-core row stream for bounded conversion."""
+
+    if batch_size <= 0:
+        raise ValueError("batch_size must be positive.")
+
+    inspection = inspect_dwca(path)
+    diagnostics = list(inspection.diagnostics)
+    empty = OccurrenceRowStream(
+        inspection=inspection,
+        diagnostics=tuple(diagnostics),
+        source_file=None,
+        batches=iter(()),
+    )
+
+    if inspection.has_errors:
+        return empty
+    if inspection.metadata is None:
+        diagnostics.append(
+            ParserDiagnostic(
+                severity="error",
+                code="missing_archive_metadata",
+                message="Occurrence rows cannot be read because archive metadata is unavailable.",
+                source=str(inspection.source_path),
+                context=inspection.meta_path,
+            )
+        )
+        return OccurrenceRowStream(inspection, tuple(diagnostics), None, iter(()))
+
+    table = inspection.metadata.occurrence_core
+    if table is None:
+        diagnostics.append(
+            ParserDiagnostic(
+                severity="error",
+                code="missing_occurrence_core",
+                message=(
+                    "DwC-A metadata does not declare an Occurrence core; "
+                    "non-occurrence core files will not be read as occurrence rows."
+                ),
+                source=str(inspection.source_path),
+                context=inspection.meta_path,
+            )
+        )
+        return OccurrenceRowStream(inspection, tuple(diagnostics), None, iter(()))
+
+    if len(table.files) != 1:
+        diagnostics.append(
+            ParserDiagnostic(
+                severity="error",
+                code="unsupported_multiple_occurrence_core_files",
+                message=(
+                    "Occurrence core declares multiple file locations; "
+                    "multi-file table streaming is deferred."
+                ),
+                source=inspection.meta_path or str(inspection.source_path),
+                context=", ".join(table.files) if table.files else None,
+            )
+        )
+        return OccurrenceRowStream(inspection, tuple(diagnostics), None, iter(()))
+
+    source_file = table.files[0]
+    return OccurrenceRowStream(
+        inspection=inspection,
+        diagnostics=tuple(diagnostics),
+        source_file=source_file,
+        batches=_iter_occurrence_row_batches(
+            inspection=inspection,
+            table=table,
+            source_file=source_file,
+            batch_size=batch_size,
+        ),
     )
 
 
@@ -197,6 +312,106 @@ def iter_occurrence_rows(path: str | Path) -> Iterator[OccurrenceSourceRecord]:
         codes = ", ".join(diagnostic.code for diagnostic in result.diagnostics)
         raise ValueError(f"Occurrence rows could not be read: {codes}")
     yield from result.records
+
+
+def _iter_occurrence_row_batches(
+    *,
+    inspection: ArchiveInspection,
+    table: ArchiveTable,
+    source_file: str,
+    batch_size: int,
+) -> Iterator[OccurrenceRowBatch]:
+    records: list[OccurrenceSourceRecord] = []
+    batch_diagnostics: list[ParserDiagnostic] = []
+    rows_read = 0
+    parse_failures = 0
+
+    def flush() -> OccurrenceRowBatch | None:
+        nonlocal records, batch_diagnostics, rows_read, parse_failures
+        if not records and not batch_diagnostics:
+            return None
+        batch = OccurrenceRowBatch(
+            records=tuple(records),
+            diagnostics=tuple(batch_diagnostics),
+            rows_read=rows_read,
+            parse_failures=parse_failures,
+        )
+        records = []
+        batch_diagnostics = []
+        rows_read = 0
+        parse_failures = 0
+        return batch
+
+    try:
+        with _open_declared_text_file(inspection, source_file) as text_file:
+            reader = _make_csv_reader(text_file, table)
+            for _ in range(table.text_format.ignore_header_lines):
+                try:
+                    next(reader)
+                except StopIteration:
+                    return
+                except csv.Error as exc:
+                    parse_failures += 1
+                    batch_diagnostics.append(
+                        _row_parse_diagnostic(
+                            inspection=inspection,
+                            source_file=source_file,
+                            source_row_number=max(reader.line_num, 1),
+                            exc=exc,
+                        )
+                    )
+                    batch = flush()
+                    if batch is not None:
+                        yield batch
+                    return
+
+            source_data_row_number = 1
+            while True:
+                try:
+                    row = next(reader)
+                except StopIteration:
+                    break
+                except csv.Error as exc:
+                    parse_failures += 1
+                    batch_diagnostics.append(
+                        _row_parse_diagnostic(
+                            inspection=inspection,
+                            source_file=source_file,
+                            source_row_number=max(reader.line_num, 1),
+                            exc=exc,
+                        )
+                    )
+                    break
+
+                records.append(
+                    _record_from_row(
+                        table=table,
+                        source_file=source_file,
+                        source_row_number=reader.line_num,
+                        source_data_row_number=source_data_row_number,
+                        row=row,
+                    )
+                )
+                rows_read += 1
+                source_data_row_number += 1
+                if len(records) >= batch_size:
+                    batch = flush()
+                    if batch is not None:
+                        yield batch
+    except (KeyError, OSError) as exc:
+        batch_diagnostics.append(
+            ParserDiagnostic(
+                severity="error",
+                code="occurrence_core_read_error",
+                message=f"Could not read occurrence core file: {exc}",
+                source=str(inspection.source_path),
+                context=source_file,
+            )
+        )
+
+    batch = flush()
+    if batch is not None:
+        yield batch
 
 
 def _record_from_row(
@@ -233,6 +448,18 @@ def _record_from_row(
         field_metadata=table.fields,
         relationship_keys=relationship_keys,
     )
+
+
+def _capture_first_source_values(
+    first_source_values: dict[str, str],
+    record: OccurrenceSourceRecord,
+) -> None:
+    for term in SUMMARY_SOURCE_TERMS:
+        if term in first_source_values:
+            continue
+        value = record.value_for_term(term)
+        if value and value.strip():
+            first_source_values[term] = value.strip()
 
 
 def _value_for_field(field: ArchiveField, row: list[str]) -> str | None:

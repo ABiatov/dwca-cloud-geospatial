@@ -19,7 +19,9 @@ from dwca_cloud_geospatial.flatgeobuf import (
     write_flatgeobuf_occurrences,
 )
 from dwca_cloud_geospatial.geoparquet import (
+    BBOX_COLUMN,
     DEFAULT_GEOPARQUET_RELATIVE_PATH,
+    GeoParquetWriterOptions,
     write_geoparquet_occurrences,
 )
 from dwca_cloud_geospatial.normalization import normalize_occurrence_records
@@ -73,9 +75,11 @@ def _build_geoparquet_bundle(
 ) -> None:
     pytest.importorskip("pyarrow", reason="PyArrow is required for validation fixtures.")
     read_result, normalization_result = _read_and_normalize(fixture_path)
+    writer_options = GeoParquetWriterOptions(large_output_mode=bundle_id.endswith("-large"))
     geoparquet_result = write_geoparquet_occurrences(
         normalization_result.accepted_records,
         bundle_root,
+        options=writer_options,
     )
     write_bundle_metadata(
         output_directory=bundle_root,
@@ -237,6 +241,32 @@ def test_quality_flag_tokens_and_has_flag_consistency_are_validated(
     assert result.status == FAILED
     assert "quality_flags_token_invalid" in error_codes
     assert "has_quality_flags_mismatch" in error_codes
+
+
+def test_large_geoparquet_bbox_covering_is_validated(tmp_path: Path) -> None:
+    pa = pytest.importorskip("pyarrow", reason="PyArrow is required.")
+    pq = pytest.importorskip("pyarrow.parquet", reason="PyArrow is required.")
+    _build_geoparquet_bundle(tmp_path, bundle_id="validation-geoparquet-large")
+    parquet_path = tmp_path / DEFAULT_GEOPARQUET_RELATIVE_PATH
+    table = pq.read_table(parquet_path)
+    bbox_index = table.column_names.index(BBOX_COLUMN)
+    replacement = []
+    for row in table.to_pylist():
+        bbox = dict(row[BBOX_COLUMN])
+        bbox["xmax"] = bbox["xmax"] + 1
+        replacement.append(bbox)
+    table = table.set_column(
+        bbox_index,
+        BBOX_COLUMN,
+        pa.array(replacement, type=table.schema.field(BBOX_COLUMN).type),
+    )
+    pq.write_table(table, parquet_path)
+    _refresh_manifest_entry(tmp_path, DEFAULT_GEOPARQUET_RELATIVE_PATH)
+
+    result = validate_output_bundle(tmp_path)
+
+    assert result.status == FAILED
+    assert "geoparquet_bbox_point_mismatch" in {error.code for error in result.errors}
 
 
 def test_nullable_gbif_and_obis_source_fields_are_accepted(tmp_path: Path) -> None:

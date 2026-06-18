@@ -2,7 +2,7 @@
 
 Status: Accepted MVP plan
 
-Last updated: 2026-06-13
+Last updated: 2026-06-18
 
 ## Purpose
 
@@ -25,7 +25,8 @@ The MVP includes:
 - A Python core library for parsing DwC-A archives, normalizing occurrence records and writing output bundles.
 - A CLI for repeatable local conversion and validation.
 - GeoParquet, FlatGeobuf, JSON metadata and CSV rejection reports as the initial output formats.
-- A thin static MapLibre viewer that reads `manifest.json`, metadata files and `exports/occurrences.fgb`.
+- A thin static MapLibre viewer that reads `manifest.json`, metadata files and
+  `exports/occurrences.fgb` when a FlatGeobuf layer is generated.
 - A primitive `tkinter` GUI that calls the same core conversion API as the CLI.
 - Documentation and sample runs using local DwC-A examples.
 
@@ -122,9 +123,9 @@ Accepted defaults:
   GeoParquet 1.1 outputs, write a covering bbox column by default so spatial
   readers can use Parquet statistics for row-group pruning.
 - Spatial layout: for large GeoParquet outputs, spatial sorting is default-on
-  and strategy-configurable. Start with a simple longitude/latitude or bbox
-  min-corner sort when that is the bounded local option; allow later Hilbert
-  sorting through DuckDB, geoparquet-io or an equivalent helper when available.
+  and strategy-configurable. The implemented MVP strategy streams records into
+  temporary coarse longitude/latitude grid buckets and writes buckets in stable
+  spatial order without calling `sorted(records)` on the full archive.
 - Validation: required baseline validation uses PyArrow. Optional
   GeoParquet-aware validation uses `geoparquet-io`, DuckDB and Pyogrio/GDAL
   when available. Missing optional validation tools should be reported as
@@ -149,28 +150,29 @@ Accepted large-archive pipeline direction:
 - This large-archive path remains file-based and must not introduce a required
   permanent database, API service, scheduler or cloud-specific runtime.
 
-Current implementation limitation:
+Current implementation:
 
-- Prompt 07's GeoParquet writer streams accepted normalized records into
-  PyArrow/Parquet row groups and does not use GeoPandas, but the current
-  parser and normalizer still materialize full record sets before writer
-  handoff in tests and future core conversion orchestration. End-to-end
-  chunked parser/normalizer/writer flow remains future work.
+- `stream_occurrence_row_batches` provides bounded occurrence row batches.
+- `normalize_occurrence_record_batch` normalizes each bounded batch.
+- GeoParquet-only large-output conversion streams accepted records through
+  parser, normalization, GeoParquet writing and rejected-report writing without
+  retaining full accepted or rejected tuples in `ConversionResult`.
+- The default FlatGeobuf path and combined FlatGeobuf+GeoParquet conversions
+  still use the existing FlatGeobuf writer handoff, which materializes its
+  accepted rows for the current GDAL/Pyogrio backend. Large-output conversion
+  claims therefore apply to GeoParquet-only large-output mode.
 
 Accepted large-output GeoParquet requirements:
 
-- GeoParquet 1.1 covering bbox column: default-on for large GeoParquet 1.1
-  outputs. Small fixtures and small local outputs may omit it until the
-  covering-bbox implementation exists, but large-output conversion must not
-  rely only on file-level bbox metadata.
+- GeoParquet 1.1 covering bbox column: implemented and default-on when
+  `GeoParquetWriterOptions.large_output_mode=True`. The `bbox` struct has
+  numeric `xmin`, `ymin`, `xmax` and `ymax` fields equal to point coordinates.
 - Spatial sorting: default-on for large GeoParquet outputs, with a
   configurable strategy. Sorting should be chosen to tighten row-group bboxes
   for spatial predicate pushdown.
-- Partitioned GeoParquet dataset output: optional large-dataset mode enabled by
-  configuration or threshold when a single `data/occurrences.parquet` file is
-  impractical for publishing, updating or querying. Candidate implementations
-  include `pyarrow.dataset.write_dataset`, partitioning by a useful attribute,
-  or coarse grid partitioning when spatial queries dominate.
+- Partitioned GeoParquet dataset output: deferred. The writer exposes
+  partitioned-output configuration fields and rejects enabled partitioned mode
+  with an actionable error until manifest and validator contracts are added.
 - Optional `geoparquet-io` or DuckDB as development/validation helpers, without making either a required runtime dependency for the baseline converter.
 
 ## Accepted GeoParquet Validation Toolchain
@@ -237,7 +239,8 @@ Implemented validation coverage:
 - required bundle JSON files and supported schema versions;
 - manifest file inventory, safe relative paths, byte sizes and SHA-256
   checksums;
-- required PyArrow checks for declared single-file GeoParquet outputs;
+- required PyArrow checks for declared single-file GeoParquet outputs,
+  including large-output `bbox` covering schema/content when present;
 - optional `geoparquet-io`, DuckDB and Pyogrio/GDAL checks when available;
 - dependency-dependent FlatGeobuf inspection through Pyogrio/GDAL;
 - row-count reconciliation across manifest, processing metadata, geospatial
@@ -253,8 +256,8 @@ Current limitations:
 
 - The validator covers the implemented single-file GeoParquet output
   `data/occurrences.parquet`. Partitioned GeoParquet dataset validation
-  remains future work for the large-archive Prompt 10b path if partitioned
-  output is implemented.
+  remains future work because partitioned output is deferred and rejected when
+  requested.
 - FlatGeobuf attribute-level `quality_flags` validation depends on readable
   geospatial table support. The current validator checks FlatGeobuf projection
   fields and counts through Pyogrio/GDAL when available.
@@ -543,7 +546,7 @@ Documents to create or update during the milestones:
 | DwC-A archives vary in delimiters, headers, extensions and metadata completeness. | Drive parsing through `meta.xml`, test against local examples and preserve diagnostics. |
 | Geospatial writer dependencies may behave differently across platforms. | Keep writer APIs isolated, add validation commands and document supported environments. |
 | Viewer requirements may expand before the converter contract is stable. | Keep the viewer manifest-driven and update `docs/output_format.md` before changing generated files. |
-| Large archives may expose memory or performance limits. | Implement the accepted chunked large-archive pipeline before claiming support for tens of millions of records. Use default-on large-output GeoParquet bbox covering and spatial sorting, and enable partitioned output by configuration or threshold when needed. |
+| Large archives may expose memory or performance limits. | Use the implemented GeoParquet-only large-output path for bounded parser/normalizer/writer handoff. Keep the current FlatGeobuf and combined-output materialization limit visible, and defer partitioned GeoParquet until the manifest and validator contract support it. |
 | Provenance can be lost during normalization. | Carry source file, row number, row identifier and source metadata through every stage. |
 
 ## Open Questions
@@ -552,7 +555,6 @@ No open questions remain for the accepted MVP plan.
 
 ## Immediate Next Actions
 
-1. Implement the core conversion API and CLI handoff that calls the parser,
-   normalizer, selected geospatial writers and bundle metadata writer.
-2. Plan the chunked large-archive pipeline before MVP hardening so the
-   converter does not lock in fully materialized parser/normalizer handoffs.
+1. Document the static viewer contract, including valid GeoParquet-only
+   bundles that have no FlatGeobuf map layer.
+2. Implement the static viewer against the manifest and viewer contract.

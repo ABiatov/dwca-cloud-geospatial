@@ -238,6 +238,20 @@ Expected result in the verified local stack: all bundle validation tests pass.
 The full suite may still include dependency-dependent skips from older writer
 tests when local GDAL cannot read GeoParquet.
 
+To verify Prompt 10b large GeoParquet behavior, use the same PyArrow-capable
+environment and run the writer, conversion and validation tests:
+
+```bash
+"${REPO}/.venv/bin/python" -m pytest \
+  "${REPO}/tests/test_geoparquet_writer.py" \
+  "${REPO}/tests/test_conversion.py" \
+  "${REPO}/tests/test_bundle_validation.py" -q
+```
+
+These tests cover GeoParquet-only large-output mode, chunked conversion,
+`bbox` covering column content, grid spatial ordering, streaming rejected
+reports and required PyArrow validation of bbox covering metadata.
+
 ## CLI Help
 
 After local installation, run:

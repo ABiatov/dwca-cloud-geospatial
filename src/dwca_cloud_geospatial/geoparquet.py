@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 import struct
+import tempfile
 from typing import Any
 
 from dwca_cloud_geospatial.normalization import NormalizedOccurrenceRecord
@@ -18,9 +19,11 @@ GEOPARQUET_CRS = "OGC:CRS84"
 GEOPARQUET_COMPRESSION = "zstd"
 GEOPARQUET_DEFAULT_ROW_GROUP_SIZE = 100_000
 GEOMETRY_COLUMN = "geometry"
+BBOX_COLUMN = "bbox"
 GEOMETRY_TYPE = "Point"
 GEOMETRY_ENCODING = "WKB"
 COORDINATE_ORDER = "longitude_latitude"
+SPATIAL_SORT_GRID = "grid"
 
 GEOPARQUET_ATTRIBUTE_COLUMNS: tuple[str, ...] = (
     "source_record_id",
@@ -74,6 +77,11 @@ GEOPARQUET_PROJECTION_COLUMNS: tuple[str, ...] = (
     *GEOPARQUET_ATTRIBUTE_COLUMNS,
     GEOMETRY_COLUMN,
 )
+GEOPARQUET_LARGE_PROJECTION_COLUMNS: tuple[str, ...] = (
+    *GEOPARQUET_ATTRIBUTE_COLUMNS,
+    BBOX_COLUMN,
+    GEOMETRY_COLUMN,
+)
 
 _STRING_COLUMNS = frozenset(
     column
@@ -122,6 +130,13 @@ class GeoParquetWriteResult:
     row_group_size: int
     compression: str
     geoparquet_version: str
+    large_output_mode: bool = False
+    covering_bbox_column: bool = False
+    spatial_sorting: bool = False
+    spatial_sort_strategy: str | None = None
+    partitioned_dataset: bool = False
+    partition_key: str | None = None
+    partition_threshold: int | None = None
 
 
 @dataclass(frozen=True)
@@ -131,6 +146,14 @@ class GeoParquetWriterOptions:
     relative_path: Path = DEFAULT_GEOPARQUET_RELATIVE_PATH
     row_group_size: int = GEOPARQUET_DEFAULT_ROW_GROUP_SIZE
     compression: str = GEOPARQUET_COMPRESSION
+    large_output_mode: bool = False
+    covering_bbox_column: bool | None = None
+    spatial_sorting: bool | None = None
+    spatial_sort_strategy: str = SPATIAL_SORT_GRID
+    spatial_sort_grid_degrees: float = 1.0
+    partitioned_dataset: bool = False
+    partition_key: str | None = None
+    partition_threshold: int | None = None
 
 
 def write_geoparquet_occurrences(
@@ -149,6 +172,13 @@ def write_geoparquet_occurrences(
     writer_options = options or GeoParquetWriterOptions()
     if writer_options.row_group_size <= 0:
         raise ValueError("GeoParquet row_group_size must be positive.")
+    if writer_options.spatial_sort_grid_degrees <= 0:
+        raise ValueError("GeoParquet spatial_sort_grid_degrees must be positive.")
+    if writer_options.partitioned_dataset:
+        raise ValueError(
+            "Partitioned GeoParquet dataset output is not implemented yet; "
+            "write a single-file GeoParquet output or keep partitioned_dataset disabled."
+        )
 
     try:
         import pyarrow as pa
@@ -161,13 +191,20 @@ def write_geoparquet_occurrences(
     output_root = Path(output_directory)
     relative_path = writer_options.relative_path
     path = output_root / relative_path
+    covering_bbox = _covering_bbox_enabled(writer_options)
+    spatial_sorting = _spatial_sorting_enabled(writer_options)
+    if spatial_sorting and writer_options.spatial_sort_strategy != SPATIAL_SORT_GRID:
+        raise ValueError(
+            "Unsupported GeoParquet spatial sort strategy "
+            f"{writer_options.spatial_sort_strategy!r}; supported: {SPATIAL_SORT_GRID}."
+        )
 
     writer = None
     bounds: Bounds | None = None
     record_count = 0
     rows: list[MappingRow] = []
     geometry_wkb: list[bytes] = []
-    schema = _arrow_schema(pa)
+    schema = _arrow_schema(pa, covering_bbox=covering_bbox)
 
     def flush() -> None:
         nonlocal writer
@@ -182,14 +219,23 @@ def write_geoparquet_occurrences(
                 write_statistics=True,
                 use_dictionary=True,
             )
-        table = _arrow_table(pa, rows=rows, geometry_wkb=geometry_wkb, schema=schema)
+        table = _arrow_table(
+            pa,
+            rows=rows,
+            geometry_wkb=geometry_wkb,
+            schema=schema,
+            covering_bbox=covering_bbox,
+        )
         writer.write_table(table, row_group_size=writer_options.row_group_size)
         rows.clear()
         geometry_wkb.clear()
 
     try:
-        for record in records:
-            row = project_geoparquet_record(record)
+        if spatial_sorting:
+            row_iterable = _spatially_sorted_rows(records, writer_options)
+        else:
+            row_iterable = (project_geoparquet_record(record) for record in records)
+        for row in row_iterable:
             rows.append(row)
             geometry_wkb.append(
                 _point_wkb(row["decimal_longitude"], row["decimal_latitude"])
@@ -210,7 +256,12 @@ def write_geoparquet_occurrences(
         if writer is None:
             raise AssertionError("GeoParquet writer was not initialized.")
         writer.add_key_value_metadata(
-            {"geo": json.dumps(_geo_metadata(bounds), separators=(",", ":"))}
+            {
+                "geo": json.dumps(
+                    _geo_metadata(bounds, covering_bbox=covering_bbox),
+                    separators=(",", ":"),
+                )
+            }
         )
     finally:
         if writer is not None:
@@ -220,7 +271,7 @@ def write_geoparquet_occurrences(
         path=path,
         relative_path=relative_path,
         record_count=record_count,
-        columns=GEOPARQUET_PROJECTION_COLUMNS,
+        columns=_projection_columns(covering_bbox),
         geometry_column=GEOMETRY_COLUMN,
         geometry_type=GEOMETRY_TYPE,
         geometry_encoding=GEOMETRY_ENCODING,
@@ -230,6 +281,15 @@ def write_geoparquet_occurrences(
         row_group_size=writer_options.row_group_size,
         compression=writer_options.compression,
         geoparquet_version=GEOPARQUET_VERSION,
+        large_output_mode=writer_options.large_output_mode,
+        covering_bbox_column=covering_bbox,
+        spatial_sorting=spatial_sorting,
+        spatial_sort_strategy=writer_options.spatial_sort_strategy
+        if spatial_sorting
+        else None,
+        partitioned_dataset=False,
+        partition_key=writer_options.partition_key,
+        partition_threshold=writer_options.partition_threshold,
     )
 
 
@@ -246,16 +306,42 @@ def _arrow_table(
     rows: Sequence[MappingRow],
     geometry_wkb: Sequence[bytes],
     schema: Any,
+    covering_bbox: bool,
 ) -> Any:
     data: dict[str, list[Any]] = {
         column: [row[column] for row in rows] for column in GEOPARQUET_ATTRIBUTE_COLUMNS
     }
+    if covering_bbox:
+        data[BBOX_COLUMN] = [
+            {
+                "xmin": row["decimal_longitude"],
+                "ymin": row["decimal_latitude"],
+                "xmax": row["decimal_longitude"],
+                "ymax": row["decimal_latitude"],
+            }
+            for row in rows
+        ]
     data[GEOMETRY_COLUMN] = list(geometry_wkb)
     return pa.Table.from_pydict(data, schema=schema)
 
 
-def _arrow_schema(pa: Any) -> Any:
+def _arrow_schema(pa: Any, *, covering_bbox: bool = False) -> Any:
     fields = [_arrow_field(pa, column) for column in GEOPARQUET_ATTRIBUTE_COLUMNS]
+    if covering_bbox:
+        fields.append(
+            pa.field(
+                BBOX_COLUMN,
+                pa.struct(
+                    [
+                        pa.field("xmin", pa.float64(), nullable=False),
+                        pa.field("ymin", pa.float64(), nullable=False),
+                        pa.field("xmax", pa.float64(), nullable=False),
+                        pa.field("ymax", pa.float64(), nullable=False),
+                    ]
+                ),
+                nullable=False,
+            )
+        )
     fields.append(pa.field(GEOMETRY_COLUMN, pa.binary(), nullable=False))
     return pa.schema(fields)
 
@@ -295,20 +381,83 @@ def _extend_bounds(
     )
 
 
-def _geo_metadata(bounds: Bounds) -> dict[str, Any]:
+def _geo_metadata(bounds: Bounds, *, covering_bbox: bool = False) -> dict[str, Any]:
+    geometry_metadata = {
+        "encoding": GEOMETRY_ENCODING,
+        "geometry_types": [GEOMETRY_TYPE],
+        "crs": _ogc_crs84_projjson(),
+        "edges": "planar",
+        "bbox": list(bounds),
+    }
+    if covering_bbox:
+        geometry_metadata["covering"] = {
+            "bbox": {
+                "xmin": [BBOX_COLUMN, "xmin"],
+                "ymin": [BBOX_COLUMN, "ymin"],
+                "xmax": [BBOX_COLUMN, "xmax"],
+                "ymax": [BBOX_COLUMN, "ymax"],
+            }
+        }
     return {
         "version": GEOPARQUET_VERSION,
         "primary_column": GEOMETRY_COLUMN,
-        "columns": {
-            GEOMETRY_COLUMN: {
-                "encoding": GEOMETRY_ENCODING,
-                "geometry_types": [GEOMETRY_TYPE],
-                "crs": _ogc_crs84_projjson(),
-                "edges": "planar",
-                "bbox": list(bounds),
-            }
-        },
+        "columns": {GEOMETRY_COLUMN: geometry_metadata},
     }
+
+
+def _projection_columns(covering_bbox: bool) -> tuple[str, ...]:
+    if covering_bbox:
+        return GEOPARQUET_LARGE_PROJECTION_COLUMNS
+    return GEOPARQUET_PROJECTION_COLUMNS
+
+
+def _covering_bbox_enabled(options: GeoParquetWriterOptions) -> bool:
+    if options.covering_bbox_column is not None:
+        return options.covering_bbox_column
+    return options.large_output_mode
+
+
+def _spatial_sorting_enabled(options: GeoParquetWriterOptions) -> bool:
+    if options.spatial_sorting is not None:
+        return options.spatial_sorting
+    return options.large_output_mode
+
+
+def _spatially_sorted_rows(
+    records: Iterable[NormalizedOccurrenceRecord],
+    options: GeoParquetWriterOptions,
+) -> Iterable[MappingRow]:
+    with tempfile.TemporaryDirectory(prefix="dwca-geoparquet-grid-") as temp_dir:
+        bucket_paths: dict[tuple[int, int], Path] = {}
+        handles: dict[tuple[int, int], Any] = {}
+        try:
+            for record in records:
+                row = project_geoparquet_record(record)
+                bucket = _grid_bucket(
+                    row["decimal_longitude"],
+                    row["decimal_latitude"],
+                    options.spatial_sort_grid_degrees,
+                )
+                path = bucket_paths.setdefault(
+                    bucket, Path(temp_dir) / f"bucket_{bucket[0]}_{bucket[1]}.jsonl"
+                )
+                handle = handles.get(bucket)
+                if handle is None:
+                    handle = path.open("a", encoding="utf-8")
+                    handles[bucket] = handle
+                handle.write(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n")
+        finally:
+            for handle in handles.values():
+                handle.close()
+
+        for bucket in sorted(bucket_paths):
+            with bucket_paths[bucket].open(encoding="utf-8") as file_obj:
+                for line in file_obj:
+                    yield json.loads(line)
+
+
+def _grid_bucket(longitude: float, latitude: float, degrees: float) -> tuple[int, int]:
+    return (int((longitude + 180.0) // degrees), int((latitude + 90.0) // degrees))
 
 
 def _ogc_crs84_projjson() -> dict[str, Any]:

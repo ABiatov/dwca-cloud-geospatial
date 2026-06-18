@@ -67,8 +67,23 @@ DwC-A field-level defaults are part of the archive schema and should be applied 
 ## Resolved By Accepted Docs
 
 - Baseline parsing belongs in the project-owned Python core library layer. `docs/development_plan.md` M1 requires safe archive inspection, a `meta.xml` parser, occurrence core detection, chunked row reading, metadata file discovery and parser diagnostics. Prompt 08 implemented EML extraction in the output bundle source metadata writer by reading the declared metadata file when safely available. ADR-001 requires CLI, GUI and future integrations to call the same core conversion APIs.
-- The Prompt 03 row reader API is `dwca_cloud_geospatial.occurrence.read_occurrence_rows(path)`. It returns `OccurrenceReadResult` with `OccurrenceSourceRecord` entries for normalization.
-- The Prompt 04 normalization API is `dwca_cloud_geospatial.normalization.normalize_occurrence_records(records)`. It consumes `OccurrenceSourceRecord.value_for_term(term)`, returns `OccurrenceNormalizationResult`, and separates accepted `NormalizedOccurrenceRecord` values from `RejectedOccurrenceRecord` values.
+- The collected Prompt 03 row reader API is
+  `dwca_cloud_geospatial.occurrence.read_occurrence_rows(path)`. It returns
+  `OccurrenceReadResult` with `OccurrenceSourceRecord` entries for small tests
+  and compatibility callers.
+- Prompt 10b added
+  `dwca_cloud_geospatial.occurrence.stream_occurrence_row_batches(path,
+  batch_size=...)`, `OccurrenceRowStream` and `OccurrenceRowBatch` for
+  bounded large-output conversion.
+- The Prompt 04 normalization API is
+  `dwca_cloud_geospatial.normalization.normalize_occurrence_records(records)`.
+  It consumes `OccurrenceSourceRecord.value_for_term(term)`, returns
+  `OccurrenceNormalizationResult`, and separates accepted
+  `NormalizedOccurrenceRecord` values from `RejectedOccurrenceRecord` values.
+- Prompt 10b added
+  `dwca_cloud_geospatial.normalization.normalize_occurrence_record_batch`
+  for chunked handoff; callers aggregate counts and warning rates across
+  batches before metadata writing.
 - Output provenance must include `source_record_id`, `source_file` and `source_row_number`, per `docs/development_plan.md` M2 and `docs/output_format.md`.
 - `source_row_number` is the physical 1-based row number in the source data file, including skipped header rows. `source_data_row_number` is the logical 1-based data-record number after declared header rows when available. Diagnostics and rejection reports should include both values where practical.
 - `meta.xml` field defaults are applied only when the declared field has no source column index or the source column is not present in the row shape; they are not used to replace explicit empty strings or invalid source values in present columns.

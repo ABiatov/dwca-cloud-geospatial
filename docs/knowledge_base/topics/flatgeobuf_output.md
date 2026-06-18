@@ -40,7 +40,9 @@ Accepted and planned output roles:
 - FlatGeobuf can be an exchange or viewer data layer.
 - PMTiles can be the optimized map tile layer for larger browser maps in MVP+.
 
-Accepted MVP override: FlatGeobuf is the default viewer/exchange output, not optional, unless the user explicitly selects a different documented output mode.
+Accepted MVP override: FlatGeobuf is the default viewer/exchange output when
+the user does not choose another format. It is omitted from explicit
+GeoParquet-only bundles, including GeoParquet large-output bundles.
 
 ## Resolved By Accepted Docs
 

@@ -40,7 +40,8 @@ GeoParquet file while preserving project fields and provenance.
 11. For large GeoParquet outputs, apply a default-on spatial sort using the
     configured strategy so row-group bboxes stay useful for predicate pushdown.
 12. Keep partitioned GeoParquet dataset output as an explicit large-dataset
-    mode enabled by configuration or threshold.
+    mode enabled by configuration or threshold; reject it until the manifest
+    and validator contracts support partition file inventories.
 13. Validate output with required PyArrow checks and optional GeoParquet-aware
     tools when installed, preferring `geoparquet-io`, then DuckDB, then
     Pyogrio/GDAL as a best-effort reader check.
@@ -57,7 +58,8 @@ GeoParquet file while preserving project fields and provenance.
 - Publishing version: GeoParquet 1.1 unless a later accepted decision chooses 2.0.
 - Row group size: default around 100,000 rows.
 - Large-output bbox covering: default-on for GeoParquet 1.1.
-- Large-output spatial sorting: default-on, strategy configurable.
+- Large-output spatial sorting: default-on, strategy configurable. The
+  implemented bounded strategy is `grid`.
 - Partitioned dataset output: optional large-dataset mode by configuration or
   threshold.
 
