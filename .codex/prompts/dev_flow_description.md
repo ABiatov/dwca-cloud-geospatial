@@ -69,4 +69,4 @@ At the end of each prompt:
 
 ## Current next work item
 
-`11_viewer_contract.md`
+`12_static_viewer.md`

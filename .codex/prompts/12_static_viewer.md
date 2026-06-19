@@ -18,6 +18,17 @@
 - Prompts `01` through `11`, including `10b` and `10c`
 - Latest session logs for prompts `01` through `11`, including `10b` and `10c`
   when present
+- Prompt 11 accepted viewer contract: `docs/viewer_contract.md` is the
+  canonical MVP static viewer contract. It accepts FlatGeobuf point layers as
+  the MVP browser map source, treats persistent GeoPackage artifacts as
+  inventory/download metadata only, and treats GeoParquet-only bundles as a
+  valid no-FlatGeobuf/no-map-layer state unless a later contract explicitly
+  adds browser GeoParquet loading.
+- Prompt 11 viewer-contract fixtures:
+  `tests/fixtures/output_bundles/viewer_contract/flatgeobuf_with_geopackage_manifest.json`
+  and
+  `tests/fixtures/output_bundles/viewer_contract/geoparquet_only_manifest.json`.
+  These are manifest-semantics fixtures, not complete output bundles.
 - Current sample output bundle generation path.
 - Prompt 10 sample bundle generation path: use
   `dwca-cloud-geospatial convert <archive> <output>` for default
@@ -91,10 +102,16 @@ Implement the minimal static MapLibre viewer for generated MVP bundles.
   `docs/viewer_contract.md` without attempting unsupported browser loading.
 - Handle valid bundles that do not include `data/occurrences.fgb` without
   crashing.
+- For GeoParquet-only bundles, load and display manifest/source/processing
+  metadata, generated-file inventory, counts and processing warnings, then
+  show the accepted no-map-layer state. Do not attempt browser GeoParquet
+  loading unless `docs/viewer_contract.md` is deliberately updated first.
 - Show dataset provenance fields when available.
 - Show feature details for viewer-required fields.
 - Implement browser-side filters for fields present in the bundle: text contains search for `scientific_name`, categorical filters, year filtering and show/hide records with `quality_flags`.
-- Do not use substring matching for individual quality flag codes.
+- Split nullable `quality_flags` on `|` and match exact tokens. Prefer
+  `has_quality_flags` for flagged/unflagged controls when present; do not use
+  substring matching for individual quality flag codes.
 - Omit absent filter fields from the UI without error.
 - Avoid live GBIF/OBIS API calls.
 - Add static viewer smoke tests or browser checks where practical in the existing toolchain.

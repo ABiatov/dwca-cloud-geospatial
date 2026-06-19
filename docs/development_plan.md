@@ -486,6 +486,10 @@ Deliverables:
 - Static viewer files.
 - Manifest-driven dataset loading.
 - FlatGeobuf point layer display.
+- Graceful no-map-layer handling for valid GeoParquet-only bundles that omit
+  `data/occurrences.fgb`.
+- GeoPackage artifact display as retained output metadata/download, not as the
+  MVP browser map layer.
 - Dataset provenance panel.
 - Feature details panel for viewer-required fields.
 - MVP browser-side filters for `scientific_name`, `kingdom`, `event_year`, `basis_of_record`, `iucn_red_list_category` and `quality_flags` where those fields are present.
@@ -493,9 +497,14 @@ Deliverables:
 Acceptance criteria:
 
 - The viewer opens a generated sample bundle from static files.
+- GeoParquet-only bundles without FlatGeobuf display metadata/provenance and
+  a clear no-map-layer state instead of failing.
 - Missing optional metadata is handled gracefully.
 - Missing filter fields are omitted from the viewer UI without error.
 - The viewer supports text contains search for `scientific_name`, select/dropdown filters for categorical fields, year filtering and a show/hide control for records with quality flags where supported by the bundle.
+- Quality flag filters split nullable `quality_flags` on `|` and match exact
+  tokens, using `has_quality_flags` when present for flagged/unflagged
+  controls.
 - No live GBIF or OBIS API access is required.
 
 ### M6: Primitive GUI
@@ -565,6 +574,7 @@ No open questions remain for the accepted MVP plan.
 
 ## Immediate Next Actions
 
-1. Document the static viewer contract, including valid GeoParquet-only
-   bundles that have no FlatGeobuf map layer.
-2. Implement the static viewer against the manifest and viewer contract.
+1. Implement the static viewer against `docs/viewer_contract.md`.
+2. Preserve the accepted no-FlatGeobuf behavior for GeoParquet-only bundles
+   and artifact-only handling for `data/occurrences.gpkg` during viewer
+   implementation.

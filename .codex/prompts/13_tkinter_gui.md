@@ -19,6 +19,19 @@
 - Latest session logs for prompts `01` through `12`, including `10b` and `10c`
   when present
 - Current core conversion API, CLI and viewer launch instructions.
+- Prompt 11 accepted viewer contract: `docs/viewer_contract.md` is the
+  canonical MVP static viewer contract. GUI viewer instructions should not
+  imply that every valid bundle has a browser map layer: FlatGeobuf bundles
+  use `data/occurrences.fgb` as the MVP map source, persistent
+  `data/occurrences.gpkg` is artifact/download metadata only, and
+  GeoParquet-only bundles are valid but open in the viewer as a
+  no-FlatGeobuf/no-map-layer metadata/provenance state.
+- Prompt 11 viewer-contract fixtures for downstream smoke/context checks:
+  `tests/fixtures/output_bundles/viewer_contract/flatgeobuf_with_geopackage_manifest.json`
+  and
+  `tests/fixtures/output_bundles/viewer_contract/geoparquet_only_manifest.json`
+  are hand-authored manifest-semantics fixtures, not complete generated
+  bundles.
 - Prompt 10 core conversion API:
   `dwca_cloud_geospatial.conversion.convert_dwca_archive`,
   `ConversionOptions`, `ConversionResult`, `ConversionError`,
@@ -101,7 +114,10 @@ Implement a primitive `tkinter` desktop entry point for non-CLI users while reus
   returns them.
 - When exposing validation in the GUI, display required validation errors
   separately from dependency-dependent skipped checks and warnings.
-- Provide a way to open the generated output directory or show viewer instructions.
+- Provide a way to open the generated output directory or show viewer
+  instructions. Viewer guidance must distinguish FlatGeobuf bundles with a map
+  layer from GeoParquet-only bundles that load metadata/provenance but no MVP
+  map layer.
 - Add tests for GUI-adjacent logic where possible without requiring an interactive display.
 - Document GUI usage in `docs/converter.md` or another accepted docs path.
 

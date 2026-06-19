@@ -28,6 +28,11 @@ that streams occurrence batches, writes a GeoParquet `bbox` covering column
 and applies bounded grid spatial ordering.
 
 The accepted MVP development plan is documented in [docs/development_plan.md](docs/development_plan.md).
+The accepted static viewer contract is documented in
+[docs/viewer_contract.md](docs/viewer_contract.md): MVP map display uses
+declared FlatGeobuf point layers, GeoPackage artifacts are retained for
+metadata/download, and GeoParquet-only bundles remain valid with a graceful
+no-map-layer metadata/provenance state.
 
 ## Developer Quick Start
 

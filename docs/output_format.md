@@ -749,7 +749,7 @@ The viewer must support filters for these fields when present:
 | `event_year` | numeric range or discrete values |
 | `basis_of_record` | categorical |
 | `iucn_red_list_category` | categorical |
-| `quality_flags` | show/hide records with flags; exact token matching when filtering by flag code is added |
+| `quality_flags` | show/hide records with flags; split on `\|` and use exact-token matching for flag-code filters |
 
 The viewer must omit absent generated-bundle fields from the filter UI without error. Missing DOI, citation, GBIF or OBIS metadata should be shown as absent, not as errors.
 

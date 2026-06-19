@@ -175,6 +175,26 @@
   describing the GeoPackage staging and GDAL/OGR helper strategy, validation
   checks for GeoPackage and FlatGeobuf count reconciliation, and dependency
   setup for required helper tooling installed into `.venv`.
+- Prompt 11 viewer contract to preserve in final docs:
+  `docs/viewer_contract.md` is the accepted MVP static viewer contract.
+  The MVP browser map source is declared FlatGeobuf point layer
+  `data/occurrences.fgb`; `data/occurrences.gpkg` is shown as a retained
+  artifact/download metadata item, not as a browser map layer; explicit
+  GeoParquet-only bundles remain valid and should show metadata/provenance
+  plus the no-FlatGeobuf/no-map-layer state rather than failing; browser
+  GeoParquet loading and PMTiles are not accepted MVP viewer requirements.
+- Prompt 11 filter semantics to preserve: MVP filters are
+  `scientific_name`, `kingdom`, `event_year`, `basis_of_record`,
+  `iucn_red_list_category` and `quality_flags` when present. `quality_flags`
+  must be split on `|` and matched as exact tokens, with `has_quality_flags`
+  used for flagged/unflagged controls when available. Optional absent fields
+  are omitted from viewer UI without errors.
+- Prompt 11 viewer-contract fixtures:
+  `tests/fixtures/output_bundles/viewer_contract/flatgeobuf_with_geopackage_manifest.json`
+  and
+  `tests/fixtures/output_bundles/viewer_contract/geoparquet_only_manifest.json`
+  are hand-authored manifest-semantics fixtures for viewer contract tests, not
+  complete generated output bundles.
 - Post-Prompt-03 handoff clarification: the Prompt 03 `Open Issues Affecting
   Normalization` were confirmed to be scope boundaries, not blockers before
   Prompt 04. Final docs should preserve that split: source row reading in
