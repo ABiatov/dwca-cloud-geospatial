@@ -219,6 +219,19 @@ Known details:
 The normalized output field is `class`. Viewer code must not look for the
 Python implementation attribute name `class_`.
 
+When `source_record_id` is present, the current viewer derives an additional
+`source record URL` detail row after it. The link target is:
+
+```text
+https://www.gbif.org/occurrence/{source_record_id}
+```
+
+The link opens in a new browser tab with `target="_blank"`.
+
+Selected features should be visibly highlighted on the map. Point colors may
+use `kingdom` to improve scanning, with a high-contrast fallback when kingdom
+is absent or not in the known color set.
+
 ## MVP Filters
 
 The viewer should create filters only for fields present in
@@ -310,6 +323,33 @@ limited-map or unsupported-size message instead of failing the whole bundle.
 Basemap tiles, if used by the implementation, must be optional to bundle
 inspection. Lack of a basemap must not prevent loading the bundle metadata or
 declared occurrence layer.
+
+## Implementation Files
+
+The MVP static viewer implementation lives under:
+
+```text
+viewer/
+  index.html
+  styles.css
+  app.js
+  README.md
+```
+
+`dwca-cloud-geospatial convert` copies these files into each generated bundle
+root. Opening the copied `index.html` from a static HTTP server reads the
+neighboring `manifest.json`. The browser entry point also accepts
+`?bundle=<bundle-root-url>` or `?manifest=<manifest-json-url>` when the shared
+source viewer under `viewer/` is served separately.
+
+The current implementation loads MapLibre GL JS and FlatGeobuf JavaScript from
+public CDN URLs declared in `viewer/index.html`. These are frontend static
+assets only; the viewer still does not call GBIF, OBIS or a project backend.
+The map style uses the public OpenStreetMap raster tile endpoint
+`https://tile.openstreetmap.org/{z}/{x}/{y}.png` with visible attribution as
+the default basemap. For fully offline static hosting, mirror those
+JavaScript/CSS assets, configure an offline or self-hosted basemap and update
+`viewer/index.html` / `viewer/app.js`.
 
 ## Contract Fixtures
 

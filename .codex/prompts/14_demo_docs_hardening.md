@@ -189,6 +189,35 @@
   must be split on `|` and matched as exact tokens, with `has_quality_flags`
   used for flagged/unflagged controls when available. Optional absent fields
   are omitted from viewer UI without errors.
+- Prompt 12 static viewer implementation to preserve in final docs:
+  `viewer/` contains the source `index.html`, `styles.css`, `app.js` and
+  `README.md`, and `dwca-cloud-geospatial convert` copies those files into
+  each generated output bundle root. Local launch serves the output parent and
+  opens the copied viewer directly, for example
+  `python -m http.server 8000 --directory "${REPO}"` and
+  `http://localhost:8000/scratch/sample-bundle/index.html`. The shared source
+  viewer still accepts `?bundle=<bundle-root-url>` and
+  `?manifest=<manifest-json-url>`.
+- Prompt 12 frontend dependency behavior to preserve: copied `index.html`
+  references MapLibre GL JS and FlatGeobuf JavaScript from public CDN URLs,
+  and uses OpenStreetMap raster tiles as the default basemap. These are
+  frontend static assets, not a backend service or live biodiversity-data API.
+  Fully offline hosting should mirror those assets or replace the basemap URL
+  and update the source/copy viewer files.
+- Prompt 12 static viewer interaction behavior to preserve: FlatGeobuf is
+  loaded from fetched bytes/`Uint8Array`; hidden no-map or empty-state
+  overlays must not cover an active map; selected features are highlighted on
+  the map; point color styling follows `kingdom`; and selected-record details
+  derive a clickable `source record URL` after `source_record_id` using
+  `https://www.gbif.org/occurrence/{source_record_id}` with `target="_blank"`.
+- Prompt 12 verification to preserve:
+  `.venv/bin/python -m pytest tests/test_static_viewer.py -q` covers static
+  viewer smoke inputs for generated FlatGeobuf-with-GeoPackage and
+  GeoParquet-only bundles, no-map-layer behavior, artifact-only GeoPackage and
+  GeoParquet handling, exact-token `quality_flags` filtering, copied viewer
+  files, OpenStreetMap basemap wiring, derived source-record links, kingdom
+  colors, selected-feature highlighting, hidden empty-state behavior and
+  FlatGeobuf `Uint8Array` loading.
 - Prompt 11 viewer-contract fixtures:
   `tests/fixtures/output_bundles/viewer_contract/flatgeobuf_with_geopackage_manifest.json`
   and

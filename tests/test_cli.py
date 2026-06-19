@@ -85,7 +85,9 @@ def test_convert_command_writes_default_flatgeobuf_bundle(
     assert exit_code == 0
     assert "Formats: flatgeobuf" in captured.out
     assert "Accepted records: 1" in captured.out
+    assert "Viewer:" in captured.out
     assert (output / "manifest.json").exists()
+    assert (output / "index.html").exists()
     assert (output / "data" / "occurrences.fgb").exists()
 
 
@@ -146,6 +148,7 @@ def test_convert_command_overwrite_replaces_existing_output(
     assert "Formats: geoparquet" in captured.out
     assert not (output / "sentinel.txt").exists()
     assert (output / "manifest.json").exists()
+    assert (output / "index.html").exists()
     assert (output / "data" / "occurrences.parquet").exists()
 
 

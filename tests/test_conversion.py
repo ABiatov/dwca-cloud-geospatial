@@ -70,6 +70,10 @@ def test_core_conversion_writes_default_flatgeobuf_bundle(tmp_path: Path) -> Non
     assert result.flatgeobuf_result is not None
     assert result.geoparquet_result is None
     assert (tmp_path / "bundle" / MANIFEST_RELATIVE_PATH).exists()
+    assert (tmp_path / "bundle" / "index.html").exists()
+    assert (tmp_path / "bundle" / "styles.css").exists()
+    assert (tmp_path / "bundle" / "app.js").exists()
+    assert (tmp_path / "bundle" / "README.md").exists()
     assert (tmp_path / "bundle" / DEFAULT_FLATGEOBUF_RELATIVE_PATH).exists()
     assert not (tmp_path / "bundle" / DEFAULT_GEOPARQUET_RELATIVE_PATH).exists()
 
@@ -81,6 +85,7 @@ def test_core_conversion_writes_default_flatgeobuf_bundle(tmp_path: Path) -> Non
         "metadata/processing.json",
         "data/occurrences.fgb",
     ]
+    assert "index.html" not in {entry["path"] for entry in manifest["files"]}
 
 
 def test_core_conversion_supports_explicit_geoparquet_output(tmp_path: Path) -> None:
@@ -95,6 +100,7 @@ def test_core_conversion_supports_explicit_geoparquet_output(tmp_path: Path) -> 
     assert result.output_formats == ("geoparquet",)
     assert result.flatgeobuf_result is None
     assert result.geoparquet_result is not None
+    assert (tmp_path / "bundle" / "index.html").exists()
     assert (tmp_path / "bundle" / DEFAULT_GEOPARQUET_RELATIVE_PATH).exists()
     assert not (tmp_path / "bundle" / DEFAULT_FLATGEOBUF_RELATIVE_PATH).exists()
 
@@ -210,6 +216,7 @@ def test_default_flatgeobuf_conversion_uses_geopackage_staging_and_streamed_reje
     assert result.flatgeobuf_result.staging_result is not None
     assert (tmp_path / "bundle" / DEFAULT_GEOPACKAGE_RELATIVE_PATH).exists()
     assert (tmp_path / "bundle" / DEFAULT_FLATGEOBUF_RELATIVE_PATH).exists()
+    assert (tmp_path / "bundle" / "index.html").exists()
     assert result.metadata_result.rejected_records_path is not None
     assert result.metadata_result.rejected_records_path.exists()
 

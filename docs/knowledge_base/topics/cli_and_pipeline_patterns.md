@@ -32,10 +32,9 @@ Accepted MVP command shape after Prompt 10:
 - `convert <archive> <output> --overwrite`: replace an existing output path.
 - `validate [--json] <bundle>`: validate output bundle, GeoParquet,
   FlatGeobuf, manifest, metadata and diagnostics.
-
-Candidate future command:
-
-- `viewer <bundle>` or `build-viewer <bundle>`: generate or launch static viewer assets if not included in `convert`.
+- `convert` also copies static viewer files into the output root as
+  `index.html`, `styles.css`, `app.js` and `README.md`, then reports the
+  copied viewer entry path.
 
 ## Implementation Shape
 

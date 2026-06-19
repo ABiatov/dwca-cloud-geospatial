@@ -57,6 +57,7 @@ from dwca_cloud_geospatial.occurrence import (
 FLATGEOBUF_FORMAT = "flatgeobuf"
 GEOPARQUET_FORMAT = "geoparquet"
 SUPPORTED_OUTPUT_FORMATS = (FLATGEOBUF_FORMAT, GEOPARQUET_FORMAT)
+VIEWER_ASSET_FILENAMES = ("index.html", "styles.css", "app.js", "README.md")
 
 
 class ConversionError(RuntimeError):
@@ -172,6 +173,7 @@ def convert_dwca_archive(
             geoparquet_result=geoparquet_result,
             options=_bundle_options(conversion_options, output_formats=output_formats),
         )
+        _copy_static_viewer(output_root)
     except (FlatGeobufDependencyError, GeoParquetDependencyError) as exc:
         raise ConversionError(
             f"{exc} Install the documented optional dependencies for the selected output format.",
@@ -291,6 +293,7 @@ def _convert_dwca_archive_streaming_outputs(
             rejected_records_path=rejected_writer.written_path,
             options=_bundle_options(conversion_options, output_formats=output_formats),
         )
+        _copy_static_viewer(output_root)
     except (FlatGeobufDependencyError, GeoParquetDependencyError) as exc:
         raise ConversionError(
             f"{exc} Install the documented optional dependencies for the selected output format.",
@@ -465,6 +468,20 @@ def _prepare_output_path(output_root: Path, *, overwrite: bool) -> None:
         shutil.rmtree(output_root)
     else:
         output_root.unlink()
+
+
+def _copy_static_viewer(output_root: Path) -> None:
+    viewer_source = Path(__file__).resolve().parents[2] / "viewer"
+    if not viewer_source.is_dir():
+        raise ConversionError(
+            "Static viewer assets were not found in the repository viewer/ directory."
+        )
+
+    for filename in VIEWER_ASSET_FILENAMES:
+        source = viewer_source / filename
+        if not source.is_file():
+            raise ConversionError(f"Static viewer asset is missing: {source}")
+        shutil.copy2(source, output_root / filename)
 
 
 def _raise_for_occurrence_read_errors(occurrence_result: OccurrenceReadResult) -> None:

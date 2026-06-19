@@ -75,6 +75,19 @@ into `data/occurrences.gpkg`, then creates `data/occurrences.fgb` from the
 GeoPackage with `SPATIAL_INDEX=YES`. The GeoPackage remains in the bundle and
 is inventoried in `manifest.files`.
 
+Conversion also copies the static viewer files into the output directory:
+
+```text
+index.html
+styles.css
+app.js
+README.md
+```
+
+These viewer files are not listed in `manifest.files`; that inventory remains
+reserved for generated data, metadata and report artifacts. Opening
+`index.html` from a static HTTP server reads the neighboring `manifest.json`.
+
 Large GeoParquet output is enabled through `GeoParquetWriterOptions` on the
 core API. It keeps the CLI default unchanged and writes single-file
 GeoParquet with a `bbox` covering column, grid-based spatial ordering,
@@ -189,6 +202,10 @@ Default FlatGeobuf conversion writes:
 
 ```text
 output-bundle/
+  index.html
+  styles.css
+  app.js
+  README.md
   manifest.json
   metadata/
     source.json

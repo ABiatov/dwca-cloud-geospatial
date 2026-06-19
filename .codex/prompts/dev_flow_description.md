@@ -69,4 +69,4 @@ At the end of each prompt:
 
 ## Current next work item
 
-`12_static_viewer.md`
+`13_tkinter_gui.md`

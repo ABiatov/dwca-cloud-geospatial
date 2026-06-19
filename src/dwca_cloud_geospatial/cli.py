@@ -160,6 +160,7 @@ def _convert_archive(args: argparse.Namespace) -> int:
     print(f"Accepted records: {result.accepted_record_count}")
     print(f"Rejected records: {result.rejected_record_count}")
     print(f"Manifest: {result.metadata_result.manifest_path}")
+    print(f"Viewer: {result.output_directory / 'index.html'}")
     return 0
 
 

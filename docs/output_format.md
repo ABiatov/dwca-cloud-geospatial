@@ -16,6 +16,10 @@ Default output directory:
 
 ```text
 output/
+  index.html                    # static viewer entry point copied by convert
+  styles.css                    # static viewer style
+  app.js                        # static viewer behavior
+  README.md                     # static viewer launch notes
   manifest.json
   metadata/
     source.json
@@ -30,6 +34,9 @@ output/
 
 MVP files:
 
+- `index.html`, `styles.css`, `app.js` and `README.md`: static viewer files
+  copied into the bundle root by `convert`. These files are convenience
+  publishing assets and are not listed in `manifest.files`.
 - `manifest.json`: top-level discovery document for tools and the viewer.
 - `metadata/source.json`: source archive, DwC-A, GBIF and OBIS provenance when available.
 - `metadata/processing.json`: converter version, configuration, counts, warnings and validation summary.
@@ -50,7 +57,9 @@ When the user does not choose an explicit conversion format, the MVP converter s
 
 GeoParquet remains an MVP-supported output format for analytical workflows, but it should be generated only when the user explicitly selects it or when a documented command/config option requests a full multi-format bundle.
 
-Generated files must be listed in `manifest.files`. Files not generated for a conversion must not be listed there.
+Generated data, metadata and report files must be listed in `manifest.files`.
+Static viewer files copied into the bundle root are not data artifacts and are
+not listed in `manifest.files`.
 
 ## Versioning
 
@@ -739,6 +748,16 @@ The viewer must be able to show these feature fields in popups or a details pane
 | `source_row_number` |
 | `source_data_row_number` |
 | `quality_flags` |
+
+The current viewer also derives a display-only `source record URL` row from
+`source_record_id` when available, using
+`https://www.gbif.org/occurrence/{source_record_id}`. This derived link is not
+a generated occurrence column and is not required in FlatGeobuf or
+GeoParquet schemas.
+
+Map styling is viewer behavior, not output schema: the current viewer colors
+points by `kingdom` where available, uses a high-contrast fallback for missing
+or unknown kingdoms, and highlights the selected feature on the map.
 
 The viewer must support filters for these fields when present:
 

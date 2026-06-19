@@ -261,6 +261,53 @@ chunked conversion, `bbox` covering column content, grid spatial ordering,
 streaming rejected reports, GeoPackage/FlatGeobuf count reconciliation and
 required PyArrow validation of bbox covering metadata.
 
+To verify the static viewer smoke checks, run:
+
+```bash
+"${REPO}/.venv/bin/python" -m pytest "${REPO}/tests/test_static_viewer.py" -q
+```
+
+The static viewer source files live under:
+
+```text
+${REPO}/viewer/
+```
+
+`dwca-cloud-geospatial convert` copies those viewer files into each generated
+bundle root as `index.html`, `styles.css`, `app.js` and `README.md`.
+
+For a local browser check, create a bundle under the repository root and serve
+the repository as static files:
+
+```bash
+"${REPO}/.venv/bin/dwca-cloud-geospatial" convert \
+  "${REPO}/tests/fixtures/dwca/minimal_occurrence/normalization" \
+  "${REPO}/scratch/sample-bundle" \
+  --overwrite
+python -m http.server 8000 --directory "${REPO}"
+```
+
+Then open:
+
+```text
+http://localhost:8000/scratch/sample-bundle/index.html
+```
+
+The shared source viewer still supports the explicit bundle URL form when
+needed:
+
+```text
+http://localhost:8000/viewer/?bundle=../scratch/sample-bundle/
+```
+
+Use `--format geoparquet` to verify the accepted no-FlatGeobuf state. The
+viewer loads metadata, counts, processing warnings and artifact inventory for
+GeoParquet-only bundles, but it does not attempt browser GeoParquet loading.
+The viewer references MapLibre GL JS and FlatGeobuf JavaScript from public CDN
+URLs in `viewer/index.html` and OpenStreetMap raster tiles from
+`https://tile.openstreetmap.org/{z}/{x}/{y}.png` in `viewer/app.js`; mirror
+or replace those assets for fully offline static hosting.
+
 ## CLI Help
 
 After local installation, run:

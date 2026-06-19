@@ -21,25 +21,34 @@ Generate static viewer-facing files from converted occurrence data without addin
 ## Steps
 
 1. Start from validated geospatial occurrence output.
-2. For MVP map display, use `data/occurrences.fgb` when a FlatGeobuf layer
+2. Copy the static viewer source files into the output bundle root as
+   `index.html`, `styles.css`, `app.js` and `README.md`; keep these viewer
+   files out of `manifest.files`.
+3. For MVP map display, use `data/occurrences.fgb` when a FlatGeobuf layer
    is generated. GeoParquet-only bundles are valid without FlatGeobuf; handle
    them with the accepted no-map-layer behavior from `docs/viewer_contract.md`
    unless GeoParquet browser loading is accepted later. PMTiles is MVP+ and
    should be added only when requested by accepted docs or user scope.
-3. Generate bounds, center, layer metadata, and field list.
-4. Write a manifest JSON that declares all viewer-facing paths.
-5. Ensure paths are relative and static-host friendly.
-6. Keep basemap or external asset URLs explicit in viewer config.
-7. Use `has_quality_flags` when available for show/hide controls, and split
+4. Generate bounds, center, layer metadata, and field list.
+5. Write a manifest JSON that declares generated data, metadata and report
+   paths.
+6. Ensure paths are relative and static-host friendly.
+7. Keep basemap or external asset URLs explicit in viewer config.
+8. Use `has_quality_flags` when available for show/hide controls, and split
    nullable `quality_flags` on `|` for exact-token filtering.
-8. Add diagnostics for missing or skipped geometry.
-9. Test the generated manifest with the static viewer loader.
+9. Color points by `kingdom` where available and provide a high-contrast
+   selected-feature highlight.
+10. Add derived source-record links only from stable provenance fields, for
+   example `https://www.gbif.org/occurrence/{source_record_id}`.
+11. Add diagnostics for missing or skipped geometry.
+12. Test the generated manifest with the static viewer loader.
 
 ## Acceptance Evidence
 
 - Viewer can load from static files only.
 - Manifest references existing files.
 - Map layer bounds match generated data.
+- Copied `index.html` opens the neighboring `manifest.json`.
 - No permanent API, scheduler, database, or cloud-specific service is required.
 
 ## Related Topics

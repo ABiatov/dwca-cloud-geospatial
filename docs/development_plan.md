@@ -483,7 +483,8 @@ Goal: make generated bundles inspectable in a browser without a backend.
 Deliverables:
 
 - `docs/viewer_contract.md`.
-- Static viewer files.
+- Static viewer source files under `viewer/`, copied into each generated
+  bundle root by `convert`.
 - Manifest-driven dataset loading.
 - FlatGeobuf point layer display.
 - Graceful no-map-layer handling for valid GeoParquet-only bundles that omit
@@ -496,7 +497,9 @@ Deliverables:
 
 Acceptance criteria:
 
-- The viewer opens a generated sample bundle from static files.
+- The viewer opens a generated sample bundle from static files when the
+  output parent is served as a static root, for example
+  `http://localhost:8000/scratch/sample-bundle/index.html`.
 - GeoParquet-only bundles without FlatGeobuf display metadata/provenance and
   a clear no-map-layer state instead of failing.
 - Missing optional metadata is handled gracefully.
@@ -505,6 +508,9 @@ Acceptance criteria:
 - Quality flag filters split nullable `quality_flags` on `|` and match exact
   tokens, using `has_quality_flags` when present for flagged/unflagged
   controls.
+- The selected feature is highlighted on the map, point colors use `kingdom`
+  where available, and feature details include a derived GBIF occurrence link
+  when `source_record_id` is present.
 - No live GBIF or OBIS API access is required.
 
 ### M6: Primitive GUI
@@ -574,7 +580,6 @@ No open questions remain for the accepted MVP plan.
 
 ## Immediate Next Actions
 
-1. Implement the static viewer against `docs/viewer_contract.md`.
-2. Preserve the accepted no-FlatGeobuf behavior for GeoParquet-only bundles
-   and artifact-only handling for `data/occurrences.gpkg` during viewer
-   implementation.
+1. Implement the primitive `tkinter` GUI over the same core conversion API.
+2. Preserve the viewer launch guidance from `viewer/README.md` when adding GUI
+   instructions for opening or inspecting generated bundles.

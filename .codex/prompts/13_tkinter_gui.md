@@ -26,6 +26,33 @@
   `data/occurrences.gpkg` is artifact/download metadata only, and
   GeoParquet-only bundles are valid but open in the viewer as a
   no-FlatGeobuf/no-map-layer metadata/provenance state.
+- Prompt 12 static viewer implementation: static viewer source files live
+  under `viewer/` (`index.html`, `styles.css`, `app.js`, `README.md`) and
+  `dwca-cloud-geospatial convert` copies them into each generated output
+  bundle root. Local launch can serve the output parent and open the copied
+  viewer directly, for example
+  `python -m http.server 8000 --directory "${REPO}"` and
+  `http://localhost:8000/scratch/sample-bundle/index.html`. The shared source
+  viewer still accepts `?bundle=<bundle-root-url>` and
+  `?manifest=<manifest-json-url>`.
+- Prompt 12 frontend dependency behavior: `viewer/index.html` references
+  MapLibre GL JS and FlatGeobuf JavaScript from public CDN URLs, and the
+  viewer uses OpenStreetMap raster tiles as the default basemap. GUI guidance
+  may point users to `viewer/README.md`; it should not imply that the Python
+  GUI starts a backend service or bundles offline frontend assets.
+- Prompt 12 viewer behavior to preserve in GUI/docs handoff: FlatGeobuf is
+  loaded in the browser from fetched bytes/`Uint8Array`, no-map or empty-state
+  overlays must not cover an active map when hidden, feature details derive a
+  clickable `source record URL` after `source_record_id` using
+  `https://www.gbif.org/occurrence/{source_record_id}` with `target="_blank"`,
+  point colors are styled by `kingdom`, and the selected feature is
+  highlighted on the map.
+- Prompt 12 smoke tests: `tests/test_static_viewer.py` generates FlatGeobuf
+  and GeoParquet-only sample bundles, validates them, and checks viewer
+  no-map-layer, artifact-only, exact-token quality flag behavior, copied
+  viewer files, OpenStreetMap basemap wiring, derived source-record links,
+  kingdom colors, selected-feature highlighting, hidden empty-state behavior
+  and FlatGeobuf `Uint8Array` loading.
 - Prompt 11 viewer-contract fixtures for downstream smoke/context checks:
   `tests/fixtures/output_bundles/viewer_contract/flatgeobuf_with_geopackage_manifest.json`
   and
@@ -117,7 +144,8 @@ Implement a primitive `tkinter` desktop entry point for non-CLI users while reus
 - Provide a way to open the generated output directory or show viewer
   instructions. Viewer guidance must distinguish FlatGeobuf bundles with a map
   layer from GeoParquet-only bundles that load metadata/provenance but no MVP
-  map layer.
+  map layer, and should point at the copied `<output>/index.html` viewer entry
+  when referencing the static viewer.
 - Add tests for GUI-adjacent logic where possible without requiring an interactive display.
 - Document GUI usage in `docs/converter.md` or another accepted docs path.
 

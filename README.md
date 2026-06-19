@@ -65,6 +65,18 @@ The Python import package is `dwca_cloud_geospatial`; the console command is
 structure, `convert` writes local output bundles, and `validate` checks
 generated bundle structure and geospatial outputs.
 
+`convert` copies the minimal static viewer into each output bundle as
+`index.html`, `styles.css`, `app.js` and `README.md`. After generating a
+bundle, serve the repository or output parent as static files:
+
+```bash
+python -m http.server 8000 --directory "${REPO}"
+```
+
+```text
+http://localhost:8000/scratch/sample-bundle/index.html
+```
+
 More setup details are documented in [docs/developer_setup.md](docs/developer_setup.md).
 Converter usage is documented in [docs/converter.md](docs/converter.md).
 
@@ -77,7 +89,7 @@ Converter usage is documented in [docs/converter.md](docs/converter.md).
 - Bounded parser/normalizer/writer handoff for default FlatGeobuf staging and
   GeoParquet large-output bundles.
 - Metadata describing source files, processing parameters and generated outputs.
-- A minimal static MapLibre viewer.
+- A minimal static MapLibre viewer copied into each generated bundle.
 
 ## MVP+ Planned Outputs
 
