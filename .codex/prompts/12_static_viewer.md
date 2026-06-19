@@ -43,21 +43,20 @@
   include `large_indexed_flatgeobuf_write` with `stage="flatgeobuf_writer"`,
   `feature_count` and `estimated_spatial_index_bytes`.
 - Prompt 06 FlatGeobuf writer output contract: MVP bundles load
-  `exports/occurrences.fgb`, with required fields from
+  `data/occurrences.fgb`, with required fields from
   `FLATGEOBUF_PROJECTION_COLUMNS`, point geometry in longitude/latitude order,
   CRS assumption `OGC:CRS84`, nullable `quality_flags`, and
   `has_quality_flags`.
 - Prompt 10/10b GeoParquet-only bundle behavior: explicit GeoParquet
   conversion, including large-output mode, may produce a valid bundle without
-  `exports/occurrences.fgb`. If `docs/viewer_contract.md` does not accept
+  `data/occurrences.fgb`. If `docs/viewer_contract.md` does not accept
   GeoParquet browser loading, the viewer should handle this as a graceful
   no-map-layer state while still showing manifest, source and processing
   metadata.
-- Prompt 06 large-output behavior: generated FlatGeobuf files are indexed by
-  default unless conversion explicitly used `SPATIAL_INDEX=NO`. If processing
-  metadata exposes writer warning code `large_indexed_flatgeobuf_write`, the
-  viewer should treat it as a non-fatal processing warning, not as a data-load
-  error.
+- Prompt 10c FlatGeobuf behavior: generated FlatGeobuf files are indexed with
+  `SPATIAL_INDEX=YES`. If processing metadata exposes writer warning code
+  `large_indexed_flatgeobuf_write`, the viewer should treat it as a non-fatal
+  processing warning, not as a data-load error.
 - Prompt 04 normalized occurrence field names and rejection/count structures,
   especially `quality_flags`, `has_quality_flags`, `source_records`,
   `accepted_records` and `rejected_records`.
@@ -71,7 +70,7 @@
   consistently with `docs/viewer_contract.md`. The MVP map display may
   continue to use FlatGeobuf unless the viewer contract explicitly changes.
 - Prompt 10c optimized FlatGeobuf handoff when present: bundles may include
-  persistent `data/occurrences.gpkg` alongside `exports/occurrences.fgb`.
+  persistent `data/occurrences.gpkg` alongside `data/occurrences.fgb`.
   Unless `docs/viewer_contract.md` explicitly accepts browser loading from
   GeoPackage, treat the GeoPackage as a downloadable/source artifact or
   metadata item, not as the default map layer.
@@ -87,10 +86,10 @@ Implement the minimal static MapLibre viewer for generated MVP bundles.
   smoke inputs where practical.
 - Load a generated bundle from `manifest.json`.
 - Read `metadata/source.json` and `metadata/processing.json`.
-- Display `exports/occurrences.fgb` as a point layer.
+- Display `data/occurrences.fgb` as a point layer.
 - Preserve/display declared `data/occurrences.gpkg` metadata according to
   `docs/viewer_contract.md` without attempting unsupported browser loading.
-- Handle valid bundles that do not include `exports/occurrences.fgb` without
+- Handle valid bundles that do not include `data/occurrences.fgb` without
   crashing.
 - Show dataset provenance fields when available.
 - Show feature details for viewer-required fields.

@@ -23,7 +23,7 @@ Purpose: this directory contains ordered prompts for building the DwC-A to cloud
 3. `03_occurrence_parser.md`: stream or chunk occurrence core rows into structured source records.
 4. `04_occurrence_normalization.md`: map source records into normalized occurrence and rejection models.
 5. `05_quality_rules.md`: implement quality flags, conversion failure accounting and rejected-record behavior.
-6. `06_flatgeobuf_writer.md`: write the default `exports/occurrences.fgb` projection.
+6. `06_flatgeobuf_writer.md`: write the default `data/occurrences.fgb` projection.
 7. `07_geoparquet_writer.md`: write explicit GeoParquet output with GeoParquet metadata.
 8. `08_manifest_metadata_writers.md`: write manifest, source metadata and processing metadata.
 9. `09_bundle_validation.md`: validate output bundles and reconcile counts/files/schema.
@@ -69,4 +69,4 @@ At the end of each prompt:
 
 ## Current next work item
 
-`10c_optimized_flatgeobuf_via_geopackage.md`
+`11_viewer_contract.md`

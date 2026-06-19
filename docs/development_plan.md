@@ -2,7 +2,7 @@
 
 Status: Accepted MVP plan
 
-Last updated: 2026-06-18
+Last updated: 2026-06-19
 
 ## Purpose
 
@@ -26,7 +26,7 @@ The MVP includes:
 - A CLI for repeatable local conversion and validation.
 - GeoParquet, FlatGeobuf, JSON metadata and CSV rejection reports as the initial output formats.
 - A thin static MapLibre viewer that reads `manifest.json`, metadata files and
-  `exports/occurrences.fgb` when a FlatGeobuf layer is generated.
+  `data/occurrences.fgb` when a FlatGeobuf layer is generated.
 - A primitive `tkinter` GUI that calls the same core conversion API as the CLI.
 - Documentation and sample runs using local DwC-A examples.
 
@@ -154,13 +154,13 @@ Current implementation:
 
 - `stream_occurrence_row_batches` provides bounded occurrence row batches.
 - `normalize_occurrence_record_batch` normalizes each bounded batch.
-- GeoParquet-only large-output conversion streams accepted records through
-  parser, normalization, GeoParquet writing and rejected-report writing without
+- GeoParquet large-output conversion streams accepted records through parser,
+  normalization, GeoParquet writing and rejected-report writing without
   retaining full accepted or rejected tuples in `ConversionResult`.
 - The default FlatGeobuf path and combined FlatGeobuf+GeoParquet conversions
-  still use the existing FlatGeobuf writer handoff, which materializes its
-  accepted rows for the current GDAL/Pyogrio backend. Large-output conversion
-  claims therefore apply to GeoParquet-only large-output mode.
+  stream accepted batches into persistent GeoPackage staging at
+  `data/occurrences.gpkg`, then create indexed FlatGeobuf from that
+  GeoPackage.
 
 Accepted large-output GeoParquet requirements:
 
@@ -243,8 +243,10 @@ Implemented validation coverage:
   including large-output `bbox` covering schema/content when present;
 - optional `geoparquet-io`, DuckDB and Pyogrio/GDAL checks when available;
 - dependency-dependent FlatGeobuf inspection through Pyogrio/GDAL;
+- GeoPackage artifact validation through SQLite metadata checks and optional
+  Pyogrio/GDAL inspection;
 - row-count reconciliation across manifest, processing metadata, geospatial
-  outputs and rejected-record reports;
+  outputs, GeoPackage staging and rejected-record reports;
 - rejected CSV required columns;
 - viewer field presence in inspected generated data;
 - `quality_flags` exact-token representation and `has_quality_flags`
@@ -276,45 +278,49 @@ Rationale:
 
 - GeoPandas `to_file()` delegates file writing to Pyogrio when available, so Pyogrio/GDAL is the actual writer layer.
 - Pyogrio has full read/write support for FlatGeobuf through GDAL and can use Arrow for faster writing.
-- The Prompt 06 production implementation uses `pyogrio.write_arrow` with a
-  PyArrow table, not a GeoPandas GeoDataFrame. It still materializes the
-  projected record table and WKB geometries before writing, so the MVP
-  implementation must validate memory limits before writing very large
-  FlatGeobuf outputs.
+- The default production implementation writes accepted chunks into a
+  persistent GeoPackage at `data/occurrences.gpkg` with `pyogrio.write_arrow`,
+  then streams that GeoPackage through Pyogrio/GDAL into indexed FlatGeobuf.
 - GDAL's FlatGeobuf driver creates a spatial index by default, which is useful for static viewer and remote bbox reads, but its packed Hilbert R-tree requires memory proportional to feature count.
 
 Accepted defaults:
 
 - Library: `pyogrio` with GDAL FlatGeobuf support.
-- Engine settings: use `pyogrio.write_arrow` with a PyArrow table; PyArrow is
-  required for the current production FlatGeobuf backend.
+- Engine settings: use `pyogrio.write_arrow` for bounded GeoPackage chunk
+  appends and Pyogrio/GDAL `open_arrow` to `write_arrow` for the final
+  GeoPackage-to-FlatGeobuf export. PyArrow is required for the current
+  production backend.
 - Development install: use the optional `flatgeobuf` extra from
   `pyproject.toml`, normally `python -m pip install -e "${REPO}[dev,flatgeobuf]"`.
   The verified local `.venv/` stack is Pyogrio `0.12.1`, GDAL `3.11.4` as
-  reported by Pyogrio, PyArrow `24.0.0`, and FlatGeobuf driver support `rw`.
+  reported by Pyogrio, PyArrow `24.0.0`, and `GPKG`/FlatGeobuf driver support
+  `rw`.
 - Layer options: `SPATIAL_INDEX=YES`.
 - Spatial index: enabled by default for FlatGeobuf output.
 - Large-output guardrail: estimate spatial-index memory before writing; emit a required large dataset warning when projected memory or feature count is high enough to make the indexed write risky.
 - Initial guardrail thresholds: warn for indexed writes at `>= 1,000,000`
   accepted features or estimated spatial-index construction memory
   `>= 256 MiB`, using an initial estimate of `64` bytes per feature.
+- Persistent staging artifact: retain `data/occurrences.gpkg` in the output
+  bundle, inventory it with role `geopackage` and record counts/checksums.
 - Large-output warning behavior: emit structured warning code
-  `large_indexed_flatgeobuf_write` before the backend write. The warning does
-  not fail conversion and does not automatically switch to `SPATIAL_INDEX=NO`.
-  Users or future CLI/core options must explicitly request no spatial index.
+  `large_indexed_flatgeobuf_write` before the final indexed FlatGeobuf export.
+  The warning does not fail conversion and does not automatically switch to
+  `SPATIAL_INDEX=NO`.
 - Geometry policy: write only accepted records with non-null point geometry.
 - Field policy: write a compact normalized occurrence field set optimized for viewer and lightweight exchange, not the full source/raw Darwin Core field set. Include geometry, required provenance fields, accepted viewer display/filter fields, coordinates, `quality_flags`, `has_quality_flags` and the additional accepted Darwin Core fields documented in `docs/output_format.md`.
 - GeoPandas role: allowed only for tests, examples and notebooks during early development. Production writer code should call Pyogrio/GDAL directly where practical.
 
 Current implementation limitation:
 
-- Prompt 06's parser, normalizer and FlatGeobuf writer still materialize full
-  record sets in memory. For very large DwC-A inputs, such as 5 million
-  accepted occurrence records, the writer estimates about 320,000,000 bytes for
+- The parser/normalizer/FlatGeobuf handoff is chunked through GeoPackage
+  staging, so Python no longer materializes the full accepted record set for
+  FlatGeobuf generation. GDAL still builds the final FlatGeobuf spatial index,
+  so very large outputs may consume substantial memory or fail during the
+  final indexed export. For very large DwC-A inputs, such as 5 million accepted
+  occurrence records, the writer estimates about 320,000,000 bytes for
   spatial-index construction and emits `large_indexed_flatgeobuf_write`, but it
-  still attempts the indexed write by default. The process may take a long
-  time, consume substantial memory or fail until a chunked parser/normalizer/
-  writer handoff is implemented.
+  still attempts the indexed write by default.
 
 ## Accepted MVP Viewer Filters
 
@@ -425,7 +431,9 @@ Goal: write the accepted MVP output bundle described in `docs/output_format.md`.
 
 Deliverables:
 
-- FlatGeobuf writer for default `exports/occurrences.fgb` output.
+- FlatGeobuf writer for default `data/occurrences.fgb` output.
+- Persistent GeoPackage staging artifact at `data/occurrences.gpkg` whenever
+  FlatGeobuf is generated.
 - GeoParquet writer for explicit `data/occurrences.parquet` output.
 - `manifest.json` writer.
 - `metadata/source.json` writer, including EML content extraction from the
@@ -440,6 +448,8 @@ Acceptance criteria:
 - Generated bundles match the documented layout.
 - When GeoParquet is generated, its metadata declares point geometry, CRS `OGC:CRS84` and longitude-latitude order.
 - FlatGeobuf contains the viewer-required fields and is written with a spatial index by default.
+- `data/occurrences.gpkg` is retained, inventoried and reconciles counts with
+  `data/occurrences.fgb`.
 - GeoParquet and FlatGeobuf outputs use the accepted nullable `|`-delimited `quality_flags` representation.
 - Large FlatGeobuf outputs emit the documented large dataset warning before indexed writes that may require substantial memory.
 - Manifest file inventory, counts and layer paths reconcile with generated files.
@@ -546,7 +556,7 @@ Documents to create or update during the milestones:
 | DwC-A archives vary in delimiters, headers, extensions and metadata completeness. | Drive parsing through `meta.xml`, test against local examples and preserve diagnostics. |
 | Geospatial writer dependencies may behave differently across platforms. | Keep writer APIs isolated, add validation commands and document supported environments. |
 | Viewer requirements may expand before the converter contract is stable. | Keep the viewer manifest-driven and update `docs/output_format.md` before changing generated files. |
-| Large archives may expose memory or performance limits. | Use the implemented GeoParquet-only large-output path for bounded parser/normalizer/writer handoff. Keep the current FlatGeobuf and combined-output materialization limit visible, and defer partitioned GeoParquet until the manifest and validator contract support it. |
+| Large archives may expose memory or performance limits. | Use the implemented chunked GeoPackage staging path for FlatGeobuf and GeoParquet large-output mode for analytical bundles. Keep the remaining GDAL FlatGeobuf spatial-index memory risk visible, and defer partitioned GeoParquet until the manifest and validator contract support it. |
 | Provenance can be lost during normalization. | Carry source file, row number, row identifier and source metadata through every stage. |
 
 ## Open Questions

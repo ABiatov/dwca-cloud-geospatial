@@ -46,9 +46,13 @@ GeoParquet-only bundles, including GeoParquet large-output bundles.
 
 ## Resolved By Accepted Docs
 
-- FlatGeobuf is the default MVP output when the user does not choose an explicit conversion format. `docs/development_plan.md` and `docs/output_format.md` both record `exports/occurrences.fgb` as the default output.
+- FlatGeobuf is the default MVP output when the user does not choose an explicit conversion format. `docs/development_plan.md` and `docs/output_format.md` both record `data/occurrences.fgb` as the default output.
 - FlatGeobuf should contain accepted records with non-null point geometry, not rejected or null-geometry rows. Rejected or skipped rows are represented through diagnostics/reports, especially conditional `reports/rejected_records.csv`.
 - FlatGeobuf must include the viewer-required fields and MVP filter fields when those fields are present in the generated bundle, per `docs/development_plan.md` M3 and M5.
+- Default FlatGeobuf generation uses persistent GeoPackage staging at
+  `data/occurrences.gpkg`. The GeoPackage is retained and inventoried in
+  `manifest.files`; it is not a temporary file and is not the MVP default
+  viewer map layer.
 - FlatGeobuf should use a compact normalized occurrence field set optimized for viewer and lightweight exchange, not the full source/raw Darwin Core field set. It must include geometry, required provenance fields, accepted viewer display fields, accepted filter fields when present, coordinates, nullable `quality_flags` and `has_quality_flags`. Full raw/core/extension table preservation belongs in future raw Parquet-family exports, not in the MVP FlatGeobuf layer.
 - FlatGeobuf writing should start from accepted `NormalizedOccurrenceRecord`
   values produced by normalization after Prompt 05 quality rules. Use
@@ -60,14 +64,19 @@ GeoParquet-only bundles, including GeoParquet large-output bundles.
 
 - Writer API:
   `dwca_cloud_geospatial.flatgeobuf.write_flatgeobuf_occurrences`.
-- Output path: `exports/occurrences.fgb`.
+- Optimized staged writer API:
+  `dwca_cloud_geospatial.flatgeobuf.write_flatgeobuf_occurrences_via_geopackage`
+  and `GeoPackageStagedFlatGeobufWriter`.
+- Output path: `data/occurrences.fgb`.
+- Persistent staging path: `data/occurrences.gpkg`.
 - Production backend: Pyogrio/GDAL through PyArrow; do not use GeoPandas for
   the production writer path.
 - Development dependency extra: install with
   `python -m pip install -e "${REPO}[dev,flatgeobuf]"`.
-- Verified local stack after Prompt 06 follow-up: Pyogrio `0.12.1`, GDAL
-  `3.11.4` as reported by Pyogrio, PyArrow `24.0.0`, and FlatGeobuf driver
-  support `rw`.
+- Verified local stack after Prompt 10c: Pyogrio `0.12.1`, GDAL `3.11.4` as
+  reported by Pyogrio, PyArrow `24.0.0`, `GPKG rw`, FlatGeobuf `rw` and no
+  `.venv` `ogr2ogr` executable. The selected helper strategy is Pyogrio/GDAL
+  `open_arrow` to `write_arrow`.
 - Dependency behavior: if Pyogrio/PyArrow/GDAL support is unavailable, the
   writer raises `FlatGeobufDependencyError`; tests can still validate
   projection and guardrails through the isolated backend seam.
@@ -78,8 +87,8 @@ GeoParquet-only bundles, including GeoParquet large-output bundles.
 ## Spatial Index And Large Outputs
 
 - Prompt 06 requests `SPATIAL_INDEX=YES` by default.
-- `FlatGeobufWriterOptions(spatial_index=False)` requests
-  `SPATIAL_INDEX=NO` and suppresses spatial-index memory warnings.
+- The optimized staged conversion path requires `SPATIAL_INDEX=YES` and fails
+  rather than silently producing an unindexed FlatGeobuf fallback.
 - Prompt 10 exposes FlatGeobuf writer options through the public core
   conversion API:
   `ConversionOptions(flatgeobuf=FlatGeobufWriterOptions(...))`. The MVP CLI
@@ -90,9 +99,8 @@ GeoParquet-only bundles, including GeoParquet large-output bundles.
   features or estimated spatial-index memory `>= 256 MiB`.
 - Initial estimate: `64` bytes per accepted feature for spatial-index
   construction.
-- Large-output warnings are non-fatal. The writer warns before the backend
-  write but still attempts the indexed write unless conversion options
-  explicitly disable the index.
+- Large-output warnings are non-fatal. The writer warns before the final
+  indexed FlatGeobuf export but still attempts the indexed write.
 - Core conversion preserves these writer warnings in
   `metadata/processing.json.warnings` with `stage="flatgeobuf_writer"`.
 - Example: 5 million accepted features estimate about 320,000,000 bytes for
@@ -102,12 +110,13 @@ GeoParquet-only bundles, including GeoParquet large-output bundles.
 
 ## Current Large-Data Limitation
 
-Prompt 06 does not yet provide a fully streaming large-data pipeline. The
-current parser, normalizer and FlatGeobuf writer materialize full record sets
-in memory. Very large DwC-A inputs may take a long time, consume substantial
-memory or fail until chunked parser/normalizer/writer handoff is implemented.
+Prompt 10c provides a chunked parser/normalizer/GeoPackage staging handoff for
+FlatGeobuf generation, avoiding Python-side full accepted-record
+materialization for the FlatGeobuf writer handoff. Very large DwC-A inputs may
+still take a long time, consume substantial memory or fail while GDAL builds
+the final FlatGeobuf spatial index.
 
 ## Open Questions
 
-- Whether to expose `SPATIAL_INDEX=NO` as an MVP CLI flag remains deferred.
-  The core API can already request it through `FlatGeobufWriterOptions`.
+- Whether to expose a user-facing no-spatial-index mode remains deferred; it
+  must not become a silent fallback for default FlatGeobuf generation.

@@ -21,7 +21,7 @@ Generate static viewer-facing files from converted occurrence data without addin
 ## Steps
 
 1. Start from validated geospatial occurrence output.
-2. For MVP map display, use `exports/occurrences.fgb` when a FlatGeobuf layer
+2. For MVP map display, use `data/occurrences.fgb` when a FlatGeobuf layer
    is generated. GeoParquet-only bundles are valid without FlatGeobuf; handle
    them with the accepted no-map-layer behavior from `docs/viewer_contract.md`
    unless GeoParquet browser loading is accepted later. PMTiles is MVP+ and

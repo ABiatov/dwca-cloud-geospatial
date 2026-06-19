@@ -13,7 +13,10 @@ from dwca_cloud_geospatial.conversion import (
     ConversionOptions,
     convert_dwca_archive,
 )
-from dwca_cloud_geospatial.flatgeobuf import DEFAULT_FLATGEOBUF_RELATIVE_PATH
+from dwca_cloud_geospatial.flatgeobuf import (
+    DEFAULT_FLATGEOBUF_RELATIVE_PATH,
+    DEFAULT_GEOPACKAGE_RELATIVE_PATH,
+)
 from dwca_cloud_geospatial.geoparquet import (
     DEFAULT_GEOPARQUET_RELATIVE_PATH,
     GeoParquetWriterOptions,
@@ -76,7 +79,7 @@ def test_core_conversion_writes_default_flatgeobuf_bundle(tmp_path: Path) -> Non
     assert [entry["path"] for entry in manifest["files"]] == [
         "metadata/source.json",
         "metadata/processing.json",
-        "exports/occurrences.fgb",
+        "data/occurrences.fgb",
     ]
 
 
@@ -175,3 +178,103 @@ def test_large_geoparquet_conversion_streams_chunks_and_rejected_report(
 
     validation = validate_output_bundle(tmp_path / "bundle")
     assert not validation.has_errors
+
+
+def test_default_flatgeobuf_conversion_uses_geopackage_staging_and_streamed_rejections(
+    tmp_path: Path,
+) -> None:
+    pyogrio = pytest.importorskip(
+        "pyogrio",
+        reason="Pyogrio/GDAL is required for GeoPackage-staged FlatGeobuf conversion.",
+    )
+    pytest.importorskip("pyarrow", reason="PyArrow is required for Pyogrio Arrow.")
+    drivers = pyogrio.list_drivers()
+    if drivers.get("GPKG") is None or drivers.get("FlatGeobuf") is None:
+        pytest.skip("GDAL must expose both GPKG and FlatGeobuf drivers.")
+
+    result = convert_dwca_archive(
+        NORMALIZATION_FIXTURE_DIR,
+        tmp_path / "bundle",
+        options=ConversionOptions(chunk_size=2),
+    )
+
+    assert result.output_formats == ("flatgeobuf",)
+    assert result.occurrence_result.records == ()
+    assert result.normalization_result.accepted_records == ()
+    assert result.normalization_result.rejected_records == ()
+    assert result.accepted_record_count == 2
+    assert result.rejected_record_count == 5
+    assert result.flatgeobuf_result is not None
+    assert result.flatgeobuf_result.generated_from_geopackage is True
+    assert result.flatgeobuf_result.spatial_index is True
+    assert result.flatgeobuf_result.staging_result is not None
+    assert (tmp_path / "bundle" / DEFAULT_GEOPACKAGE_RELATIVE_PATH).exists()
+    assert (tmp_path / "bundle" / DEFAULT_FLATGEOBUF_RELATIVE_PATH).exists()
+    assert result.metadata_result.rejected_records_path is not None
+    assert result.metadata_result.rejected_records_path.exists()
+
+    manifest = json.loads(
+        (tmp_path / "bundle" / MANIFEST_RELATIVE_PATH).read_text(encoding="utf-8")
+    )
+    assert [entry["path"] for entry in manifest["files"]] == [
+        "metadata/source.json",
+        "metadata/processing.json",
+        "data/occurrences.gpkg",
+        "data/occurrences.fgb",
+        "reports/rejected_records.csv",
+    ]
+    inventory = {entry["path"]: entry for entry in manifest["files"]}
+    assert inventory["data/occurrences.gpkg"]["role"] == "geopackage"
+    assert inventory["data/occurrences.gpkg"]["media_type"] == (
+        "application/geopackage+sqlite3"
+    )
+    assert inventory["data/occurrences.gpkg"]["record_count"] == 2
+    assert inventory["data/occurrences.fgb"]["record_count"] == 2
+
+    processing = json.loads(
+        (tmp_path / "bundle" / "metadata" / "processing.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert processing["counts"]["geopackage_records"] == 2
+    assert processing["counts"]["flatgeobuf_records"] == 2
+    assert processing["configuration"]["geopackage_staging"] == {
+        "enabled": True,
+        "relative_path": "data/occurrences.gpkg",
+        "writer_backend": "pyogrio.write_arrow",
+        "layer": "occurrences",
+        "flatgeobuf_generated_from_geopackage": True,
+        "gdal_ogr_helper_strategy": "pyogrio.open_arrow_to_write_arrow",
+        "flatgeobuf_spatial_index": True,
+    }
+    assert processing["output_decisions"]["geopackage_staging_enabled"] is True
+    assert processing["output_decisions"]["flatgeobuf_spatial_index"] is True
+
+    gpkg_rows = pyogrio.read_arrow(
+        tmp_path / "bundle" / DEFAULT_GEOPACKAGE_RELATIVE_PATH,
+        layer="occurrences",
+    )[1]
+    fgb_rows = pyogrio.read_arrow(
+        tmp_path / "bundle" / DEFAULT_FLATGEOBUF_RELATIVE_PATH
+    )[1]
+    comparable = [
+        "source_record_id",
+        "quality_flags",
+        "has_quality_flags",
+        "decimal_longitude",
+        "decimal_latitude",
+    ]
+    assert {
+        tuple(row[column] for column in comparable)
+        for row in gpkg_rows.select(comparable).to_pylist()
+    } == {
+        tuple(row[column] for column in comparable)
+        for row in fgb_rows.select(comparable).to_pylist()
+    }
+
+    validation = validate_output_bundle(tmp_path / "bundle")
+    assert not validation.has_errors
+    assert any(
+        check.name == "geopackage_sqlite" and check.status == "passed"
+        for check in validation.checks
+    )

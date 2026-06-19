@@ -38,27 +38,32 @@ returns `BundleValidationResult` with `status`, `errors`, `warnings`,
 7. Run optional GeoParquet-aware checks when available: `geoparquet-io` first,
    DuckDB second, and Pyogrio/GDAL as best-effort reader checks. Report missing
    optional tools as warnings or skipped checks when PyArrow validation passes.
-8. Confirm row counts match conversion reports.
+8. Confirm row counts match conversion reports, including GeoPackage staging
+   counts when `data/occurrences.gpkg` is declared.
 9. If `reports/rejected_records.csv` is present, validate required columns and
    reconcile its row count. If no records are rejected, confirm the report is
    absent and omitted from `manifest.files`.
 10. If raw core or extension table exports are generated, confirm extension relationship keys can join to core keys.
-11. Validate FlatGeobuf or PMTiles files if present. FlatGeobuf validation is
+11. Validate declared GeoPackage staging artifacts. Confirm the file opens as
+   SQLite/GeoPackage, required metadata tables are present when checkable, the
+   occurrence layer has required projection columns and row counts reconcile
+   with manifest and processing metadata.
+12. Validate FlatGeobuf or PMTiles files if present. FlatGeobuf validation is
    dependency-dependent: use the documented `.[dev,flatgeobuf]` stack when
    available, and report skipped geospatial file-inspection checks as warnings
    rather than failing otherwise.
-12. Check viewer manifest paths, bounds, layers, and field names.
-13. Confirm normalized output fields use snake_case project names and do not
+13. Check viewer manifest paths, bounds, layers, and field names.
+14. Confirm normalized output fields use snake_case project names and do not
     emit parser/source camelCase terms; `class` is the output field, not
     Python attribute `class_`.
-14. Validate `quality_flags` as nullable `|`-delimited strings and split them
+15. Validate `quality_flags` as nullable `|`-delimited strings and split them
     for exact-token checks.
-15. Reconcile `warning_count`, `warnings`, and `type_conversion_failures` in
+16. Reconcile `warning_count`, `warnings`, and `type_conversion_failures` in
     processing metadata.
-16. Reconcile FlatGeobuf writer warnings recorded in processing metadata,
+17. Reconcile FlatGeobuf writer warnings recorded in processing metadata,
     including non-fatal `large_indexed_flatgeobuf_write` warnings for indexed
     writes over large accepted record sets.
-17. Return or save a validation result with errors, warnings, skipped checks
+18. Return or save a validation result with errors, warnings, skipped checks
     and tool versions.
 
 Current implementation notes:
@@ -71,6 +76,9 @@ Current implementation notes:
 - FlatGeobuf validation checks projection fields and counts through
   Pyogrio/GDAL when available. Row-level FlatGeobuf `quality_flags` validation
   depends on local geospatial table reader support.
+- GeoPackage staging validation checks `data/occurrences.gpkg` through SQLite
+  metadata and optional Pyogrio/GDAL inspection, then reconciles its row count
+  with FlatGeobuf and accepted records.
 - Optional `geoparquet-io`, DuckDB and Pyogrio/GDAL checks should be treated
   as structured warnings or skipped checks when required PyArrow validation
   passes.
@@ -87,6 +95,8 @@ Current implementation notes:
 - Validation catches malformed `quality_flags` tokens or delimiter usage.
 - Validation accepts missing GBIF/OBIS source metadata values as null.
 - Validation confirms conditional rejected-report presence and row counts.
+- Validation confirms persistent GeoPackage staging inventory, schema and count
+  reconciliation when FlatGeobuf is generated through staging.
 - Validation reconciles warning counts with processing warnings.
 - Validation treats `large_indexed_flatgeobuf_write` as a non-fatal processing
   warning unless a later accepted core-conversion policy changes it.

@@ -37,11 +37,13 @@ The package uses a `src/` layout with import package
 After activation, `python`, `pip`, `pytest` and `dwca-cloud-geospatial` should
 resolve inside `${REPO}/.venv/`.
 
-## FlatGeobuf Writer Dependencies
+## FlatGeobuf And GeoPackage-Staging Dependencies
 
-The Prompt 06 FlatGeobuf writer production path uses Pyogrio with GDAL
-FlatGeobuf support and PyArrow. Install those optional dependencies into the
-same in-repository `.venv/`:
+The default FlatGeobuf production path uses Pyogrio with GDAL FlatGeobuf and
+GeoPackage support plus PyArrow. Conversion writes accepted chunks into
+`data/occurrences.gpkg`, then streams that GeoPackage through Pyogrio/GDAL into
+indexed `data/occurrences.fgb` with `SPATIAL_INDEX=YES`. Install those
+optional dependencies into the same in-repository `.venv/`:
 
 ```bash
 source "${REPO}/.venv/bin/activate"
@@ -62,10 +64,12 @@ install a compatible system GDAL first and then reinstall Pyogrio.
 Verify the installed writer stack with:
 
 ```bash
-"${REPO}/.venv/bin/python" -c "import pyogrio, pyarrow; print('pyogrio', pyogrio.__version__); print('gdal', pyogrio.__gdal_version_string__); print('pyarrow', pyarrow.__version__); print('FlatGeobuf', pyogrio.list_drivers().get('FlatGeobuf'))"
+"${REPO}/.venv/bin/python" -c "import shutil, pyogrio, pyarrow; print('pyogrio', pyogrio.__version__); print('gdal', pyogrio.__gdal_version_string__); print('pyarrow', pyarrow.__version__); print('GPKG', pyogrio.list_drivers().get('GPKG')); print('FlatGeobuf', pyogrio.list_drivers().get('FlatGeobuf')); print('ogr2ogr', shutil.which('ogr2ogr'))"
 ```
 
-The FlatGeobuf driver should report read/write support, usually `rw`.
+The `GPKG` and `FlatGeobuf` drivers should report read/write support, usually
+`rw`. An `ogr2ogr` executable is not required for the current implementation;
+the selected helper strategy is Pyogrio/GDAL `open_arrow` to `write_arrow`.
 
 This repository has been verified with:
 
@@ -73,7 +77,9 @@ This repository has been verified with:
 pyogrio 0.12.1
 GDAL 3.11.4
 pyarrow 24.0.0
+GPKG rw
 FlatGeobuf rw
+ogr2ogr None
 ```
 
 ## GeoParquet Writer Dependencies
@@ -145,7 +151,7 @@ Verify the validation-only optional tools with:
 For the full writer and validation workflow, verify Pyogrio/GDAL as well:
 
 ```bash
-"${REPO}/.venv/bin/python" -c "import pyogrio; print('pyogrio', pyogrio.__version__); print('gdal', pyogrio.__gdal_version_string__); print('FlatGeobuf', pyogrio.list_drivers().get('FlatGeobuf'))"
+"${REPO}/.venv/bin/python" -c "import pyogrio; print('pyogrio', pyogrio.__version__); print('gdal', pyogrio.__gdal_version_string__); print('GPKG', pyogrio.list_drivers().get('GPKG')); print('FlatGeobuf', pyogrio.list_drivers().get('FlatGeobuf'))"
 ```
 
 The validator uses the `geoparquet-io` Python API when available; it does not
@@ -172,6 +178,8 @@ pyproj 3.7.0
 pyarrow 24.0.0
 pyogrio 0.12.1
 GDAL 3.11.4
+GPKG rw
+FlatGeobuf rw
 ```
 
 The Prompt 07 Pyogrio/GDAL GeoParquet reader test still skips in this local
@@ -205,7 +213,7 @@ Tests should derive fixture locations from `tests/conftest.py` so they do not
 depend on the process working directory.
 
 To fully verify Prompt 06 FlatGeobuf behavior, including a real
-`exports/occurrences.fgb` write instead of the dependency-isolated backend
+`data/occurrences.fgb` write instead of the dependency-isolated backend
 tests, install the FlatGeobuf writer dependencies above and run:
 
 ```bash
@@ -248,9 +256,10 @@ environment and run the writer, conversion and validation tests:
   "${REPO}/tests/test_bundle_validation.py" -q
 ```
 
-These tests cover GeoParquet-only large-output mode, chunked conversion,
-`bbox` covering column content, grid spatial ordering, streaming rejected
-reports and required PyArrow validation of bbox covering metadata.
+These tests cover GeoParquet large-output mode, FlatGeobuf GeoPackage staging,
+chunked conversion, `bbox` covering column content, grid spatial ordering,
+streaming rejected reports, GeoPackage/FlatGeobuf count reconciliation and
+required PyArrow validation of bbox covering metadata.
 
 ## CLI Help
 

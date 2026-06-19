@@ -2,7 +2,7 @@
 
 Status: Accepted baseline for MVP
 
-Last updated: 2026-06-18
+Last updated: 2026-06-19
 
 ## Purpose
 
@@ -20,10 +20,10 @@ output/
   metadata/
     source.json
     processing.json
-  data/                         # when GeoParquet is selected
-    occurrences.parquet
-  exports/
-    occurrences.fgb
+  data/
+    occurrences.gpkg            # when FlatGeobuf is generated
+    occurrences.fgb             # when FlatGeobuf is generated
+    occurrences.parquet         # when GeoParquet is selected
   reports/                      # when one or more records are rejected
     rejected_records.csv
 ```
@@ -33,7 +33,10 @@ MVP files:
 - `manifest.json`: top-level discovery document for tools and the viewer.
 - `metadata/source.json`: source archive, DwC-A, GBIF and OBIS provenance when available.
 - `metadata/processing.json`: converter version, configuration, counts, warnings and validation summary.
-- `exports/occurrences.fgb`: default FlatGeobuf output for GIS exchange and simple viewer loading.
+- `data/occurrences.fgb`: default FlatGeobuf output for GIS exchange and simple viewer loading.
+- `data/occurrences.gpkg`: persistent GeoPackage staging artifact retained
+  whenever FlatGeobuf is generated; this is a bundle artifact, not a
+  temporary file.
 - `data/occurrences.parquet`: GeoParquet occurrence table when GeoParquet output is explicitly selected.
 - `reports/rejected_records.csv`: rejected or skipped records with reason codes and source context, written only when at least one record is rejected or skipped.
 
@@ -93,7 +96,8 @@ MVP outputs are projections of the canonical occurrence schema:
 | Output | Projection role | Required relationship to canonical schema |
 | --- | --- | --- |
 | `data/occurrences.parquet` | Analytical GeoParquet projection. | Should carry the broad normalized field set needed for analysis, provenance and GeoParquet geometry metadata. |
-| `exports/occurrences.fgb` | Compact viewer and exchange projection when FlatGeobuf is generated. | May omit analytical-only fields, but must include stable provenance fields, point geometry, viewer display fields, accepted filter fields, parsed coordinates, `quality_flags` and `has_quality_flags` when generated. |
+| `data/occurrences.fgb` | Compact viewer and exchange projection when FlatGeobuf is generated. | May omit analytical-only fields, but must include stable provenance fields, point geometry, viewer display fields, accepted filter fields, parsed coordinates, `quality_flags` and `has_quality_flags` when generated. |
+| `data/occurrences.gpkg` | Persistent GeoPackage staging projection when FlatGeobuf is generated. | Uses the same compact accepted-record projection as FlatGeobuf and must reconcile record counts and accepted record set with `data/occurrences.fgb`. It is inventoried for audit/download but is not the MVP default viewer map layer. |
 | Future `tiles/occurrences.pmtiles` | MVP+ tiled visualization projection. | Should derive from the same accepted records and default to the FlatGeobuf compact field set unless a later accepted decision defines a smaller tile attribute profile. |
 
 When both GeoParquet and FlatGeobuf are generated, they must represent the same accepted occurrence record set unless `metadata/processing.json` documents a deliberate export filter. Rejected, skipped, missing-coordinate or invalid-coordinate rows are not part of the accepted occurrence projections; they belong in `reports/rejected_records.csv` and processing metadata.
@@ -137,7 +141,7 @@ Required `files[]` fields:
 | Field | Type | Description |
 | --- | --- | --- |
 | `path` | string | Relative path from bundle root. |
-| `role` | string | Logical role, such as `metadata`, `geoparquet`, `flatgeobuf` or `report`. |
+| `role` | string | Logical role, such as `metadata`, `geopackage`, `geoparquet`, `flatgeobuf` or `report`. |
 | `media_type` | string | MIME/media type where known. |
 | `bytes` | integer or null | File size in bytes when available. |
 | `sha256` | string or null | File checksum when available. |
@@ -199,6 +203,14 @@ Example with FlatGeobuf and GeoParquet selected, and rejected records present:
       "record_count": null
     },
     {
+      "path": "data/occurrences.gpkg",
+      "role": "geopackage",
+      "media_type": "application/geopackage+sqlite3",
+      "bytes": null,
+      "sha256": null,
+      "record_count": 1000
+    },
+    {
       "path": "data/occurrences.parquet",
       "role": "geoparquet",
       "media_type": "application/vnd.apache.parquet",
@@ -207,7 +219,7 @@ Example with FlatGeobuf and GeoParquet selected, and rejected records present:
       "record_count": 1000
     },
     {
-      "path": "exports/occurrences.fgb",
+      "path": "data/occurrences.fgb",
       "role": "flatgeobuf",
       "media_type": "application/octet-stream",
       "bytes": null,
@@ -229,7 +241,7 @@ Example with FlatGeobuf and GeoParquet selected, and rejected records present:
       "title": "Occurrences",
       "type": "point",
       "source_format": "flatgeobuf",
-      "path": "exports/occurrences.fgb",
+      "path": "data/occurrences.fgb",
       "geometry": {
         "column": "geometry",
         "crs": "OGC:CRS84",
@@ -525,9 +537,14 @@ Recommended optional source-preservation fields:
 
 Rows in `occurrences.parquet` should contain records accepted for geospatial output. Records rejected for missing or invalid coordinates belong in `reports/rejected_records.csv` when any rejected records exist.
 
-## `exports/occurrences.fgb`
+## `data/occurrences.fgb`
 
 `occurrences.fgb` is the FlatGeobuf representation of accepted occurrence points.
+
+Default FlatGeobuf generation writes accepted normalized records in bounded
+chunks into `data/occurrences.gpkg`, then creates indexed FlatGeobuf from that
+GeoPackage through Pyogrio/GDAL with `SPATIAL_INDEX=YES`. The GeoPackage is
+retained after conversion.
 
 When both FlatGeobuf and GeoParquet are generated, FlatGeobuf should contain the same accepted records as `data/occurrences.parquet` unless `metadata/processing.json` documents a deliberate export filter.
 
@@ -550,8 +567,8 @@ Initial large indexed-write warning behavior:
   spatial-index construction memory `>= 256 MiB`.
 - Initial spatial-index memory estimate: `64` bytes per accepted feature.
 - The warning is non-fatal and does not automatically change the writer option
-  to `SPATIAL_INDEX=NO`; a no-index write must be explicitly requested by
-  conversion options.
+  to `SPATIAL_INDEX=NO`; the default staged FlatGeobuf path keeps
+  `SPATIAL_INDEX=YES`.
 - For example, 5 million accepted features estimate about 320,000,000 bytes
   for spatial-index construction, so they should emit
   `large_indexed_flatgeobuf_write` before the writer attempts the indexed
@@ -596,7 +613,28 @@ Required FlatGeobuf projection columns:
 
 Full source/raw Darwin Core core and extension table preservation belongs in future raw Parquet-family exports, not in the MVP FlatGeobuf layer.
 
-The static viewer should prefer `exports/occurrences.fgb` for MVP map display
+## `data/occurrences.gpkg`
+
+`occurrences.gpkg` is the persistent GeoPackage staging artifact used to build
+`data/occurrences.fgb` when FlatGeobuf is generated. It must remain in the
+bundle and be listed in `manifest.files` with role `geopackage`, media type
+`application/geopackage+sqlite3`, byte size, SHA-256 and accepted record count.
+
+The GeoPackage occurrence layer uses the same accepted compact projection as
+FlatGeobuf, including point geometry in `OGC:CRS84`, longitude/latitude order,
+`quality_flags` and `has_quality_flags`. Its accepted record set should match
+the final FlatGeobuf output unless processing metadata records an explicit
+export filter.
+
+Processing metadata records whether staging was enabled, staging path,
+GeoPackage writer backend, whether FlatGeobuf was generated from GeoPackage,
+the GDAL/OGR helper strategy and FlatGeobuf spatial-index status.
+
+The static viewer should not use `data/occurrences.gpkg` as the default map
+layer under the MVP contract. It should continue to prefer
+`data/occurrences.fgb` when FlatGeobuf exists.
+
+The static viewer should prefer `data/occurrences.fgb` for MVP map display
 when a FlatGeobuf layer is generated. Explicit GeoParquet-only bundles,
 including GeoParquet large-output bundles, may omit FlatGeobuf and remain
 valid output bundles; viewer contracts must define a graceful no-FlatGeobuf
@@ -646,9 +684,9 @@ The converter may add more reason codes, but they must be documented in `metadat
 
 The thin static viewer must be able to read `manifest.json`,
 `metadata/source.json` and `metadata/processing.json`. For map display, it
-should use `exports/occurrences.fgb` when that layer is generated and declared
+should use `data/occurrences.fgb` when that layer is generated and declared
 in `manifest.layers`. GeoParquet-only bundles are valid without
-`exports/occurrences.fgb`; the viewer should handle them without crashing and
+`data/occurrences.fgb`; the viewer should handle them without crashing and
 show metadata/provenance plus the accepted no-map-layer state from
 `docs/viewer_contract.md`.
 
@@ -724,12 +762,15 @@ Bundle validation should check:
 - Checksums match when `sha256` is present.
 - `metadata/source.json` and `metadata/processing.json` exist and parse as JSON.
 - `data/occurrences.parquet` opens as Parquet and has GeoParquet metadata when declared in `manifest.files`.
+- `data/occurrences.gpkg` exists when declared, opens as SQLite/GeoPackage,
+  has required GeoPackage metadata tables when checkable and includes the
+  occurrence projection columns.
 - GeoParquet geometry column is `geometry` when GeoParquet is generated.
 - Generated occurrence fields use the normalized snake_case project field names documented by the canonical occurrence schema and do not expose source camelCase terms as normalized output columns.
 - Required projection columns are present for each generated occurrence output format.
 - Geometry CRS and coordinate order are documented for every generated geospatial output.
-- `exports/occurrences.fgb` exists when declared in `manifest.layers`.
-- Row counts reconcile across manifest, processing metadata, generated geospatial outputs and rejected report when present.
+- `data/occurrences.fgb` exists when declared in `manifest.layers`.
+- Row counts reconcile across manifest, processing metadata, generated geospatial outputs, GeoPackage staging and rejected report when present.
 - `reports/rejected_records.csv` has the required columns when rejected records exist.
 - Viewer-required fields are either present in the data or omitted from `manifest.viewer.display_fields` and `manifest.viewer.filter_fields`.
 - `quality_flags` is nullable string data when present, uses `|` as its delimiter, and does not contain flag codes with the delimiter.

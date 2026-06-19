@@ -10,6 +10,7 @@ import pytest
 
 from dwca_cloud_geospatial.flatgeobuf import (
     DEFAULT_FLATGEOBUF_RELATIVE_PATH,
+    DEFAULT_GEOPACKAGE_RELATIVE_PATH,
     FLATGEOBUF_CRS,
     FLATGEOBUF_PROJECTION_COLUMNS,
     GEOMETRY_COLUMN,
@@ -20,6 +21,7 @@ from dwca_cloud_geospatial.flatgeobuf import (
     estimate_spatial_index_memory_bytes,
     project_flatgeobuf_record,
     write_flatgeobuf_occurrences,
+    write_flatgeobuf_occurrences_via_geopackage,
 )
 from dwca_cloud_geospatial.normalization import normalize_occurrence_records
 from dwca_cloud_geospatial.occurrence import read_occurrence_rows
@@ -95,7 +97,7 @@ def test_write_flatgeobuf_uses_default_path_spatial_index_and_point_wkb(
     )
 
     assert result.relative_path == DEFAULT_FLATGEOBUF_RELATIVE_PATH
-    assert result.path == tmp_path / "exports" / "occurrences.fgb"
+    assert result.path == tmp_path / "data" / "occurrences.fgb"
     assert result.record_count == len(accepted_records) == 2
     assert result.columns == FLATGEOBUF_PROJECTION_COLUMNS
     assert result.geometry_column == GEOMETRY_COLUMN
@@ -105,7 +107,7 @@ def test_write_flatgeobuf_uses_default_path_spatial_index_and_point_wkb(
 
     assert len(backend.calls) == 1
     call = backend.calls[0]
-    assert call["path"] == tmp_path / "exports" / "occurrences.fgb"
+    assert call["path"] == tmp_path / "data" / "occurrences.fgb"
     assert call["layer_options"] == {SPATIAL_INDEX_OPTION: "YES"}
     assert len(call["rows"]) == 2
     assert all(row["occurrence_id"] not in rejected_ids for row in call["rows"])
@@ -209,3 +211,61 @@ def test_real_flatgeobuf_write_when_optional_dependencies_are_available(
     assert math.isclose(south, 38.7223)
     assert math.isclose(east, -8.2)
     assert math.isclose(north, 40.1)
+
+
+def test_real_geopackage_staged_flatgeobuf_write_reconciles_records(
+    tmp_path: Path,
+) -> None:
+    pyogrio = pytest.importorskip(
+        "pyogrio",
+        reason="Pyogrio/GDAL is required for GeoPackage-staged FlatGeobuf.",
+    )
+    pytest.importorskip("pyarrow", reason="PyArrow is required for Pyogrio Arrow.")
+    drivers = pyogrio.list_drivers()
+    if drivers.get("GPKG") is None or drivers.get("FlatGeobuf") is None:
+        pytest.skip("GDAL must expose both GPKG and FlatGeobuf drivers.")
+
+    accepted_records, _rejected_records = _accepted_records()
+    result = write_flatgeobuf_occurrences_via_geopackage(
+        (accepted_records[:1], accepted_records[1:]),
+        tmp_path,
+    )
+
+    assert result.path == tmp_path / DEFAULT_FLATGEOBUF_RELATIVE_PATH
+    assert result.path.exists()
+    assert result.spatial_index is True
+    assert result.generated_from_geopackage is True
+    assert result.helper_strategy == "pyogrio.open_arrow_to_write_arrow"
+    assert result.staging_result is not None
+    assert result.staging_result.path == tmp_path / DEFAULT_GEOPACKAGE_RELATIVE_PATH
+    assert result.staging_result.path.exists()
+    assert result.staging_result.record_count == result.record_count == 2
+
+    gpkg_info = pyogrio.read_info(
+        result.staging_result.path,
+        layer="occurrences",
+        force_feature_count=True,
+    )
+    fgb_info = pyogrio.read_info(result.path, force_feature_count=True)
+    assert gpkg_info["features"] == fgb_info["features"] == 2
+    assert set(FLATGEOBUF_PROJECTION_COLUMNS).issubset(set(gpkg_info["fields"]))
+    assert set(FLATGEOBUF_PROJECTION_COLUMNS).issubset(set(fgb_info["fields"]))
+
+    gpkg_rows = pyogrio.read_arrow(result.staging_result.path, layer="occurrences")[1]
+    fgb_rows = pyogrio.read_arrow(result.path)[1]
+    comparable = (
+        "source_record_id",
+        "quality_flags",
+        "has_quality_flags",
+        "decimal_longitude",
+        "decimal_latitude",
+    )
+    gpkg_set = {
+        tuple(row[column] for column in comparable)
+        for row in gpkg_rows.select(list(comparable)).to_pylist()
+    }
+    fgb_set = {
+        tuple(row[column] for column in comparable)
+        for row in fgb_rows.select(list(comparable)).to_pylist()
+    }
+    assert gpkg_set == fgb_set

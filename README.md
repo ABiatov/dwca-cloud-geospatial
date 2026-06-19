@@ -19,10 +19,13 @@ APIs, file layouts and command-line interfaces should be treated as experimental
 Checklist DwC-A archives with `Taxon` cores can be inspected, but the MVP
 conversion workflow targets occurrence archives that declare coordinate terms.
 
-Default conversion writes FlatGeobuf. Explicit GeoParquet conversion can also
-run in a core-API large-output mode that streams occurrence batches, writes a
-GeoParquet `bbox` covering column and applies bounded grid spatial ordering.
-That bounded-memory mode currently applies to GeoParquet-only bundles.
+Default conversion writes indexed FlatGeobuf at `data/occurrences.fgb`.
+FlatGeobuf generation now uses a bounded parser/normalizer handoff into a
+persistent GeoPackage staging artifact at `data/occurrences.gpkg`, then asks
+Pyogrio/GDAL to create the indexed FlatGeobuf with `SPATIAL_INDEX=YES`.
+Explicit GeoParquet conversion can also run in a core-API large-output mode
+that streams occurrence batches, writes a GeoParquet `bbox` covering column
+and applies bounded grid spatial ordering.
 
 The accepted MVP development plan is documented in [docs/development_plan.md](docs/development_plan.md).
 
@@ -45,7 +48,8 @@ python -m pytest "${REPO}/tests"
 dwca-cloud-geospatial --help
 ```
 
-Default FlatGeobuf conversion requires the optional writer dependencies:
+Default FlatGeobuf conversion requires the optional writer dependencies,
+including Pyogrio/GDAL support for both `GPKG` and `FlatGeobuf`:
 
 ```bash
 python -m pip install -e "${REPO}[dev,flatgeobuf]"
@@ -62,9 +66,11 @@ Converter usage is documented in [docs/converter.md](docs/converter.md).
 ## MVP Outputs
 
 - FlatGeobuf for the default lightweight geospatial exchange and viewer output.
+- Persistent GeoPackage staging artifact at `data/occurrences.gpkg` whenever
+  FlatGeobuf is generated.
 - GeoParquet for analytical workflows when explicitly selected.
-- GeoParquet-only large-output bundles through the core API for bounded
-  parser/normalizer/writer handoff.
+- Bounded parser/normalizer/writer handoff for default FlatGeobuf staging and
+  GeoParquet large-output bundles.
 - Metadata describing source files, processing parameters and generated outputs.
 - A minimal static MapLibre viewer.
 

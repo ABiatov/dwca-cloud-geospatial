@@ -50,7 +50,7 @@
   `FlatGeobufWriterWarning`, `FlatGeobufDependencyError`,
   `DEFAULT_FLATGEOBUF_RELATIVE_PATH`, `FLATGEOBUF_PROJECTION_COLUMNS`, and
   tests in `tests/test_flatgeobuf_writer.py`. The writer produces
-  `exports/occurrences.fgb`, uses an optional Pyogrio/PyArrow/GDAL production
+  `data/occurrences.fgb`, uses an optional Pyogrio/PyArrow/GDAL production
   backend, requests `SPATIAL_INDEX=YES` by default, emits structured
   `large_indexed_flatgeobuf_write` warnings for risky indexed writes, and has
   dependency-specific real FlatGeobuf checks that skip explicitly when local
@@ -58,17 +58,16 @@
 - Prompt 06 dependency follow-up: `pyproject.toml` includes the `flatgeobuf`
   optional extra and `docs/developer_setup.md` documents
   `python -m pip install -e "${REPO}[dev,flatgeobuf]"`. The local `.venv/`
-  verified Pyogrio `0.12.1`, GDAL `3.11.4`, PyArrow `24.0.0`, FlatGeobuf
-  driver `rw`, Prompt 06 writer tests with `6 passed`, and the full suite with
-  `27 passed`.
-- Prompt 06 large-data limitation to preserve in final docs: the current
-  parser, normalizer and FlatGeobuf writer still materialize full record sets
-  in memory. For very large DwC-A inputs, such as 5 million accepted
-  occurrence records, the writer estimates about 320,000,000 bytes for
-  spatial-index construction, emits `large_indexed_flatgeobuf_write`, keeps
-  `SPATIAL_INDEX=YES` by default, and attempts the write. It may take a long
-  time, consume substantial memory, or fail; it does not auto-switch to
-  `SPATIAL_INDEX=NO` unless a future accepted change introduces that behavior.
+  verified Pyogrio `0.12.1`, GDAL `3.11.4`, PyArrow `24.0.0`, `GPKG rw`,
+  FlatGeobuf driver `rw`, and no `.venv` `ogr2ogr` executable.
+- Prompt 10c large-data limitation to preserve in final docs: FlatGeobuf
+  conversion avoids Python-side full accepted-record materialization by
+  writing accepted chunks to persistent `data/occurrences.gpkg`, then creating
+  indexed `data/occurrences.fgb` through Pyogrio/GDAL with
+  `SPATIAL_INDEX=YES`. For very large DwC-A inputs, GDAL may still need
+  substantial memory while building the final FlatGeobuf spatial index; 5
+  million accepted records estimate about 320,000,000 bytes for
+  spatial-index construction and emit `large_indexed_flatgeobuf_write`.
 - Prompt 07 GeoParquet writer API:
   `dwca_cloud_geospatial.geoparquet.write_geoparquet_occurrences`,
   `GeoParquetWriteResult`, `GeoParquetWriterOptions`,
@@ -162,16 +161,16 @@
   default-on bounded `grid` spatial sorting, streaming rejected-report
   writing, bounded count/warning aggregation and PyArrow validation of bbox
   schema/content. Partitioned GeoParquet dataset output remains deferred and
-  is rejected when requested. Combined FlatGeobuf+GeoParquet conversion still
-  uses the existing FlatGeobuf materialized writer handoff.
+  is rejected when requested. Combined FlatGeobuf+GeoParquet conversion uses
+  the Prompt 10c GeoPackage-staged FlatGeobuf handoff.
 - Prompt 10/10b viewer/docs implication to preserve: valid GeoParquet-only
-  bundles, including large-output bundles, may omit `exports/occurrences.fgb`.
+  bundles, including large-output bundles, may omit `data/occurrences.fgb`.
   Viewer and final docs should describe the accepted no-FlatGeobuf behavior
   from `docs/viewer_contract.md` instead of assuming every valid bundle has a
   FlatGeobuf map layer.
 - Prompt 10c optimized FlatGeobuf implementation when present: preserve the
   persistent GeoPackage staging artifact at `data/occurrences.gpkg`,
-  indexed FlatGeobuf output at `exports/occurrences.fgb`, manifest inventory
+  indexed FlatGeobuf output at `data/occurrences.fgb`, manifest inventory
   role/media type/checksum/record count for GeoPackage, processing metadata
   describing the GeoPackage staging and GDAL/OGR helper strategy, validation
   checks for GeoPackage and FlatGeobuf count reconciliation, and dependency
@@ -209,12 +208,10 @@ Make the MVP understandable, repeatable and ready for external review.
   dependency stack and real writer verification command.
 - Add regression tests for parser behavior, normalization, output writing and bundle validation where gaps remain.
 - Add known limitations and MVP+ roadmap, including PMTiles as deferred.
-- Document the current large-DwC-A limitation clearly: full-record
-  materialization remains a risk until chunked parser/normalizer/writer
-  handoff is implemented.
-- If Prompt 10b has been completed, replace the generic materialization
-  limitation with the actual implemented bounded-memory behavior, test
-  evidence and remaining scale limits.
+- Document the current large-DwC-A limitation clearly: Prompt 10b/10c provide
+  chunked parser/normalizer/writer handoff for GeoParquet large-output mode and
+  FlatGeobuf GeoPackage staging, but GDAL FlatGeobuf spatial-index creation
+  may still need substantial memory.
 - Document the checklist limitation clearly: checklist/Taxon DwC-A archives can
   be inspected, but the MVP converter only produces geospatial outputs from
   occurrence archives with coordinate terms.

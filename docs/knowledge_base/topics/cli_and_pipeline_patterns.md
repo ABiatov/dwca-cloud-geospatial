@@ -60,8 +60,9 @@ Implemented Prompt 10 core API:
 Implemented Prompt 10b core-only large-output options:
 
 - `ConversionOptions.chunk_size` controls streaming occurrence batch size.
-- `GeoParquetWriterOptions.large_output_mode=True` selects the bounded
-  GeoParquet-only large-output path.
+- `GeoParquetWriterOptions.large_output_mode=True` selects GeoParquet
+  large-output optimizations. FlatGeobuf conversion uses chunked GeoPackage
+  staging by default when FlatGeobuf is selected.
 - The large-output path writes GeoParquet `bbox` covering metadata and uses
   the bounded `grid` spatial sort. It is not exposed as a dedicated CLI flag
   yet; CLI `--format geoparquet` keeps the Prompt 10 syntax.
@@ -106,12 +107,11 @@ Do not hide behavior in working-directory assumptions.
 - The MVP CLI should use the Python standard library `argparse`. Command handlers should remain thin wrappers around core functions and structured configuration/result objects. Click or Typer should not be added unless the CLI grows enough that `argparse` becomes burdensome to maintain.
 - `inspect <archive>` should ship in the MVP CLI as a lightweight archive/schema inspection command. It should parse DwC-A structure through `meta.xml`, report core/extension files, row types, declared fields, coordinate field presence and parser warnings, and avoid full occurrence normalization, geospatial conversion or output bundle writing. Human-readable text output is sufficient for MVP; `--json` is useful but optional.
 - Checklist/Taxon DwC-A archives should remain valid for `inspect`, but `convert` should fail fast with an actionable non-occurrence input error when no occurrence core or coordinate terms are present.
-- FlatGeobuf conversion should preserve Prompt 06 writer semantics: default
-  indexed writes request `SPATIAL_INDEX=YES`, large indexed writes surface
-  non-fatal structured warnings such as `large_indexed_flatgeobuf_write`, and
-  `SPATIAL_INDEX=NO` should be an explicit user/config option if exposed by
-  the core API or CLI. Do not silently auto-disable the index for large files
-  without updating `docs/output_format.md`.
+- FlatGeobuf conversion should preserve indexed output semantics: default
+  writes request `SPATIAL_INDEX=YES`, large indexed writes surface non-fatal
+  structured warnings such as `large_indexed_flatgeobuf_write`, and conversion
+  must not silently auto-disable the index for large files without updating
+  `docs/output_format.md`.
 - CLI/core errors should surface `FlatGeobufDependencyError` as an actionable
   dependency setup message, pointing users to the documented
   `.[dev,flatgeobuf]` install path.

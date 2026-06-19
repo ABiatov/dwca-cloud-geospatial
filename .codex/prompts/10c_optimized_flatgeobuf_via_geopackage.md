@@ -112,7 +112,7 @@ bundle at `data/occurrences.gpkg` after conversion and be listed in
 
 - Keep default conversion format as FlatGeobuf.
 - Preserve the indexed FlatGeobuf output at:
-  `exports/occurrences.fgb`.
+  `data/occurrences.fgb`.
 - Add a persistent GeoPackage artifact at:
   `data/occurrences.gpkg`.
 - Do not delete `data/occurrences.gpkg` after FlatGeobuf generation.
@@ -129,7 +129,7 @@ bundle at `data/occurrences.gpkg` after conversion and be listed in
   - FlatGeobuf spatial index status.
 - Do not add `data/occurrences.gpkg` as the default viewer map layer unless
   the viewer contract explicitly accepts it. The MVP viewer should continue
-  to prefer `exports/occurrences.fgb` when FlatGeobuf exists.
+  to prefer `data/occurrences.fgb` when FlatGeobuf exists.
 
 ## Implementation Tasks
 
@@ -141,7 +141,7 @@ bundle at `data/occurrences.gpkg` after conversion and be listed in
   `FLATGEOBUF_PROJECTION_COLUMNS`, point geometry, `OGC:CRS84`,
   longitude/latitude order, `quality_flags` and `has_quality_flags`.
 - Ensure the accepted record set in `data/occurrences.gpkg` and
-  `exports/occurrences.fgb` is identical unless processing metadata documents
+  `data/occurrences.fgb` is identical unless processing metadata documents
   an explicit export filter.
 - Use `SPATIAL_INDEX=YES` for the final FlatGeobuf. Do not silently switch to
   `SPATIAL_INDEX=NO`.
@@ -182,7 +182,7 @@ bundle at `data/occurrences.gpkg` after conversion and be listed in
 - Use small chunk sizes in tests to prove chunked handoff at the API level.
 - Add tests proving:
   - `data/occurrences.gpkg` is written and retained;
-  - `exports/occurrences.fgb` is written with spatial index requested;
+  - `data/occurrences.fgb` is written with spatial index requested;
   - both files are inventoried in `manifest.files`;
   - GeoPackage and FlatGeobuf record counts reconcile;
   - rejected records are streamed and counted correctly;
@@ -238,7 +238,7 @@ Documentation must clearly state:
   GeoPackage staging handoff without Python-side full accepted-record
   materialization.
 - `data/occurrences.gpkg` is retained in the output bundle and inventoried.
-- `exports/occurrences.fgb` is generated from the GeoPackage with
+- `data/occurrences.fgb` is generated from the GeoPackage with
   `SPATIAL_INDEX=YES`.
 - Bundle metadata records the GeoPackage staging strategy, helper backend and
   output counts.

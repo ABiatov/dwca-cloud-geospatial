@@ -15,7 +15,7 @@ sources:
 
 ## Use In This Project
 
-Accepted MVP override: the first static viewer should load `exports/occurrences.fgb`. PMTiles is an intended MVP+ viewer-optimized map output, not an MVP requirement.
+Accepted MVP override: the first static viewer should load `data/occurrences.fgb`. PMTiles is an intended MVP+ viewer-optimized map output, not an MVP requirement.
 
 The static MapLibre viewer should consume generated files and a manifest from static hosting without requiring a permanent backend.
 
@@ -54,7 +54,7 @@ Likely manifest sections:
 
 - PMTiles is deferred to MVP+. The first prototype should start with FlatGeobuf viewer loading: `planning/decisions/ADR-001-mvp-boundaries-and-interfaces.md` moves PMTiles to MVP+, and `docs/development_plan.md` excludes PMTiles generation from the MVP except as documented MVP+ work.
 - The MVP static viewer should read `manifest.json` and metadata files, and
-  use `exports/occurrences.fgb` for map display when a FlatGeobuf layer is
+  use `data/occurrences.fgb` for map display when a FlatGeobuf layer is
   generated. GeoParquet-only bundles may omit FlatGeobuf and should be handled
   through the no-map-layer behavior accepted in `docs/viewer_contract.md`.
   Browser-side filters apply over generated bundle fields when a readable

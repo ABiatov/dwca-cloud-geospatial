@@ -22,7 +22,7 @@
   `FlatGeobufWriterWarning`, `FlatGeobufDependencyError`,
   `DEFAULT_FLATGEOBUF_RELATIVE_PATH` and
   `FLATGEOBUF_PROJECTION_COLUMNS`.
-- Prompt 06 writes accepted records under `exports/occurrences.fgb`, requests
+- Prompt 06 writes accepted records under `data/occurrences.fgb`, requests
   `SPATIAL_INDEX=YES` by default, returns structured large indexed-write
   warnings with code `large_indexed_flatgeobuf_write`, and raises
   `FlatGeobufDependencyError` when optional Pyogrio/PyArrow/GDAL support is

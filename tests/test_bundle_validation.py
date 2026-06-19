@@ -304,5 +304,5 @@ def test_flatgeobuf_declarations_are_validated_when_dependencies_are_available(
     result = validate_output_bundle(tmp_path)
 
     assert not result.has_errors
-    assert "exports/occurrences.fgb" in result.checked_files
+    assert "data/occurrences.fgb" in result.checked_files
     assert any(check.name == "flatgeobuf_pyogrio" and check.status == "passed" for check in result.checks)

@@ -20,6 +20,7 @@ from dwca_cloud_geospatial.flatgeobuf import (
     FlatGeobufDependencyError,
     FlatGeobufWriteResult,
     FlatGeobufWriterOptions,
+    GeoPackageStagedFlatGeobufWriter,
     write_flatgeobuf_occurrences,
 )
 from dwca_cloud_geospatial.geoparquet import (
@@ -127,7 +128,7 @@ def convert_dwca_archive(
     _prepare_output_path(output_root, overwrite=conversion_options.overwrite)
 
     if _use_streaming_conversion(conversion_options, output_formats):
-        return _convert_dwca_archive_streaming_geoparquet(
+        return _convert_dwca_archive_streaming_outputs(
             source_path=source_path,
             output_root=output_root,
             output_formats=output_formats,
@@ -196,7 +197,7 @@ def convert_dwca_archive(
     )
 
 
-def _convert_dwca_archive_streaming_geoparquet(
+def _convert_dwca_archive_streaming_outputs(
     *,
     source_path: Path,
     output_root: Path,
@@ -221,6 +222,14 @@ def _convert_dwca_archive_streaming_geoparquet(
 
     aggregator = _StreamingNormalizationAggregator()
     rejected_writer = RejectedRecordsCsvWriter(output_root / REJECTED_RECORDS_RELATIVE_PATH)
+    flatgeobuf_writer = (
+        GeoPackageStagedFlatGeobufWriter(
+            output_root,
+            options=conversion_options.flatgeobuf,
+        )
+        if FLATGEOBUF_FORMAT in output_formats
+        else None
+    )
 
     def accepted_records():
         try:
@@ -237,16 +246,24 @@ def _convert_dwca_archive_streaming_geoparquet(
                 normalized = normalize_occurrence_record_batch(batch.records)
                 aggregator.add_normalization_result(normalized)
                 rejected_writer.write_many(normalized.rejected_records)
+                if flatgeobuf_writer is not None:
+                    flatgeobuf_writer.write_batch(normalized.accepted_records)
                 yield from normalized.accepted_records
         finally:
             rejected_writer.close()
 
     try:
-        geoparquet_result = write_geoparquet_occurrences(
-            accepted_records(),
-            output_root,
-            options=conversion_options.geoparquet,
-        )
+        flatgeobuf_result: FlatGeobufWriteResult | None = None
+        geoparquet_result: GeoParquetWriteResult | None = None
+        if GEOPARQUET_FORMAT in output_formats:
+            geoparquet_result = write_geoparquet_occurrences(
+                accepted_records(),
+                output_root,
+                options=conversion_options.geoparquet,
+            )
+        else:
+            for _record in accepted_records():
+                pass
         occurrence_result = OccurrenceReadResult(
             inspection=stream.inspection,
             records=(),
@@ -263,15 +280,18 @@ def _convert_dwca_archive_streaming_geoparquet(
                 "Check coordinate values and required provenance fields in the source archive.",
                 diagnostics=occurrence_result.diagnostics,
             )
+        if flatgeobuf_writer is not None:
+            flatgeobuf_result = flatgeobuf_writer.finish()
         metadata_result = write_bundle_metadata(
             output_directory=output_root,
             occurrence_result=occurrence_result,
             normalization_result=normalization_result,
+            flatgeobuf_result=flatgeobuf_result,
             geoparquet_result=geoparquet_result,
             rejected_records_path=rejected_writer.written_path,
             options=_bundle_options(conversion_options, output_formats=output_formats),
         )
-    except GeoParquetDependencyError as exc:
+    except (FlatGeobufDependencyError, GeoParquetDependencyError) as exc:
         raise ConversionError(
             f"{exc} Install the documented optional dependencies for the selected output format.",
             diagnostics=tuple((*stream.diagnostics, *aggregator.diagnostics)),
@@ -294,6 +314,7 @@ def _convert_dwca_archive_streaming_geoparquet(
         occurrence_result=occurrence_result,
         normalization_result=normalization_result,
         metadata_result=metadata_result,
+        flatgeobuf_result=flatgeobuf_result,
         geoparquet_result=geoparquet_result,
     )
 
@@ -421,9 +442,15 @@ def _use_streaming_conversion(
     output_formats: tuple[str, ...],
 ) -> bool:
     return (
-        GEOPARQUET_FORMAT in output_formats
-        and FLATGEOBUF_FORMAT not in output_formats
-        and conversion_options.geoparquet.large_output_mode
+        (
+            FLATGEOBUF_FORMAT in output_formats
+            and conversion_options.flatgeobuf_backend is None
+        )
+        or (
+            GEOPARQUET_FORMAT in output_formats
+            and FLATGEOBUF_FORMAT not in output_formats
+            and conversion_options.geoparquet.large_output_mode
+        )
     )
 
 

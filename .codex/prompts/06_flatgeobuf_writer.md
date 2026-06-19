@@ -33,7 +33,7 @@
 
 ## Goal
 
-Write accepted occurrence records to the MVP default FlatGeobuf export at `exports/occurrences.fgb`.
+Write accepted occurrence records to the MVP default FlatGeobuf export at `data/occurrences.fgb`.
 
 ## Tasks
 
@@ -60,7 +60,7 @@ Write accepted occurrence records to the MVP default FlatGeobuf export at `expor
 
 ## Acceptance Criteria
 
-- `exports/occurrences.fgb` can be produced for sample accepted records when dependencies are available.
+- `data/occurrences.fgb` can be produced for sample accepted records when dependencies are available.
 - Required FlatGeobuf projection columns are present.
 - Spatial index is requested by default.
 - Large dataset warning behavior is testable.

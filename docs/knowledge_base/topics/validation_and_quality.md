@@ -93,7 +93,9 @@ Required validation failures should be separated from optional
 dependency-dependent skips. For declared GeoParquet files, PyArrow validation
 is required. `geoparquet-io`, DuckDB and Pyogrio/GDAL checks are optional and
 should be recorded as warnings or skipped checks when unavailable. FlatGeobuf
-inspection is dependency-dependent through Pyogrio/GDAL.
+inspection is dependency-dependent through Pyogrio/GDAL. Declared GeoPackage
+staging artifacts are checked through SQLite/GeoPackage metadata tables and
+row counts, with optional Pyogrio/GDAL inspection when available.
 
 ## Diagnostics
 
@@ -133,6 +135,11 @@ Write diagnostics as portable files, likely JSON and/or CSV:
   now also checks GeoParquet `bbox` covering schema/content when the column is
   present. Partitioned GeoParquet dataset validation remains future work
   because partitioned output is deferred and rejected when requested.
+- Prompt 10c added persistent GeoPackage staging at `data/occurrences.gpkg`
+  for default indexed FlatGeobuf generation. Validation checks that declared
+  GeoPackage files exist, match manifest size/checksum, expose GeoPackage
+  metadata tables when readable, include required occurrence projection
+  columns and reconcile row counts with FlatGeobuf and accepted records.
 - Invalid or incomplete coordinate records are rejected from geospatial outputs and preserved through diagnostics/reports, including stable reason codes. `docs/development_plan.md` M2 requires invalid or incomplete coordinate records to be rejected, M3 requires `reports/rejected_records.csv` when records are rejected or skipped, and `docs/output_format.md` makes that report conditional on at least one rejected/skipped record.
 - Validation should exist both during conversion and as a separate validation surface. `docs/development_plan.md` M3 calls for a bundle validation command or API, and M4 calls for a CLI command for validating an existing output bundle.
 - For MVP, type conversion failures should be counted by field and reason in processing metadata. Optional-field conversion failures should set normalized values to null and emit warnings when the failure rate for a field is `>= 5%` of parsed records. Critical-field failures, including coordinate parsing failures, should reject affected records with stable reason codes. The conversion should fail only when no accepted occurrence records remain, required provenance fields cannot be produced, or parser/metadata structure prevents reliable row interpretation. Future releases may add configurable warning/failure thresholds.

@@ -235,7 +235,7 @@ def test_explicit_geoparquet_bundle_inventory_and_rejected_report(
 
     layers_by_format = {layer["source_format"]: layer for layer in manifest["layers"]}
     assert set(layers_by_format) == {"flatgeobuf", "geoparquet"}
-    assert layers_by_format["flatgeobuf"]["path"] == "exports/occurrences.fgb"
+    assert layers_by_format["flatgeobuf"]["path"] == "data/occurrences.fgb"
     assert layers_by_format["geoparquet"]["path"] == "data/occurrences.parquet"
     assert manifest["viewer"]["default_layer"] == "occurrences"
 

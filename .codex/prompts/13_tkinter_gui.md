@@ -60,26 +60,24 @@
   `warning_count` and optional conversion warnings from the core workflow
   without treating them as conversion failures.
 - Prompt 06 FlatGeobuf behavior: default conversion uses
-  `exports/occurrences.fgb` with `SPATIAL_INDEX=YES` unless core conversion
-  exposes and the user selects an explicit no-index option. Large indexed
-  writes emit structured warning code `large_indexed_flatgeobuf_write`; GUI
-  status should surface that as a warning, not a failure.
+  `data/occurrences.fgb` with `SPATIAL_INDEX=YES`. Large indexed writes
+  emit structured warning code `large_indexed_flatgeobuf_write`; GUI status
+  should surface that as a warning, not a failure.
 - Prompt 06 dependency setup: FlatGeobuf-capable development installs use
   `python -m pip install -e "${REPO}[dev,flatgeobuf]"`. If the core API
   raises `FlatGeobufDependencyError`, GUI errors should preserve its actionable
   dependency message.
-- Prompt 10b large-output handoff: GUI options should expose only large-output
+- Prompt 10b/10c large-output handoff: GUI options should expose only large-output
   controls implemented by the core API. Implemented controls are GeoParquet
   `large_output_mode`, chunk size and the default `grid` spatial sort through
   `GeoParquetWriterOptions`; partitioned GeoParquet mode is not implemented
-  and should preserve the core actionable error if requested. Large-output
-  bounded-memory mode applies to GeoParquet-only conversion; if the user also
-  selects FlatGeobuf, the GUI must not describe that run as bounded-memory
-  large-output conversion because the current FlatGeobuf writer still
-  materializes accepted rows. Show non-fatal large-output warnings separately
-  from conversion failures.
+  and should preserve the core actionable error if requested. FlatGeobuf
+  conversion uses chunked GeoPackage staging at `data/occurrences.gpkg`; show
+  non-fatal large-output warnings separately from conversion failures because
+  GDAL may still need substantial memory while building the final FlatGeobuf
+  spatial index.
 - Prompt 10c optimized FlatGeobuf handoff when present: default FlatGeobuf
-  conversion may create both `exports/occurrences.fgb` and persistent
+  conversion may create both `data/occurrences.fgb` and persistent
   `data/occurrences.gpkg`. GUI status should show both artifacts when present
   and preserve actionable dependency errors for missing `.venv` GDAL/OGR,
   Pyogrio or GeoPackage helper tooling.

@@ -60,7 +60,7 @@
   `DEFAULT_FLATGEOBUF_RELATIVE_PATH` and
   `FLATGEOBUF_PROJECTION_COLUMNS`.
 - Prompt 06 FlatGeobuf dependency behavior: default conversion should use the
-  writer for `exports/occurrences.fgb`; if Pyogrio/PyArrow/GDAL support is not
+  writer for `data/occurrences.fgb`; if Pyogrio/PyArrow/GDAL support is not
   installed, surface `FlatGeobufDependencyError` as an actionable conversion
   error instead of failing with an import traceback. Preserve structured
   `large_indexed_flatgeobuf_write` warnings in conversion results and

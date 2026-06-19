@@ -2,7 +2,7 @@
 
 Status: Accepted MVP behavior
 
-Last updated: 2026-06-18
+Last updated: 2026-06-19
 
 ## Purpose
 
@@ -15,7 +15,8 @@ contact GBIF or OBIS APIs, require a database, or start a backend service.
 
 ## Dependency Setup
 
-Default FlatGeobuf conversion requires the optional FlatGeobuf writer stack:
+Default FlatGeobuf conversion requires the optional FlatGeobuf writer stack
+with writable GDAL `GPKG` and `FlatGeobuf` drivers:
 
 ```bash
 python -m pip install -e "${REPO}[dev,flatgeobuf]"
@@ -59,7 +60,7 @@ Public conversion objects:
 
 Supported output format names:
 
-- `flatgeobuf`: default output at `exports/occurrences.fgb`.
+- `flatgeobuf`: default output at `data/occurrences.fgb`.
 - `geoparquet`: explicit analytical output at `data/occurrences.parquet`.
 
 Pass both names to write both geospatial outputs from the same accepted
@@ -68,6 +69,11 @@ normalized occurrence record set:
 ```python
 ConversionOptions(output_formats=("flatgeobuf", "geoparquet"))
 ```
+
+Default FlatGeobuf conversion streams occurrence batches through normalization
+into `data/occurrences.gpkg`, then creates `data/occurrences.fgb` from the
+GeoPackage with `SPATIAL_INDEX=YES`. The GeoPackage remains in the bundle and
+is inventoried in `manifest.files`.
 
 Large GeoParquet output is enabled through `GeoParquetWriterOptions` on the
 core API. It keeps the CLI default unchanged and writes single-file
@@ -84,10 +90,10 @@ ConversionOptions(
 )
 ```
 
-The bounded-memory large-output path currently applies to GeoParquet-only
-conversion. Combined FlatGeobuf+GeoParquet conversion still uses the existing
-FlatGeobuf writer handoff, which materializes accepted rows for the current
-GDAL/Pyogrio backend.
+FlatGeobuf conversion no longer requires Python-side full accepted-record
+materialization for its writer handoff. Combined FlatGeobuf+GeoParquet
+conversion appends each accepted batch to GeoPackage and passes the same
+accepted records onward to the GeoParquet writer.
 
 Partitioned GeoParquet configuration fields exist on `GeoParquetWriterOptions`
 for forward compatibility, but `partitioned_dataset=True` is rejected until the
@@ -187,13 +193,18 @@ output-bundle/
   metadata/
     source.json
     processing.json
-  exports/
+  data/
+    occurrences.gpkg
     occurrences.fgb
 ```
 
 When GeoParquet is selected, `data/occurrences.parquet` is added. When one or
 more records are rejected, `reports/rejected_records.csv` is written and
 inventoried in `manifest.json`.
+
+`metadata/processing.json` records GeoPackage staging enablement, staging path,
+writer backend, GDAL/OGR helper strategy, whether FlatGeobuf was generated
+from GeoPackage and FlatGeobuf spatial-index status.
 
 The bundle metadata is written only through
 `dwca_cloud_geospatial.bundle.write_bundle_metadata`; CLI handlers do not

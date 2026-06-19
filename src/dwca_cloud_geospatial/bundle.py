@@ -342,6 +342,10 @@ def build_processing_metadata(
         },
         "configuration": configuration,
         "configuration_hash": _configuration_hash(configuration),
+        "output_decisions": _output_decisions(
+            flatgeobuf_result=flatgeobuf_result,
+            geoparquet_result=geoparquet_result,
+        ),
         "field_mapping": _field_mapping(),
         "quality_rules": {
             "version": OCCURRENCE_SCHEMA_VERSION,
@@ -478,6 +482,11 @@ def _processing_counts(
         "warning_count": counts.warning_count,
         "geoparquet_records": geoparquet_result.record_count if geoparquet_result else 0,
         "flatgeobuf_records": flatgeobuf_result.record_count if flatgeobuf_result else 0,
+        "geopackage_records": (
+            flatgeobuf_result.staging_result.record_count
+            if flatgeobuf_result and flatgeobuf_result.staging_result
+            else 0
+        ),
     }
 
 
@@ -513,6 +522,16 @@ def _file_inventory(
                 role="geoparquet",
                 media_type="application/vnd.apache.parquet",
                 record_count=geoparquet_result.record_count,
+            )
+        )
+    if flatgeobuf_result is not None and flatgeobuf_result.staging_result is not None:
+        inventory.append(
+            _file_entry(
+                output_root=output_root,
+                relative_path=flatgeobuf_result.staging_result.relative_path,
+                role="geopackage",
+                media_type="application/geopackage+sqlite3",
+                record_count=flatgeobuf_result.staging_result.record_count,
             )
         )
     if flatgeobuf_result is not None:
@@ -671,6 +690,43 @@ def _effective_configuration(
             "spatial_index": flatgeobuf_result.spatial_index
             if flatgeobuf_result
             else None,
+            "generated_from_geopackage": flatgeobuf_result.generated_from_geopackage
+            if flatgeobuf_result
+            else False,
+            "helper_strategy": flatgeobuf_result.helper_strategy
+            if flatgeobuf_result
+            else None,
+        },
+        "geopackage_staging": {
+            "enabled": bool(
+                flatgeobuf_result is not None and flatgeobuf_result.staging_result
+            ),
+            "relative_path": (
+                flatgeobuf_result.staging_result.relative_path.as_posix()
+                if flatgeobuf_result and flatgeobuf_result.staging_result
+                else None
+            ),
+            "writer_backend": (
+                flatgeobuf_result.staging_result.writer_backend
+                if flatgeobuf_result and flatgeobuf_result.staging_result
+                else None
+            ),
+            "layer": (
+                flatgeobuf_result.staging_result.layer
+                if flatgeobuf_result and flatgeobuf_result.staging_result
+                else None
+            ),
+            "flatgeobuf_generated_from_geopackage": (
+                flatgeobuf_result.generated_from_geopackage
+                if flatgeobuf_result
+                else False
+            ),
+            "gdal_ogr_helper_strategy": (
+                flatgeobuf_result.helper_strategy if flatgeobuf_result else None
+            ),
+            "flatgeobuf_spatial_index": (
+                flatgeobuf_result.spatial_index if flatgeobuf_result else None
+            ),
         },
         "geoparquet": {
             "relative_path": geoparquet_result.relative_path.as_posix()
@@ -717,6 +773,33 @@ def _effective_configuration(
     if user_configuration:
         configuration["user"] = dict(user_configuration)
     return configuration
+
+
+def _output_decisions(
+    *,
+    flatgeobuf_result: FlatGeobufWriteResult | None,
+    geoparquet_result: GeoParquetWriteResult | None,
+) -> dict[str, Any]:
+    staging_result = flatgeobuf_result.staging_result if flatgeobuf_result else None
+    return {
+        "geopackage_staging_enabled": staging_result is not None,
+        "geopackage_staging_relative_path": (
+            staging_result.relative_path.as_posix() if staging_result else None
+        ),
+        "geopackage_staging_writer_backend": (
+            staging_result.writer_backend if staging_result else None
+        ),
+        "flatgeobuf_generated_from_geopackage": (
+            flatgeobuf_result.generated_from_geopackage if flatgeobuf_result else False
+        ),
+        "gdal_ogr_helper_strategy": (
+            flatgeobuf_result.helper_strategy if flatgeobuf_result else None
+        ),
+        "flatgeobuf_spatial_index": (
+            flatgeobuf_result.spatial_index if flatgeobuf_result else None
+        ),
+        "geoparquet_written": geoparquet_result is not None,
+    }
 
 
 def _configuration_hash(configuration: Mapping[str, Any]) -> str:

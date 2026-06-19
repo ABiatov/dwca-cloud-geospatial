@@ -9,6 +9,7 @@ from importlib.metadata import PackageNotFoundError, version
 import json
 from pathlib import Path, PurePosixPath
 import re
+import sqlite3
 from typing import Any
 
 from dwca_cloud_geospatial.bundle import (
@@ -23,6 +24,7 @@ from dwca_cloud_geospatial.bundle import (
 )
 from dwca_cloud_geospatial.flatgeobuf import (
     FLATGEOBUF_PROJECTION_COLUMNS,
+    GEOPACKAGE_LAYER,
     GEOMETRY_COLUMN as FLATGEOBUF_GEOMETRY_COLUMN,
 )
 from dwca_cloud_geospatial.geoparquet import (
@@ -247,6 +249,12 @@ def validate_output_bundle(bundle_root: str | Path) -> BundleValidationResult:
                 geospatial_counts[path_value] = row_count
         elif role == "flatgeobuf":
             columns, row_count = _validate_flatgeobuf(root, entry, collector)
+            if columns is not None:
+                geospatial_columns[path_value] = columns
+            if row_count is not None:
+                geospatial_counts[path_value] = row_count
+        elif role == "geopackage":
+            columns, row_count = _validate_geopackage(root, entry, collector)
             if columns is not None:
                 geospatial_columns[path_value] = columns
             if row_count is not None:
@@ -1316,6 +1324,198 @@ def _validate_flatgeobuf(
     return columns, row_count
 
 
+def _validate_geopackage(
+    root: Path,
+    entry: dict[str, Any],
+    collector: _ValidationCollector,
+) -> tuple[set[str] | None, int | None]:
+    relative = entry["path"]
+    path = root / relative
+    columns: set[str] | None = None
+    row_count: int | None = None
+    try:
+        with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as connection:
+            tables = _sqlite_tables(connection)
+            required_metadata = {"gpkg_contents", "gpkg_geometry_columns"}
+            missing_metadata = sorted(required_metadata - tables)
+            if missing_metadata:
+                collector.error(
+                    code="geopackage_metadata_tables_missing",
+                    message="GeoPackage is missing required metadata tables.",
+                    path=relative,
+                    check="geopackage_sqlite",
+                    details={"missing_tables": missing_metadata},
+                )
+            layer = _geopackage_occurrence_layer(connection, tables)
+            if layer is None:
+                collector.error(
+                    code="geopackage_occurrence_layer_missing",
+                    message="GeoPackage must contain an occurrences layer.",
+                    path=relative,
+                    check="geopackage_sqlite",
+                )
+            else:
+                table_info = connection.execute(f'PRAGMA table_info("{layer}")').fetchall()
+                columns = {row[1] for row in table_info}
+                missing_columns = sorted(set(FLATGEOBUF_PROJECTION_COLUMNS) - columns)
+                if missing_columns:
+                    collector.error(
+                        code="geopackage_required_columns_missing",
+                        message="GeoPackage occurrence layer is missing required columns.",
+                        path=relative,
+                        check="geopackage_sqlite",
+                        details={"missing_columns": missing_columns},
+                    )
+                row_count = int(
+                    connection.execute(f'SELECT COUNT(*) FROM "{layer}"').fetchone()[0]
+                )
+                _validate_file_record_count(
+                    entry,
+                    row_count,
+                    collector,
+                    check="geopackage_sqlite",
+                )
+    except sqlite3.Error as exc:
+        collector.error(
+            code="geopackage_sqlite_open_failed",
+            message=f"GeoPackage could not be opened as SQLite: {exc}",
+            path=relative,
+            check="geopackage_sqlite",
+        )
+
+    collector.check(
+        name="geopackage_sqlite",
+        status=FAILED
+        if any(error.path == relative and error.check == "geopackage_sqlite" for error in collector.errors)
+        else PASSED,
+        path=relative,
+        tool="sqlite3",
+        tool_version=sqlite3.sqlite_version,
+        details={
+            "row_count": row_count,
+            "columns": sorted(columns) if columns is not None else None,
+        },
+    )
+    pyogrio_columns, pyogrio_count = _validate_geopackage_with_pyogrio(
+        path,
+        relative,
+        entry,
+        collector,
+    )
+    return pyogrio_columns or columns, pyogrio_count if pyogrio_count is not None else row_count
+
+
+def _sqlite_tables(connection: sqlite3.Connection) -> set[str]:
+    rows = connection.execute(
+        "SELECT name FROM sqlite_master WHERE type IN ('table', 'view')"
+    ).fetchall()
+    return {row[0] for row in rows}
+
+
+def _geopackage_occurrence_layer(
+    connection: sqlite3.Connection,
+    tables: set[str],
+) -> str | None:
+    if "gpkg_contents" in tables:
+        rows = connection.execute(
+            "SELECT table_name FROM gpkg_contents WHERE data_type = 'features'"
+        ).fetchall()
+        feature_layers = [row[0] for row in rows]
+        if GEOPACKAGE_LAYER in feature_layers:
+            return GEOPACKAGE_LAYER
+        if len(feature_layers) == 1:
+            return feature_layers[0]
+    return GEOPACKAGE_LAYER if GEOPACKAGE_LAYER in tables else None
+
+
+def _validate_geopackage_with_pyogrio(
+    path: Path,
+    relative: str,
+    entry: dict[str, Any],
+    collector: _ValidationCollector,
+) -> tuple[set[str] | None, int | None]:
+    try:
+        import pyogrio
+    except ImportError:
+        _optional_skip(
+            collector,
+            name="geopackage_pyogrio",
+            path=relative,
+            tool="pyogrio",
+            message="Optional Pyogrio/GDAL GeoPackage validation is unavailable.",
+        )
+        return None, None
+
+    tool_version = _package_version("pyogrio")
+    if pyogrio.list_drivers().get("GPKG") is None:
+        _optional_skip(
+            collector,
+            name="geopackage_pyogrio",
+            path=relative,
+            tool="pyogrio",
+            tool_version=tool_version,
+            message="The local GDAL build does not expose the GeoPackage driver.",
+        )
+        return None, None
+    try:
+        info = pyogrio.read_info(
+            path,
+            layer=GEOPACKAGE_LAYER,
+            force_feature_count=True,
+            force_total_bounds=True,
+        )
+    except Exception as exc:
+        collector.warning(
+            code="optional_geopackage_pyogrio_skipped",
+            message=f"Optional Pyogrio/GDAL GeoPackage validation could not inspect the file: {exc}",
+            path=relative,
+            check="geopackage_pyogrio",
+        )
+        collector.check(
+            name="geopackage_pyogrio",
+            status=SKIPPED,
+            path=relative,
+            tool="pyogrio",
+            tool_version=tool_version,
+            message=str(exc),
+        )
+        return None, None
+
+    raw_fields = info.get("fields")
+    fields = set(raw_fields.tolist() if hasattr(raw_fields, "tolist") else raw_fields or [])
+    columns = set(fields)
+    columns.add(FLATGEOBUF_GEOMETRY_COLUMN)
+    row_count = info.get("features")
+    if _int_or_none(row_count) is not None:
+        row_count = int(row_count)
+        _validate_file_record_count(entry, row_count, collector, check="geopackage_pyogrio")
+    else:
+        row_count = None
+    if info.get("geometry_type") != "Point":
+        collector.error(
+            code="geopackage_geometry_type_invalid",
+            message="GeoPackage occurrence layer geometry type must be Point.",
+            path=relative,
+            check="geopackage_pyogrio",
+            details={"geometry_type": info.get("geometry_type")},
+        )
+    collector.check(
+        name="geopackage_pyogrio",
+        status=FAILED
+        if any(error.path == relative and error.check == "geopackage_pyogrio" for error in collector.errors)
+        else PASSED,
+        path=relative,
+        tool="pyogrio",
+        tool_version=tool_version,
+        details={
+            "features": row_count,
+            "geometry_type": info.get("geometry_type"),
+            "fields": sorted(fields),
+        },
+    )
+    return columns, row_count
+
+
 def _validate_rejected_report(
     root: Path,
     entry: dict[str, Any],
@@ -1534,6 +1734,48 @@ def _validate_counts(
         collector.error(
             code="processing_flatgeobuf_count_without_file",
             message="processing flatgeobuf_records is non-zero but no FlatGeobuf file is declared.",
+            path=PROCESSING_METADATA_RELATIVE_PATH.as_posix(),
+            check="counts",
+        )
+
+    if "geopackage" in entries_by_role:
+        path = entries_by_role["geopackage"]["path"]
+        if path in file_counts:
+            _validate_named_count(
+                actual=file_counts[path],
+                expected=processing_counts.get("geopackage_records"),
+                code="processing_geopackage_count_mismatch",
+                message="processing geopackage_records must match GeoPackage rows.",
+                path=PROCESSING_METADATA_RELATIVE_PATH.as_posix(),
+                check="counts",
+                collector=collector,
+            )
+            if accepted is not None:
+                _validate_named_count(
+                    actual=file_counts[path],
+                    expected=accepted,
+                    code="accepted_geopackage_count_mismatch",
+                    message="GeoPackage row count must match accepted_records.",
+                    path=path,
+                    check="counts",
+                    collector=collector,
+                )
+            flatgeobuf_entry = entries_by_role.get("flatgeobuf")
+            flatgeobuf_path = flatgeobuf_entry.get("path") if flatgeobuf_entry else None
+            if isinstance(flatgeobuf_path, str) and flatgeobuf_path in file_counts:
+                _validate_named_count(
+                    actual=file_counts[path],
+                    expected=file_counts[flatgeobuf_path],
+                    code="geopackage_flatgeobuf_count_mismatch",
+                    message="GeoPackage and FlatGeobuf record counts must reconcile.",
+                    path=path,
+                    check="counts",
+                    collector=collector,
+                )
+    elif processing_counts.get("geopackage_records") not in (0, None):
+        collector.error(
+            code="processing_geopackage_count_without_file",
+            message="processing geopackage_records is non-zero but no GeoPackage file is declared.",
             path=PROCESSING_METADATA_RELATIVE_PATH.as_posix(),
             check="counts",
         )

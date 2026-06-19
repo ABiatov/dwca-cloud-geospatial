@@ -44,7 +44,7 @@
   `large_indexed_flatgeobuf_write` with `stage="flatgeobuf_writer"`,
   `feature_count` and `estimated_spatial_index_bytes`.
 - Prompt 06 FlatGeobuf output path and projection:
-  `exports/occurrences.fgb` from `DEFAULT_FLATGEOBUF_RELATIVE_PATH`, required
+  `data/occurrences.fgb` from `DEFAULT_FLATGEOBUF_RELATIVE_PATH`, required
   columns from `FLATGEOBUF_PROJECTION_COLUMNS`, point geometry in
   longitude/latitude order, CRS assumption `OGC:CRS84`, and default indexed
   writes with dependency-specific validation when Pyogrio/PyArrow/GDAL are
@@ -72,14 +72,14 @@
   GeoParquet metadata declarations.
 - Prompt 10/10b GeoParquet-only bundle behavior: explicit GeoParquet
   conversion, including large-output mode, may produce a valid bundle without
-  `exports/occurrences.fgb`. The viewer contract must define a graceful
+  `data/occurrences.fgb`. The viewer contract must define a graceful
   no-FlatGeobuf state, such as metadata/provenance display plus an unsupported
   map-layer message, unless Prompt 11 explicitly accepts GeoParquet browser
   loading.
-- Prompt 10c optimized FlatGeobuf handoff when present: default indexed
-  FlatGeobuf generation may use persistent GeoPackage staging at
+- Prompt 10c optimized FlatGeobuf handoff: default indexed FlatGeobuf
+  generation uses persistent GeoPackage staging at
   `data/occurrences.gpkg`, retained in `manifest.files` with role
-  `geopackage`, while `exports/occurrences.fgb` remains the preferred MVP map
+  `geopackage`, while `data/occurrences.fgb` remains the preferred MVP map
   layer. The viewer contract should describe whether to expose the GeoPackage
   artifact as downloadable/source metadata only; do not make GeoPackage the
   default browser map layer unless explicitly accepted.

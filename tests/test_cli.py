@@ -86,7 +86,7 @@ def test_convert_command_writes_default_flatgeobuf_bundle(
     assert "Formats: flatgeobuf" in captured.out
     assert "Accepted records: 1" in captured.out
     assert (output / "manifest.json").exists()
-    assert (output / "exports" / "occurrences.fgb").exists()
+    assert (output / "data" / "occurrences.fgb").exists()
 
 
 def test_convert_command_rejects_checklist_archive(
