@@ -61,6 +61,18 @@ def test_static_viewer_implements_no_flatgeobuf_and_artifact_only_states() -> No
     assert "flatgeobuf.deserialize(url.href)" not in script
 
 
+def test_static_viewer_renders_provenance_doi_links_safely() -> None:
+    script = (VIEWER_DIR / "app.js").read_text(encoding="utf-8")
+
+    assert "function normalizeDoi" in script
+    assert "function doiHref" in script
+    assert "function appendCitationContent" in script
+    assert "addProvenanceDefinition(list, label, value)" in script
+    assert "https://doi.org/${doi}" in script
+    assert "doi\\.org\\/(10\\.\\d{4,9}\\/\\S+)" in script
+    assert "innerHTML" not in script
+
+
 def test_static_viewer_quality_flag_filters_use_exact_tokens() -> None:
     script = (VIEWER_DIR / "app.js").read_text(encoding="utf-8")
 

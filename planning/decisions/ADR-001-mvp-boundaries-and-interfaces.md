@@ -29,6 +29,15 @@ The MVP will not download archives from GBIF, OBIS or other APIs. Users provide 
 
 When source metadata is present in the archive or adjacent metadata, the converter must preserve GBIF/OBIS-relevant provenance fields in output metadata and expose them in the viewer where practical. This includes DOI, citation, dataset keys, download keys and license information when available.
 
+Prompt 14 accepts optional read-only GBIF occurrence download DOI/citation
+enrichment during conversion. This is not archive acquisition: it only reads
+GBIF download metadata and citation endpoints for an inferred or supplied
+download key, stores the resulting DOI/citation in generated metadata, and
+continues conversion with structured warnings when lookup fails. CLI and core
+conversion remain no-network by default. The GUI exposes this enrichment as a
+visible `GBIF DOI citation lookup` checkbox selected by default; clearing it
+keeps GUI conversion no-network.
+
 User-facing interfaces for the MVP are:
 
 - CLI commands for repeatable workflows.
@@ -51,6 +60,9 @@ The GUI should remain a thin wrapper around the core library instead of owning c
 GBIF/OBIS acquisition can be added later as an optional feature, but it must not become a required runtime dependency for the baseline conversion workflow.
 
 The viewer should display source/provenance metadata when available, but it should not require live GBIF or OBIS API access to operate.
+
+GBIF DOI/citation enrichment is a conversion-time provenance enhancement, not
+a viewer dependency and not a permanent backend service.
 
 ## Deferred
 

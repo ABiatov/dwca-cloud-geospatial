@@ -23,6 +23,7 @@ from dwca_cloud_geospatial.geoparquet import (
     GEOPARQUET_PROJECTION_COLUMNS,
     GeoParquetWriteResult,
 )
+from dwca_cloud_geospatial.gbif import GbifDownloadMetadata
 from dwca_cloud_geospatial.inspection import ArchiveInspection
 from dwca_cloud_geospatial.normalization import (
     NORMALIZED_FIELD_TERMS,
@@ -151,6 +152,8 @@ def write_bundle_metadata(
     geoparquet_result: GeoParquetWriteResult | None = None,
     rejected_records_path: str | Path | None = None,
     options: BundleWriterOptions | None = None,
+    gbif_download_metadata: GbifDownloadMetadata | None = None,
+    extra_warnings: Iterable[Mapping[str, Any]] = (),
 ) -> BundleMetadataWriteResult:
     """Write manifest, metadata JSON and optional rejected-record report."""
 
@@ -161,6 +164,7 @@ def write_bundle_metadata(
     source_metadata = build_source_metadata(
         occurrence_result=occurrence_result,
         normalization_result=normalization_result,
+        gbif_download_metadata=gbif_download_metadata,
     )
     source_summary = _source_summary(source_metadata)
     title = writer_options.title or source_summary["title"] or output_root.name
@@ -182,6 +186,8 @@ def write_bundle_metadata(
         options=writer_options,
         created_at=created_at,
         counts=counts,
+        gbif_download_metadata=gbif_download_metadata,
+        extra_warnings=extra_warnings,
     )
 
     source_path = output_root / SOURCE_METADATA_RELATIVE_PATH
@@ -255,6 +261,7 @@ def build_source_metadata(
     *,
     occurrence_result: OccurrenceReadResult,
     normalization_result: OccurrenceNormalizationResult,
+    gbif_download_metadata: GbifDownloadMetadata | None = None,
 ) -> dict[str, Any]:
     """Build ``metadata/source.json`` content from parser and EML metadata."""
 
@@ -279,10 +286,14 @@ def build_source_metadata(
     }
     gbif = {
         "dataset_key": _first_source_value(occurrence_result, _GBIF_DATASET_KEY_TERMS),
-        "download_key": _first_source_value(occurrence_result, _GBIF_DOWNLOAD_KEY_TERMS),
-        "doi": None,
-        "citation": None,
-        "license": None,
+        "download_key": (
+            gbif_download_metadata.download_key
+            if gbif_download_metadata and gbif_download_metadata.download_key
+            else _first_source_value(occurrence_result, _GBIF_DOWNLOAD_KEY_TERMS)
+        ),
+        "doi": gbif_download_metadata.doi if gbif_download_metadata else None,
+        "citation": gbif_download_metadata.citation if gbif_download_metadata else None,
+        "license": gbif_download_metadata.license if gbif_download_metadata else None,
     }
     obis = {
         "dataset_id": _first_source_value(occurrence_result, _OBIS_DATASET_ID_TERMS),
@@ -317,6 +328,8 @@ def build_processing_metadata(
     options: BundleWriterOptions,
     created_at: str,
     counts: dict[str, int],
+    gbif_download_metadata: GbifDownloadMetadata | None = None,
+    extra_warnings: Iterable[Mapping[str, Any]] = (),
 ) -> dict[str, Any]:
     """Build ``metadata/processing.json`` content."""
 
@@ -325,7 +338,10 @@ def build_processing_metadata(
         flatgeobuf_result=flatgeobuf_result,
         geoparquet_result=geoparquet_result,
     )
-    warnings = _processing_warnings(normalization_result, flatgeobuf_result)
+    warnings = [
+        *_processing_warnings(normalization_result, flatgeobuf_result),
+        *[dict(warning) for warning in extra_warnings],
+    ]
     return {
         "created_at": created_at,
         "generator": {
@@ -339,6 +355,9 @@ def build_processing_metadata(
             "archive_kind": occurrence_result.inspection.archive_kind,
             "sha256": occurrence_result.inspection.source_sha256,
             "source_file": occurrence_result.source_file,
+        },
+        "source_provenance": {
+            "gbif": _gbif_download_metadata_dict(gbif_download_metadata),
         },
         "configuration": configuration,
         "configuration_hash": _configuration_hash(configuration),
@@ -369,6 +388,17 @@ def build_processing_metadata(
         "parser_diagnostics": [
             asdict(diagnostic) for diagnostic in occurrence_result.diagnostics
         ],
+    }
+
+
+def _gbif_download_metadata_dict(
+    metadata: GbifDownloadMetadata | None,
+) -> dict[str, str | None]:
+    return {
+        "download_key": metadata.download_key if metadata else None,
+        "doi": metadata.doi if metadata else None,
+        "citation": metadata.citation if metadata else None,
+        "license": metadata.license if metadata else None,
     }
 
 

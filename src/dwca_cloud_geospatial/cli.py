@@ -13,6 +13,7 @@ from dwca_cloud_geospatial.conversion import (
     ConversionOptions,
     convert_dwca_archive,
 )
+from dwca_cloud_geospatial.gbif import GbifDownloadOptions
 from dwca_cloud_geospatial.inspection import (
     DECIMAL_LATITUDE_TERM,
     DECIMAL_LONGITUDE_TERM,
@@ -95,6 +96,29 @@ def build_parser() -> argparse.ArgumentParser:
             "Defaults to flatgeobuf."
         ),
     )
+    convert_parser.add_argument(
+        "--gbif-download-key",
+        help=(
+            "Explicit GBIF occurrence download key for source provenance. "
+            "If omitted, the converter may infer one from source metadata or the input name."
+        ),
+    )
+    convert_parser.add_argument(
+        "--gbif-doi",
+        help="Explicit GBIF occurrence download DOI, as a bare DOI or doi.org URL.",
+    )
+    convert_parser.add_argument(
+        "--gbif-citation",
+        help="Explicit GBIF occurrence download citation text.",
+    )
+    convert_parser.add_argument(
+        "--gbif-enrich",
+        action="store_true",
+        help=(
+            "Opt in to read-only GBIF API download metadata lookup during conversion. "
+            "Ordinary conversion performs no GBIF network access."
+        ),
+    )
     convert_parser.set_defaults(handler=_convert_archive)
 
     validate_parser = subparsers.add_parser(
@@ -143,6 +167,12 @@ def _convert_archive(args: argparse.Namespace) -> int:
             options=ConversionOptions(
                 output_formats=tuple(args.formats or ()),
                 overwrite=args.overwrite,
+                gbif=GbifDownloadOptions(
+                    download_key=args.gbif_download_key,
+                    doi=args.gbif_doi,
+                    citation=args.gbif_citation,
+                    enrich=args.gbif_enrich,
+                ),
             ),
         )
     except ConversionError as exc:

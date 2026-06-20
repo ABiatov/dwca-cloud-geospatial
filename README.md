@@ -83,6 +83,14 @@ For non-CLI users, a primitive Tkinter entry point is available as
 `dwca-cloud-geospatial-gui`; it calls the same core conversion and validation
 APIs as the CLI.
 
+GBIF occurrence download DOI/citation provenance can be supplied manually or
+resolved through explicit conversion-time enrichment. CLI and core conversion
+remain no-network by default; pass `--gbif-enrich` to opt in. The GUI exposes
+the same lookup as a visible `GBIF DOI citation lookup` checkbox selected by
+default, and users can clear it for a no-network GUI conversion. Generated
+bundles stay static: the copied viewer does not call GBIF, OBIS or a project
+backend.
+
 ## MVP Outputs
 
 - FlatGeobuf for the default lightweight geospatial exchange and viewer output.
@@ -92,6 +100,8 @@ APIs as the CLI.
 - Bounded parser/normalizer/writer handoff for default FlatGeobuf staging and
   GeoParquet large-output bundles.
 - Metadata describing source files, processing parameters and generated outputs.
+- Optional GBIF occurrence download DOI/citation provenance in
+  `metadata/source.json`, `manifest.json` and processing provenance metadata.
 - A minimal static MapLibre viewer copied into each generated bundle.
 
 ## MVP+ Planned Outputs

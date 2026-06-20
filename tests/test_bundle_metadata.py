@@ -35,6 +35,7 @@ from dwca_cloud_geospatial.geoparquet import (
     GEOMETRY_TYPE as GEOPARQUET_GEOMETRY_TYPE,
     GeoParquetWriteResult,
 )
+from dwca_cloud_geospatial.gbif import GbifDownloadMetadata
 from dwca_cloud_geospatial.normalization import normalize_occurrence_records
 from dwca_cloud_geospatial.occurrence import read_occurrence_rows
 
@@ -271,3 +272,51 @@ def test_explicit_geoparquet_bundle_inventory_and_rejected_report(
     assert len(rows) == 5
     assert rows[0]["reason_code"] == "missing_coordinates"
     assert rows[0]["source_data_row_number"] == "3"
+
+
+def test_bundle_metadata_preserves_manual_gbif_download_citation(
+    tmp_path: Path,
+) -> None:
+    read_result, normalization_result = _read_and_normalize(QUALITY_RULES_FIXTURE_DIR)
+
+    result = write_bundle_metadata(
+        output_directory=tmp_path,
+        occurrence_result=read_result,
+        normalization_result=normalization_result,
+        options=BundleWriterOptions(
+            bundle_id="test-gbif-citation",
+            created_at="2026-06-20T12:00:00Z",
+        ),
+        gbif_download_metadata=GbifDownloadMetadata(
+            download_key="0038004-260519110011954",
+            doi="10.15468/dl.3xbk5b",
+            citation=(
+                "GBIF.org (4 June 2026) GBIF Occurrence Download "
+                "https://doi.org/10.15468/dl.3xbk5b"
+            ),
+        ),
+    )
+
+    source = _load_json(result.source_metadata_path)
+    manifest = _load_json(result.manifest_path)
+    processing = _load_json(result.processing_metadata_path)
+
+    assert source["dataset"]["citation"] is None
+    assert source["gbif"] == {
+        "dataset_key": None,
+        "download_key": "0038004-260519110011954",
+        "doi": "10.15468/dl.3xbk5b",
+        "citation": (
+            "GBIF.org (4 June 2026) GBIF Occurrence Download "
+            "https://doi.org/10.15468/dl.3xbk5b"
+        ),
+        "license": None,
+    }
+    assert manifest["source"]["doi"] == "10.15468/dl.3xbk5b"
+    assert manifest["source"]["citation"] == source["gbif"]["citation"]
+    assert processing["source_provenance"]["gbif"] == {
+        "download_key": "0038004-260519110011954",
+        "doi": "10.15468/dl.3xbk5b",
+        "citation": source["gbif"]["citation"],
+        "license": None,
+    }

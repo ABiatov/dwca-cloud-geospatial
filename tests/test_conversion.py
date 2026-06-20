@@ -21,6 +21,7 @@ from dwca_cloud_geospatial.geoparquet import (
     DEFAULT_GEOPARQUET_RELATIVE_PATH,
     GeoParquetWriterOptions,
 )
+from dwca_cloud_geospatial.gbif import GbifDownloadOptions
 from dwca_cloud_geospatial.validation import validate_output_bundle
 
 
@@ -86,6 +87,98 @@ def test_core_conversion_writes_default_flatgeobuf_bundle(tmp_path: Path) -> Non
         "data/occurrences.fgb",
     ]
     assert "index.html" not in {entry["path"] for entry in manifest["files"]}
+
+
+def test_core_conversion_writes_manual_gbif_download_metadata_without_network(
+    tmp_path: Path,
+) -> None:
+    result = convert_dwca_archive(
+        VALID_OCCURRENCE_FIXTURE_DIR,
+        tmp_path / "bundle",
+        options=ConversionOptions(
+            flatgeobuf_backend=FileCreatingFlatGeobufBackend(),
+            gbif=GbifDownloadOptions(
+                download_key="0038004-260519110011954",
+                doi="https://doi.org/10.15468/dl.3xbk5b",
+                citation=(
+                    "GBIF.org (4 June 2026) GBIF Occurrence Download "
+                    "https://doi.org/10.15468/dl.3xbk5b"
+                ),
+            ),
+        ),
+    )
+
+    source = json.loads(
+        result.metadata_result.source_metadata_path.read_text(encoding="utf-8")
+    )
+    manifest = json.loads(result.metadata_result.manifest_path.read_text(encoding="utf-8"))
+
+    assert source["gbif"]["download_key"] == "0038004-260519110011954"
+    assert source["gbif"]["doi"] == "10.15468/dl.3xbk5b"
+    assert source["gbif"]["citation"] == (
+        "GBIF.org (4 June 2026) GBIF Occurrence Download "
+        "https://doi.org/10.15468/dl.3xbk5b"
+    )
+    assert manifest["source"]["doi"] == "10.15468/dl.3xbk5b"
+    assert manifest["source"]["citation"] == source["gbif"]["citation"]
+
+
+def test_core_conversion_enriches_gbif_doi_from_citation_endpoint(
+    tmp_path: Path,
+) -> None:
+    class FakeGbifClient:
+        def fetch_download_metadata(self, download_key: str):
+            assert download_key == "0049663-260519110011954"
+            return {
+                "key": download_key,
+                "created": "2026-06-10",
+                "license": "CC_BY_4_0",
+            }
+
+        def fetch_download_citation(self, download_key: str) -> str:
+            assert download_key == "0049663-260519110011954"
+            return (
+                "GBIF.org (10 June 2026) GBIF Occurrence Download "
+                "https://doi.org/10.15468/dl.9t5b2m"
+            )
+
+    result = convert_dwca_archive(
+        VALID_OCCURRENCE_FIXTURE_DIR,
+        tmp_path / "bundle",
+        options=ConversionOptions(
+            flatgeobuf_backend=FileCreatingFlatGeobufBackend(),
+            gbif=GbifDownloadOptions(
+                download_key="0049663-260519110011954",
+                enrich=True,
+            ),
+            gbif_client=FakeGbifClient(),
+        ),
+    )
+
+    source = json.loads(
+        result.metadata_result.source_metadata_path.read_text(encoding="utf-8")
+    )
+    manifest = json.loads(result.metadata_result.manifest_path.read_text(encoding="utf-8"))
+    processing = json.loads(
+        result.metadata_result.processing_metadata_path.read_text(encoding="utf-8")
+    )
+
+    expected_citation = (
+        "GBIF.org (10 June 2026) GBIF Occurrence Download "
+        "https://doi.org/10.15468/dl.9t5b2m"
+    )
+    assert source["gbif"]["download_key"] == "0049663-260519110011954"
+    assert source["gbif"]["doi"] == "10.15468/dl.9t5b2m"
+    assert source["gbif"]["citation"] == expected_citation
+    assert source["gbif"]["license"] == "CC_BY_4_0"
+    assert manifest["source"]["doi"] == "10.15468/dl.9t5b2m"
+    assert manifest["source"]["citation"] == expected_citation
+    assert processing["source_provenance"]["gbif"] == {
+        "download_key": "0049663-260519110011954",
+        "doi": "10.15468/dl.9t5b2m",
+        "citation": expected_citation,
+        "license": "CC_BY_4_0",
+    }
 
 
 def test_core_conversion_supports_explicit_geoparquet_output(tmp_path: Path) -> None:

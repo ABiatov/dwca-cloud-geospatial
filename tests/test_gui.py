@@ -55,7 +55,25 @@ def test_build_conversion_options_preserves_core_api_options(tmp_path: Path) -> 
     assert options.output_formats == (GEOPARQUET_FORMAT,)
     assert options.overwrite is True
     assert options.geoparquet.large_output_mode is True
+    assert options.gbif.enrich is True
     assert options.chunk_size == 7
+
+
+def test_build_conversion_options_supports_disabling_gbif_enrichment(
+    tmp_path: Path,
+) -> None:
+    archive = tmp_path / "archive.zip"
+    archive.write_text("placeholder", encoding="utf-8")
+    request = GuiConversionRequest(
+        input_path=archive,
+        output_directory=tmp_path / "bundle",
+        output_formats=(FLATGEOBUF_FORMAT,),
+        gbif_enrich=False,
+    )
+
+    options = build_conversion_options(request)
+
+    assert options.gbif.enrich is False
 
 
 def test_existing_output_requires_overwrite_checkbox(tmp_path: Path) -> None:
@@ -97,13 +115,17 @@ def test_parse_chunk_size_requires_positive_integer() -> None:
 
 
 def test_conversion_summary_separates_warnings_and_staging_artifacts() -> None:
+    processing_path = Path("/tmp/bundle/metadata/processing.json")
     result = SimpleNamespace(
         input_path=Path("/tmp/archive.zip"),
         output_directory=Path("/tmp/bundle"),
         output_formats=(FLATGEOBUF_FORMAT,),
         accepted_record_count=2,
         rejected_record_count=1,
-        metadata_result=SimpleNamespace(manifest_path=Path("/tmp/bundle/manifest.json")),
+        metadata_result=SimpleNamespace(
+            manifest_path=Path("/tmp/bundle/manifest.json"),
+            processing_metadata_path=processing_path,
+        ),
         normalization_result=SimpleNamespace(
             warnings=(
                 SimpleNamespace(
@@ -137,6 +159,33 @@ def test_conversion_summary_separates_warnings_and_staging_artifacts() -> None:
     assert "Non-fatal conversion warnings" in summary
     assert "GeoPackage staging artifact" in summary
     assert "occurrences.gpkg" in summary
+
+
+def test_conversion_warning_lines_include_gbif_processing_warnings(
+    tmp_path: Path,
+) -> None:
+    processing_path = tmp_path / "processing.json"
+    processing_path.write_text(
+        (
+            '{"warnings": ['
+            '{"code": "gbif_download_metadata_lookup_failed", '
+            '"stage": "gbif_download_metadata", '
+            '"message": "GBIF download citation request failed"}'
+            "]}"
+        ),
+        encoding="utf-8",
+    )
+    result = SimpleNamespace(
+        normalization_result=SimpleNamespace(warnings=()),
+        flatgeobuf_result=None,
+        metadata_result=SimpleNamespace(processing_metadata_path=processing_path),
+    )
+
+    warning_lines = conversion_warning_lines(result)
+
+    assert warning_lines == [
+        "gbif_download_metadata_lookup_failed: GBIF download citation request failed"
+    ]
 
 
 def test_validation_summary_separates_errors_warnings_and_skips(tmp_path: Path) -> None:

@@ -347,6 +347,11 @@ python -m dwca_cloud_geospatial.gui
 Headless test runs do not require a GUI display; GUI-adjacent tests cover the
 non-visual request validation and status-formatting helpers.
 
+The GUI includes a `GBIF DOI citation lookup` checkbox selected by default.
+It maps to CLI `--gbif-enrich` and may make read-only GBIF API requests during
+conversion to populate occurrence download DOI/citation provenance. Clear the
+checkbox for no-network GUI conversion.
+
 In the GUI status panel, use the right-click context menu or the `Copy Text`
 button to copy viewer instructions. `Ctrl+C` / `Cmd+C` copy shortcuts are a
 known MVP limitation on the current Tk/macOS path.

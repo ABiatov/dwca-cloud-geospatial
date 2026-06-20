@@ -7,6 +7,7 @@ import pytest
 
 from conftest import MINIMAL_OCCURRENCE_FIXTURE_DIR, REPOSITORY_ROOT
 from dwca_cloud_geospatial.cli import build_parser, main
+import dwca_cloud_geospatial.cli as cli_module
 
 
 VALID_OCCURRENCE_FIXTURE_DIR = MINIMAL_OCCURRENCE_FIXTURE_DIR / "valid"
@@ -41,6 +42,56 @@ def test_parser_exposes_expected_subcommands() -> None:
 
     assert "dwca-cloud-geospatial" in help_text
     assert "COMMAND" in help_text
+
+
+def test_convert_command_passes_gbif_citation_options_to_core(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    captured_options = {}
+
+    class DummyMetadataResult:
+        manifest_path = tmp_path / "bundle" / "manifest.json"
+
+    class DummyResult:
+        input_path = VALID_OCCURRENCE_FIXTURE_DIR
+        output_directory = tmp_path / "bundle"
+        output_formats = ("flatgeobuf",)
+        accepted_record_count = 1
+        rejected_record_count = 0
+        metadata_result = DummyMetadataResult()
+
+    def fake_convert(archive: str, output: str, *, options):
+        captured_options["archive"] = archive
+        captured_options["output"] = output
+        captured_options["options"] = options
+        return DummyResult()
+
+    monkeypatch.setattr(cli_module, "convert_dwca_archive", fake_convert)
+
+    exit_code = main(
+        [
+            "convert",
+            str(VALID_OCCURRENCE_FIXTURE_DIR),
+            str(tmp_path / "bundle"),
+            "--gbif-download-key",
+            "0038004-260519110011954",
+            "--gbif-doi",
+            "https://doi.org/10.15468/dl.3xbk5b",
+            "--gbif-citation",
+            "GBIF.org (4 June 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.3xbk5b",
+            "--gbif-enrich",
+        ]
+    )
+
+    capsys.readouterr()
+    options = captured_options["options"]
+    assert exit_code == 0
+    assert options.gbif.download_key == "0038004-260519110011954"
+    assert options.gbif.doi == "https://doi.org/10.15468/dl.3xbk5b"
+    assert options.gbif.citation.startswith("GBIF.org (4 June 2026)")
+    assert options.gbif.enrich is True
 
 
 def test_inspect_command_reports_archive_structure(capsys: pytest.CaptureFixture[str]) -> None:

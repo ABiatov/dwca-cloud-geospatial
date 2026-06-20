@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from pathlib import Path
 import platform
 import queue
@@ -18,6 +19,7 @@ from dwca_cloud_geospatial.conversion import (
     ConversionResult,
     convert_dwca_archive,
 )
+from dwca_cloud_geospatial.gbif import GbifDownloadOptions
 from dwca_cloud_geospatial.geoparquet import GeoParquetWriterOptions
 from dwca_cloud_geospatial.validation import BundleValidationResult, validate_output_bundle
 
@@ -34,6 +36,7 @@ class GuiConversionRequest:
     output_formats: tuple[str, ...]
     overwrite: bool = False
     validate_after_conversion: bool = True
+    gbif_enrich: bool = True
     geoparquet_large_output_mode: bool = False
     chunk_size: int = DEFAULT_CHUNK_SIZE
 
@@ -101,6 +104,7 @@ def build_conversion_options(request: GuiConversionRequest) -> ConversionOptions
         geoparquet=GeoParquetWriterOptions(
             large_output_mode=request.geoparquet_large_output_mode,
         ),
+        gbif=GbifDownloadOptions(enrich=request.gbif_enrich),
         chunk_size=request.chunk_size,
     )
 
@@ -128,6 +132,28 @@ def conversion_warning_lines(result: Any) -> list[str]:
             details.append(f"estimated_spatial_index_bytes={estimated_bytes}")
         suffix = f" ({', '.join(details)})" if details else ""
         lines.append(f"{code}: {message}{suffix}")
+
+    metadata_result = getattr(result, "metadata_result", None)
+    processing_path = getattr(metadata_result, "processing_metadata_path", None)
+    if processing_path is not None:
+        lines.extend(_gbif_processing_warning_lines(Path(processing_path)))
+    return lines
+
+
+def _gbif_processing_warning_lines(processing_path: Path) -> list[str]:
+    try:
+        processing = json.loads(processing_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    lines: list[str] = []
+    for warning in processing.get("warnings", []):
+        if not isinstance(warning, dict):
+            continue
+        if warning.get("stage") != "gbif_download_metadata":
+            continue
+        code = warning.get("code") or "gbif_download_metadata_warning"
+        message = warning.get("message") or "GBIF download metadata lookup did not complete."
+        lines.append(f"{code}: {message}")
     return lines
 
 
@@ -255,6 +281,7 @@ class _ConverterGui:
         self.geoparquet_var = tk.BooleanVar(value=False)
         self.overwrite_var = tk.BooleanVar(value=False)
         self.validate_var = tk.BooleanVar(value=True)
+        self.gbif_enrich_var = tk.BooleanVar(value=True)
         self.large_geoparquet_var = tk.BooleanVar(value=False)
         self.chunk_size_var = tk.StringVar(value=str(DEFAULT_CHUNK_SIZE))
 
@@ -323,12 +350,17 @@ class _ConverterGui:
         ).grid(row=0, column=3, sticky="w")
         ttk.Checkbutton(
             options,
+            text="GBIF DOI citation lookup",
+            variable=self.gbif_enrich_var,
+        ).grid(row=1, column=0, columnspan=2, sticky="w", pady=(8, 0))
+        ttk.Checkbutton(
+            options,
             text="GeoParquet large-output mode (bbox + grid sort)",
             variable=self.large_geoparquet_var,
-        ).grid(row=1, column=0, columnspan=2, sticky="w", pady=(8, 0))
-        ttk.Label(options, text="Chunk size").grid(row=1, column=2, sticky="e", pady=(8, 0))
+        ).grid(row=2, column=0, columnspan=2, sticky="w", pady=(8, 0))
+        ttk.Label(options, text="Chunk size").grid(row=2, column=2, sticky="e", pady=(8, 0))
         ttk.Entry(options, textvariable=self.chunk_size_var, width=12).grid(
-            row=1, column=3, sticky="w", pady=(8, 0)
+            row=2, column=3, sticky="w", pady=(8, 0)
         )
 
         status_frame = ttk.Frame(root, padding=12)
@@ -435,6 +467,7 @@ class _ConverterGui:
             output_formats=formats,
             overwrite=self.overwrite_var.get(),
             validate_after_conversion=self.validate_var.get(),
+            gbif_enrich=self.gbif_enrich_var.get(),
             geoparquet_large_output_mode=self.large_geoparquet_var.get(),
             chunk_size=parse_chunk_size(self.chunk_size_var.get()),
         )

@@ -169,6 +169,19 @@ Processing warning code `large_indexed_flatgeobuf_write` is non-fatal. Display
 it as a generation warning with `stage`, `feature_count` and
 `estimated_spatial_index_bytes` when present.
 
+DOI provenance rows should render as external links to
+`https://doi.org/{doi}` when the value is a bare DOI or DOI URL. Citation
+values may contain a DOI URL inside longer text; the viewer should build safe
+DOM nodes, keep surrounding citation text as text nodes, and render only the
+DOI URL segment as an external link with `target="_blank"` and
+`rel="noopener noreferrer"`. Missing DOI or citation values remain absent
+rows, not load errors. The viewer must not call GBIF, OBIS or a project
+backend to fill citation fields.
+
+Processing warning code `gbif_download_metadata_lookup_failed` is non-fatal
+and indicates optional conversion-time GBIF enrichment could not complete.
+The static viewer only displays the generated warning and stored provenance.
+
 GeoParquet large-output declarations in
 `metadata/processing.json.configuration.geoparquet` should be displayed or
 preserved without contradiction: `large_output_mode`,

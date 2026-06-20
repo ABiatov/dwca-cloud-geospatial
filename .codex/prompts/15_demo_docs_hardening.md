@@ -42,6 +42,22 @@
 - Prompt 14 GBIF citation workflow:
   `.codex/prompts/14_gbif_doi_citation.md`, including its source metadata,
   viewer citation and optional GBIF DOI enrichment decisions.
+- Prompt 14 accepted GBIF citation option names:
+  core API uses `GbifDownloadOptions` on `ConversionOptions.gbif`, with
+  `download_key`, `doi`, `citation` and `enrich`; CLI flags are
+  `--gbif-download-key`, `--gbif-doi`, `--gbif-citation` and
+  `--gbif-enrich`. Ordinary conversion remains no-network. API enrichment is
+  opt-in and uses `GET https://api.gbif.org/v1/occurrence/download/{key}` plus
+  `GET https://api.gbif.org/v1/occurrence/download/{key}/citation` when
+  DOI/citation values are missing from the JSON metadata response.
+- Prompt 14 source/viewer behavior to preserve:
+  GBIF occurrence download DOI/citation metadata is stored in
+  `metadata/source.json.gbif.doi` and
+  `metadata/source.json.gbif.citation`, summarized through
+  `manifest.source` fallback when dataset citation fields are absent, repeated
+  in `metadata/processing.json.source_provenance.gbif` for processing audit,
+  and rendered in the static viewer Provenance panel with active `doi.org` links.
+  The viewer must not call GBIF, OBIS or a project backend.
 - Prompt 05 quality-rule API additions:
   `TypeConversionFailure`, `OccurrenceNormalizationWarning`, `warning_count`,
   `type_conversion_failures`, `warnings`, nullable exact-token
@@ -256,7 +272,11 @@
   warnings, including `large_indexed_flatgeobuf_write`, are displayed
   separately from failures; retained `data/occurrences.gpkg` staging artifact
   paths are shown when present; validation display separates required errors,
-  warnings and dependency-dependent skipped checks.
+  warnings and dependency-dependent skipped checks. Prompt 14 GBIF
+  DOI/citation enrichment is exposed through a `GBIF DOI citation lookup`
+  checkbox that is selected by default and maps to
+  `GbifDownloadOptions(enrich=True)` / CLI `--gbif-enrich`; clearing it keeps
+  GUI conversion no-network.
 - Prompt 13 GUI viewer guidance to preserve:
   generated bundles should point users at the copied `<output>/index.html`
   viewer entry. FlatGeobuf bundles should be described as having an MVP map

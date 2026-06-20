@@ -121,6 +121,11 @@
   `data/occurrences.gpkg`. GUI status should show both artifacts when present
   and preserve actionable dependency errors for missing `.venv` GDAL/OGR,
   Pyogrio or GeoPackage helper tooling.
+- Prompt 14 follow-up behavior: the GUI exposes a `GBIF DOI citation lookup`
+  checkbox that maps to `GbifDownloadOptions(enrich=True)`, equivalent to CLI
+  `--gbif-enrich`. It is selected by default. Clearing it keeps GUI
+  conversion no-network unless explicit GBIF metadata is supplied through the
+  Python API.
 
 ## Goal
 

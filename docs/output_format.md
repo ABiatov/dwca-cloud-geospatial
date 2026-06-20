@@ -320,8 +320,8 @@ Recommended `gbif` fields:
 | --- | --- | --- |
 | `dataset_key` | string or null | GBIF dataset key. |
 | `download_key` | string or null | GBIF occurrence download key. |
-| `doi` | string or null | GBIF DOI, when available. |
-| `citation` | string or null | GBIF citation text. |
+| `doi` | string or null | GBIF occurrence download DOI, when available. Stored as a bare DOI string such as `10.15468/dl.3xbk5b`. |
+| `citation` | string or null | GBIF occurrence download citation text. When derived from GBIF download metadata, this should use the recommended occurrence download form and include the DOI as a `https://doi.org/...` URL. |
 | `license` | string or null | GBIF license value. |
 
 Recommended `obis` fields:
@@ -333,6 +333,13 @@ Recommended `obis` fields:
 | `doi` | string or null | OBIS DOI, when available. |
 | `citation` | string or null | OBIS citation text. |
 | `license` | string or null | OBIS license value. |
+
+GBIF occurrence download DOI/citation metadata belongs in `gbif`, not in
+`dataset`, unless the source EML itself provides a dataset-level DOI or
+citation. The converter may populate `gbif.download_key`, `gbif.doi` and
+`gbif.citation` from explicit conversion options or from opt-in
+conversion-time GBIF API enrichment. Ordinary conversion remains no-network
+and missing values should be stored as `null`.
 
 The converter must not invent GBIF or OBIS identifiers. Missing values should be stored as `null`.
 
@@ -348,6 +355,7 @@ Required fields:
 | `generator` | object | Converter name, version, commit and runtime information. |
 | `input` | object | Input archive path, checksum and detected format. |
 | `configuration` | object | Effective conversion configuration and config hash. |
+| `source_provenance` | object | Resolved optional source-enrichment metadata used during conversion, including GBIF download DOI/citation metadata when supplied or enriched. |
 | `field_mapping` | object | Source terms mapped into normalized fields. Includes supported Darwin Core, Dublin Core, GBIF, OBIS and IUCN terms where applicable. |
 | `quality_rules` | object | Coordinate, date and required-field rule versions. |
 | `counts` | object | Source, accepted, rejected and output row counts. |
@@ -370,6 +378,12 @@ Required `counts` fields:
 For formats not generated in a conversion, the corresponding output count should be `0`.
 `warning_count` should equal the number of entries in `warnings`, including
 normalization warnings and non-fatal writer warnings.
+
+When GBIF download DOI/citation metadata is supplied manually or resolved
+through opt-in enrichment, `source_provenance.gbif` repeats the resolved
+`download_key`, `doi`, `citation` and `license` values for processing audit.
+The canonical source-provenance copy remains `metadata/source.json.gbif`, and
+the viewer-facing summary remains `manifest.source`.
 
 Required `type_conversion_failures[]` fields:
 
@@ -769,6 +783,11 @@ The viewer must support filters for these fields when present:
 | `basis_of_record` | categorical |
 | `iucn_red_list_category` | categorical |
 | `quality_flags` | show/hide records with flags; split on `\|` and use exact-token matching for flag-code filters |
+
+DOI rows should render as `https://doi.org/{doi}` links when the source value
+is either a bare DOI or a DOI URL. DOI URLs embedded inside citation text
+should render as active external links while preserving the surrounding
+citation text.
 
 The viewer must omit absent generated-bundle fields from the filter UI without error. Missing DOI, citation, GBIF or OBIS metadata should be shown as absent, not as errors.
 

@@ -18,6 +18,11 @@ The GeoParquet validation toolchain is documented in
 
 The MVP remains file-based and reproducible: a user provides an already downloaded Darwin Core Archive, the converter writes static geospatial outputs and metadata, and the viewer reads those generated files without a backend service.
 
+Prompt 14 adds optional conversion-time GBIF occurrence download DOI/citation
+enrichment. This does not fetch archives and does not change the static viewer
+contract. CLI and core API conversion remain no-network by default; GUI
+conversion exposes the lookup as a visible checkbox selected by default.
+
 ## Accepted MVP Scope
 
 The MVP includes:
@@ -46,6 +51,9 @@ The MVP excludes:
 - Parse archive structure through `meta.xml` where possible.
 - Treat GBIF/OBIS provenance fields and IUCN-sourced occurrence values as
   nullable fields, not as required inputs.
+- Preserve optional GBIF occurrence download DOI/citation metadata in
+  `metadata/source.json`, `manifest.json` and processing provenance metadata
+  when supplied manually or resolved by explicit conversion-time lookup.
 - Make validation explicit before writing final outputs.
 - Prefer small sample archives for early tests before optimizing for large datasets.
 - Keep output bundle changes synchronized with `docs/output_format.md`.
@@ -516,6 +524,8 @@ Acceptance criteria:
   where available, and feature details include a derived GBIF occurrence link
   when `source_record_id` is present.
 - No live GBIF or OBIS API access is required.
+- Optional GBIF DOI/citation lookup happens only during conversion and the
+  viewer remains static/no-backend.
 
 ### M6: Primitive GUI
 
@@ -534,6 +544,9 @@ Deliverables:
   limitation on the current Tk/macOS path.
 - Viewer no-map guidance for GeoParquet-only bundles explains that map points
   require generating FlatGeobuf output.
+- `GBIF DOI citation lookup` checkbox maps to
+  `GbifDownloadOptions(enrich=True)`, is selected by default, and can be
+  cleared for no-network GUI conversion.
 
 Acceptance criteria:
 
@@ -583,6 +596,7 @@ Documents to create or update during the milestones:
 | Viewer requirements may expand before the converter contract is stable. | Keep the viewer manifest-driven and update `docs/output_format.md` before changing generated files. |
 | Large archives may expose memory or performance limits. | Use the implemented chunked GeoPackage staging path for FlatGeobuf and GeoParquet large-output mode for analytical bundles. Keep the remaining GDAL FlatGeobuf spatial-index memory risk visible, and defer partitioned GeoParquet until the manifest and validator contract support it. |
 | Provenance can be lost during normalization. | Carry source file, row number, row identifier and source metadata through every stage. |
+| Optional GBIF DOI/citation lookup can fail due to network or API availability. | Keep DOI/citation nullable, continue conversion with structured warnings and preserve no-network CLI/core defaults. |
 
 ## Open Questions
 

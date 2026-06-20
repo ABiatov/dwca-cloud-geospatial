@@ -11,7 +11,9 @@ validation workflows for the DwC-A to cloud-optimized geospatial converter.
 
 The converter is file-based: it reads an already downloaded local Darwin Core
 Archive and writes a static output bundle. It does not download archives,
-contact GBIF or OBIS APIs, require a database, or start a backend service.
+contact GBIF or OBIS APIs by default, require a database, or start a backend
+service. Optional GBIF occurrence download DOI/citation enrichment is an
+explicit conversion-time action only.
 
 ## Dependency Setup
 
@@ -112,6 +114,41 @@ Partitioned GeoParquet configuration fields exist on `GeoParquetWriterOptions`
 for forward compatibility, but `partitioned_dataset=True` is rejected until the
 manifest and validator contracts support partition file inventories.
 
+GBIF occurrence download citation metadata is optional and belongs in
+`metadata/source.json.gbif`. Ordinary local conversion does not contact GBIF.
+For reproducible no-network conversion, pass explicit values through
+`GbifDownloadOptions`:
+
+```python
+from dwca_cloud_geospatial.gbif import GbifDownloadOptions
+
+ConversionOptions(
+    gbif=GbifDownloadOptions(
+        download_key="0038004-260519110011954",
+        doi="10.15468/dl.3xbk5b",
+        citation=(
+            "GBIF.org (4 June 2026) GBIF Occurrence Download "
+            "https://doi.org/10.15468/dl.3xbk5b"
+        ),
+    )
+)
+```
+
+The converter can infer a GBIF download key from declared
+`http://rs.gbif.org/terms/1.0/downloadKey` values, EML/additional metadata
+containing GBIF download citations or URLs, and input archive filenames or
+directory names that exactly match the GBIF download-key pattern. If
+`GbifDownloadOptions(enrich=True)` is set, the converter performs a read-only
+request to `GET https://api.gbif.org/v1/occurrence/download/{download_key}`.
+When DOI/citation fields are missing from that JSON response, enrichment also
+requests
+`GET https://api.gbif.org/v1/occurrence/download/{download_key}/citation` and
+extracts the DOI from the returned citation text. The lookup uses an explicit
+User-Agent, JSON or text Accept headers as appropriate, connect/read timeouts,
+bounded retries, exponential backoff with jitter, and `Retry-After` handling
+for HTTP 429. Lookup failures are written as structured non-fatal warnings in
+`metadata/processing.json.warnings`.
+
 ## CLI Commands
 
 Inspect an archive without conversion:
@@ -138,6 +175,35 @@ Convert with both FlatGeobuf and GeoParquet:
 ```bash
 dwca-cloud-geospatial convert /path/to/archive.zip /path/to/output-bundle --format flatgeobuf --format geoparquet
 ```
+
+Convert with manually supplied GBIF occurrence download citation metadata and
+no network access:
+
+```bash
+dwca-cloud-geospatial convert /path/to/0038004-260519110011954.zip /path/to/output-bundle \
+  --gbif-download-key 0038004-260519110011954 \
+  --gbif-doi 10.15468/dl.3xbk5b \
+  --gbif-citation "GBIF.org (4 June 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.3xbk5b"
+```
+
+Opt in to GBIF API enrichment when a download key can be inferred or supplied:
+
+```bash
+dwca-cloud-geospatial convert /path/to/0038004-260519110011954.zip /path/to/output-bundle --gbif-enrich
+```
+
+Read-only enrichment does not require GBIF credentials. It does not create
+downloads, perform occurrence search, use taxonomy matching or add a backend
+service. [GBIF citation guidance](https://www.gbif.org/citation-guidelines)
+says occurrence download citations should include the DOI expressed as a URL,
+and GBIF's
+[API downloads documentation](https://techdocs.gbif.org/en/data-use/api-downloads)
+documents the download metadata endpoint. The converter preserves citation
+text in `metadata/source.json.gbif.citation`, summarizes it through
+`manifest.source.citation` when dataset citation metadata is absent, and the
+static viewer renders the DOI URL as a link. The resolved GBIF download
+metadata is also copied to `metadata/processing.json.source_provenance.gbif`
+for processing audit.
 
 Validate an existing output bundle:
 
@@ -190,6 +256,10 @@ GUI controls:
 - Output formats: FlatGeobuf is selected by default; GeoParquet is explicit.
 - Overwrite checkbox. Existing output paths are rejected unless this checkbox
   is selected, matching CLI `--overwrite` behavior.
+- GBIF DOI citation lookup checkbox. This is selected by default and maps to
+  `GbifDownloadOptions(enrich=True)`, equivalent to CLI `--gbif-enrich`.
+  Clear it to keep conversion fully no-network unless explicit GBIF metadata
+  was supplied through the Python API.
 - Optional validation after conversion, using
   `dwca_cloud_geospatial.validation.validate_output_bundle`.
 - GeoParquet large-output mode, labeled as GeoParquet-only behavior. This maps
@@ -201,8 +271,10 @@ The GUI status panel reports accepted and rejected counts from the core
 conversion result, generated paths, non-fatal conversion warnings and
 validation results. FlatGeobuf large indexed-write warnings such as
 `large_indexed_flatgeobuf_write` are shown separately from conversion
-failures. When FlatGeobuf conversion returns a retained GeoPackage staging
-artifact, the GUI shows the `data/occurrences.gpkg` path as an artifact.
+failures. GBIF citation lookup failures are shown as non-fatal warnings when
+the lookup checkbox is selected. When FlatGeobuf conversion returns a retained
+GeoPackage staging artifact, the GUI shows the `data/occurrences.gpkg` path as
+an artifact.
 
 Validation output separates required validation errors from warnings and
 dependency-dependent skipped checks. Required errors indicate an invalid

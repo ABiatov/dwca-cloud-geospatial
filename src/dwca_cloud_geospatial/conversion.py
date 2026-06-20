@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import shutil
 from typing import Any
+import zipfile
 
 from dwca_cloud_geospatial.bundle import (
     BundleMetadataWriteResult,
@@ -14,6 +15,15 @@ from dwca_cloud_geospatial.bundle import (
     REJECTED_RECORDS_RELATIVE_PATH,
     RejectedRecordsCsvWriter,
     write_bundle_metadata,
+)
+from dwca_cloud_geospatial.gbif import (
+    GbifDownloadClient,
+    GbifEnrichmentResult,
+    GbifDownloadOptions,
+    extract_download_key_from_eml_xml,
+    infer_download_key_from_path_name,
+    normalize_download_key,
+    resolve_gbif_download_metadata,
 )
 from dwca_cloud_geospatial.flatgeobuf import (
     FlatGeobufBackend,
@@ -83,6 +93,12 @@ class ConversionOptions:
     flatgeobuf: FlatGeobufWriterOptions = field(default_factory=FlatGeobufWriterOptions)
     geoparquet: GeoParquetWriterOptions = field(default_factory=GeoParquetWriterOptions)
     bundle: BundleWriterOptions = field(default_factory=BundleWriterOptions)
+    gbif: GbifDownloadOptions = field(default_factory=GbifDownloadOptions)
+    gbif_client: GbifDownloadClient | None = field(
+        default=None,
+        repr=False,
+        compare=False,
+    )
     flatgeobuf_backend: FlatGeobufBackend | None = field(
         default=None,
         repr=False,
@@ -139,6 +155,11 @@ def convert_dwca_archive(
     occurrence_result = read_occurrence_rows(source_path)
     _raise_for_occurrence_read_errors(occurrence_result)
     _raise_for_missing_coordinate_terms(occurrence_result)
+    gbif_enrichment = _resolve_gbif_metadata(
+        occurrence_result=occurrence_result,
+        source_path=source_path,
+        conversion_options=conversion_options,
+    )
 
     normalization_result = normalize_occurrence_records(occurrence_result.records)
     if normalization_result.counts.accepted_records == 0:
@@ -172,6 +193,8 @@ def convert_dwca_archive(
             flatgeobuf_result=flatgeobuf_result,
             geoparquet_result=geoparquet_result,
             options=_bundle_options(conversion_options, output_formats=output_formats),
+            gbif_download_metadata=gbif_enrichment.metadata,
+            extra_warnings=gbif_enrichment.warnings,
         )
         _copy_static_viewer(output_root)
     except (FlatGeobufDependencyError, GeoParquetDependencyError) as exc:
@@ -275,6 +298,11 @@ def _convert_dwca_archive_streaming_outputs(
             parse_failures=aggregator.parse_failures,
             first_source_values=aggregator.first_source_values,
         )
+        gbif_enrichment = _resolve_gbif_metadata(
+            occurrence_result=occurrence_result,
+            source_path=source_path,
+            conversion_options=conversion_options,
+        )
         normalization_result = aggregator.result()
         if normalization_result.counts.accepted_records == 0:
             raise ConversionError(
@@ -292,6 +320,8 @@ def _convert_dwca_archive_streaming_outputs(
             geoparquet_result=geoparquet_result,
             rejected_records_path=rejected_writer.written_path,
             options=_bundle_options(conversion_options, output_formats=output_formats),
+            gbif_download_metadata=gbif_enrichment.metadata,
+            extra_warnings=gbif_enrichment.warnings,
         )
         _copy_static_viewer(output_root)
     except (FlatGeobufDependencyError, GeoParquetDependencyError) as exc:
@@ -440,6 +470,81 @@ def _normalize_output_formats(output_formats: Sequence[str]) -> tuple[str, ...]:
     return tuple(normalized)
 
 
+def _resolve_gbif_metadata(
+    *,
+    occurrence_result: OccurrenceReadResult,
+    source_path: Path,
+    conversion_options: ConversionOptions,
+) -> GbifEnrichmentResult:
+    inferred_key = (
+        _first_occurrence_download_key(occurrence_result)
+        or _download_key_from_declared_metadata(occurrence_result)
+        or infer_download_key_from_path_name(source_path.name)
+    )
+    try:
+        return resolve_gbif_download_metadata(
+            options=conversion_options.gbif,
+            inferred_download_key=inferred_key,
+            client=conversion_options.gbif_client,
+        )
+    except ValueError as exc:
+        raise ConversionError(str(exc), diagnostics=occurrence_result.diagnostics) from exc
+
+
+def _first_occurrence_download_key(
+    occurrence_result: OccurrenceReadResult,
+) -> str | None:
+    terms = (
+        "http://rs.gbif.org/terms/1.0/downloadKey",
+        "http://rs.gbif.org/terms/1.0/download_key",
+    )
+    summary_values = occurrence_result.first_source_values or {}
+    for term in terms:
+        key = normalize_download_key(summary_values.get(term))
+        if key:
+            return key
+    for record in occurrence_result.records:
+        for term in terms:
+            key = normalize_download_key(record.value_for_term(term))
+            if key:
+                return key
+    return None
+
+
+def _download_key_from_declared_metadata(
+    occurrence_result: OccurrenceReadResult,
+) -> str | None:
+    inspection = occurrence_result.inspection
+    metadata_file = inspection.metadata.metadata_file if inspection.metadata else None
+    if not metadata_file or not _is_safe_archive_path(metadata_file):
+        return None
+    try:
+        if inspection.archive_kind == "directory":
+            payload = (inspection.source_path / metadata_file).read_bytes()
+        elif inspection.archive_kind == "zip":
+            member = metadata_file
+            if inspection.meta_path and "/" in inspection.meta_path:
+                member = f"{inspection.meta_path.rsplit('/', 1)[0]}/{metadata_file}"
+            with zipfile.ZipFile(inspection.source_path) as archive:
+                payload = archive.read(member)
+        else:
+            return None
+    except (KeyError, OSError, zipfile.BadZipFile):
+        return None
+    return extract_download_key_from_eml_xml(payload)
+
+
+def _is_safe_archive_path(path: str) -> bool:
+    if not path or "\\" in path or path.startswith(("/", "\\")):
+        return False
+    if "//" in path or path.split("/", 1)[0].endswith(":"):
+        return False
+    pure_path = PurePosixPath(path)
+    if pure_path.is_absolute():
+        return False
+    return all(part not in ("", ".", "..") for part in pure_path.parts)
+
+
 def _use_streaming_conversion(
     conversion_options: ConversionOptions,
     output_formats: tuple[str, ...],
@@ -544,7 +649,21 @@ def _bundle_options(
     *,
     output_formats: tuple[str, ...],
 ) -> BundleWriterOptions:
-    configuration: dict[str, Any] = {"formats": list(output_formats)}
+    configuration: dict[str, Any] = {
+        "formats": list(output_formats),
+        "gbif": {
+            "download_key": conversion_options.gbif.download_key,
+            "doi": conversion_options.gbif.doi,
+            "citation": conversion_options.gbif.citation,
+            "enrich": conversion_options.gbif.enrich,
+            "api_base_url": conversion_options.gbif.api_base_url,
+            "connect_timeout_seconds": (
+                conversion_options.gbif.connect_timeout_seconds
+            ),
+            "read_timeout_seconds": conversion_options.gbif.read_timeout_seconds,
+            "max_retries": conversion_options.gbif.max_retries,
+        },
+    }
     if conversion_options.bundle.configuration:
         configuration["user"] = dict(conversion_options.bundle.configuration)
     return BundleWriterOptions(

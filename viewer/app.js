@@ -134,6 +134,78 @@
     list.append(term, description);
   }
 
+  function normalizeDoi(value) {
+    if (!value) {
+      return null;
+    }
+    const text = String(value).trim().replace(/[.,]+$/, "");
+    const urlMatch = text.match(/https:\/\/doi\.org\/(10\.\d{4,9}\/\S+)/i);
+    const candidate = (urlMatch ? urlMatch[1] : text.replace(/^doi:/i, "").trim()).replace(
+      /[.,]+$/,
+      ""
+    );
+    return /^10\.\d{4,9}\/\S+$/i.test(candidate) ? candidate : null;
+  }
+
+  function doiHref(value) {
+    const doi = normalizeDoi(value);
+    return doi ? `https://doi.org/${doi}` : null;
+  }
+
+  function appendExternalLink(parent, href, text) {
+    const link = document.createElement("a");
+    link.href = href;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = text || href;
+    parent.append(link);
+  }
+
+  function appendCitationContent(parent, value) {
+    const text = displayValue(value);
+    const doiUrlPattern = /https:\/\/doi\.org\/10\.\d{4,9}\/\S+/gi;
+    let offset = 0;
+    let match = doiUrlPattern.exec(text);
+    while (match) {
+      if (match.index > offset) {
+        parent.append(document.createTextNode(text.slice(offset, match.index)));
+      }
+      const rawUrl = match[0];
+      const url = rawUrl.replace(/[.,]+$/, "");
+      appendExternalLink(parent, url, url);
+      if (url.length < rawUrl.length) {
+        parent.append(document.createTextNode(rawUrl.slice(url.length)));
+      }
+      offset = match.index + match[0].length;
+      match = doiUrlPattern.exec(text);
+    }
+    if (offset < text.length) {
+      parent.append(document.createTextNode(text.slice(offset)));
+    }
+  }
+
+  function addProvenanceDefinition(list, label, value) {
+    if (value === null || value === undefined || value === "") {
+      return;
+    }
+    if (label === "DOI") {
+      const href = doiHref(value);
+      if (href) {
+        addLinkDefinition(list, label, href, href);
+        return;
+      }
+    }
+    const term = document.createElement("dt");
+    term.textContent = label;
+    const description = document.createElement("dd");
+    if (label === "Citation") {
+      appendCitationContent(description, value);
+    } else {
+      description.textContent = displayValue(value);
+    }
+    list.append(term, description);
+  }
+
   function safeRelativePath(path) {
     if (typeof path !== "string" || path.length === 0) {
       return false;
@@ -319,7 +391,7 @@
     const list = byId("provenance-list");
     list.replaceChildren();
     for (const [label, value] of provenanceRows()) {
-      addDefinition(list, label, value);
+      addProvenanceDefinition(list, label, value);
     }
   }
 
