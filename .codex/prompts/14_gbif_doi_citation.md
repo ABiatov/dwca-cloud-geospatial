@@ -1,4 +1,4 @@
-# Prompt 15: GBIF Download DOI Citation In Viewer Provenance
+# Prompt 14: GBIF Download DOI Citation In Viewer Provenance
 
 ## Required Skills
 
@@ -25,8 +25,6 @@
 - `.codex/prompts/10_core_api_cli.md`
 - `.codex/prompts/12_static_viewer.md`
 - `.codex/prompts/13_tkinter_gui.md`
-- `.codex/prompts/14_demo_docs_hardening.md`
-- `session_logs/2026-06-20_13_tkinter_gui.md`
 - `src/dwca_cloud_geospatial/bundle.py`
 - `src/dwca_cloud_geospatial/conversion.py`
 - `src/dwca_cloud_geospatial/cli.py`
@@ -239,7 +237,7 @@ that citation in Provenance with an active `doi.org` link.
 
 ## Required Session Log
 
-Write `session_logs/YYYY-MM-DD_15_gbif_doi_citation.md` with:
+Write `session_logs/YYYY-MM-DD_14_gbif_doi_citation.md` with:
 
 - Implemented CLI/API option names and defaults.
 - GBIF download key inference rules.
@@ -253,10 +251,8 @@ Write `session_logs/YYYY-MM-DD_15_gbif_doi_citation.md` with:
 
 ## Prompt Maintenance
 
-- Update `.codex/prompts/14_demo_docs_hardening.md` if final demo/docs
+- Update `.codex/prompts/15_demo_docs_hardening.md` if final demo/docs
   hardening should mention the GBIF citation workflow.
 - Update Prompt 13 GUI docs/tests if accepted conversion option names,
   source metadata schema or viewer guidance affect GUI behavior or user-facing
   GUI instructions.
-- Update future prompts if conversion option names, source metadata schema or
-  viewer provenance behavior changes.

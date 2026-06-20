@@ -33,7 +33,8 @@ Purpose: this directory contains ordered prompts for building the DwC-A to cloud
 11. `11_viewer_contract.md`: document the static viewer contract.
 12. `12_static_viewer.md`: implement the minimal static MapLibre viewer.
 13. `13_tkinter_gui.md`: implement the primitive desktop GUI over the same core API.
-14. `14_demo_docs_hardening.md`: complete docs, demos, regression tests and MVP limitations.
+14. `14_gbif_doi_citation.md`: add GBIF occurrence download DOI citation handling in output provenance and viewer links.
+15. `15_demo_docs_hardening.md`: complete docs, demos, regression tests and MVP limitations.
 
 ## Artifact Handoff Map
 
@@ -53,8 +54,9 @@ Purpose: this directory contains ordered prompts for building the DwC-A to cloud
 | 10c | Optimized indexed FlatGeobuf via persistent GeoPackage staging | 11-14 |
 | 11 | Viewer contract document | 12, 14 |
 | 12 | Static viewer files and smoke checks | 13-14 |
-| 13 | GUI entry point | 14 |
-| 14 | Final MVP documentation and evidence | Future MVP+ prompts |
+| 13 | GUI entry point | 14-15 |
+| 14 | GBIF citation metadata and viewer link behavior | 15 |
+| 15 | Final MVP documentation and evidence | Future MVP+ prompts |
 
 ## Prompt Maintenance Protocol
 
@@ -69,4 +71,4 @@ At the end of each prompt:
 
 ## Current next work item
 
-`14_demo_docs_hardening.md`
+`14_gbif_doi_citation.md`

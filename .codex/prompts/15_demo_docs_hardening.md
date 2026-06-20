@@ -1,4 +1,4 @@
-# Prompt 14: Demo, Documentation And MVP Hardening
+# Prompt 15: Demo, Documentation And MVP Hardening
 
 ## Required Skills
 
@@ -19,8 +19,8 @@
 - `docs/converter.md` if it exists.
 - `docs/viewer_contract.md` if it exists.
 - `docs/deployment.md` if it exists.
-- All prompts `01` through `13`, including `10b` and `10c`
-- Latest session logs for prompts `01` through `13`, including `10b` and
+- All prompts `01` through `14`, including `10b` and `10c`
+- Latest session logs for prompts `01` through `14`, including `10b` and
   `10c` when present
 - Current tests, examples and generated sample bundle instructions.
 - Prompt 02 inspection API and docs:
@@ -39,6 +39,9 @@
   `OccurrenceNormalizationCounts`, `NormalizedOccurrenceRecord`,
   `RejectedOccurrenceRecord`, `docs/dwca_parser.md`, and normalization
   fixtures under `tests/fixtures/dwca/minimal_occurrence/normalization/`.
+- Prompt 14 GBIF citation workflow:
+  `.codex/prompts/14_gbif_doi_citation.md`, including its source metadata,
+  viewer citation and optional GBIF DOI enrichment decisions.
 - Prompt 05 quality-rule API additions:
   `TypeConversionFailure`, `OccurrenceNormalizationWarning`, `warning_count`,
   `type_conversion_failures`, `warnings`, nullable exact-token
@@ -347,7 +350,7 @@ Make the MVP understandable, repeatable and ready for external review.
 
 ## Required Session Log
 
-Write `session_logs/YYYY-MM-DD_14_demo_docs_hardening.md` with:
+Write `session_logs/YYYY-MM-DD_15_demo_docs_hardening.md` with:
 
 - Final files updated.
 - End-to-end demo commands and results.
