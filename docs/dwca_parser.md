@@ -231,7 +231,12 @@ is `class_` because `class` is reserved in Python; `to_dict()` exports it as
 `class` for output projections.
 
 Normalization consumes source values through `OccurrenceSourceRecord.value_for_term(term)`.
-It does not hard-code source column positions. It parses
+It does not hard-code source column positions. Source-to-output mapping is
+centralized in `NORMALIZED_FIELD_TERMS`, including Darwin Core, Dublin Core,
+GBIF, OBIS and IUCN terms. For `iucn_red_list_category`, normalization accepts
+`http://iucn.org/terms/iucnRedListCategory` in addition to the GBIF and legacy
+Darwin Core-style spellings documented in `metadata/processing.json.field_mapping`.
+It parses
 `decimal_longitude` and `decimal_latitude` as finite floats, validates
 longitude/latitude ranges, rejects exact `0,0` coordinates, normalizes
 single-value ISO-style `event_date` values where practical and derives

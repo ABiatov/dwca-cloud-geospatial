@@ -2,7 +2,7 @@
 
 Status: Accepted MVP plan
 
-Last updated: 2026-06-19
+Last updated: 2026-06-20
 
 ## Purpose
 
@@ -44,7 +44,8 @@ The MVP excludes:
 - Keep the core converter independent from CLI, GUI and viewer code.
 - Preserve provenance from output rows back to source archive files and source row identifiers.
 - Parse archive structure through `meta.xml` where possible.
-- Treat GBIF and OBIS fields as nullable provenance fields, not as required inputs.
+- Treat GBIF/OBIS provenance fields and IUCN-sourced occurrence values as
+  nullable fields, not as required inputs.
 - Make validation explicit before writing final outputs.
 - Prefer small sample archives for early tests before optimizing for large datasets.
 - Keep output bundle changes synchronized with `docs/output_format.md`.
@@ -252,7 +253,9 @@ Implemented validation coverage:
 - `quality_flags` exact-token representation and `has_quality_flags`
   consistency where row-level data are readable;
 - processing warning counts and type conversion failure structures;
-- nullable GBIF and OBIS provenance values.
+- nullable GBIF and OBIS provenance values; generated nullable optional
+  occurrence fields such as `iucn_red_list_category` remain valid when source
+  values are absent.
 
 Current limitations:
 
@@ -411,7 +414,8 @@ Goal: convert parsed records into the normalized occurrence schema accepted by t
 
 Deliverables:
 
-- Mapping from Darwin Core terms into normalized occurrence fields.
+- Mapping from Darwin Core, Dublin Core, GBIF, OBIS and IUCN source terms into
+  normalized occurrence fields.
 - Coordinate parsing and validation for longitude, latitude, ranges and `0,0` policy.
 - Event date and event year normalization where practical.
 - Required provenance fields: `source_record_id`, `source_file` and physical `source_row_number`; include `source_data_row_number` when available.

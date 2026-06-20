@@ -2,7 +2,7 @@
 
 Status: Accepted baseline for MVP
 
-Last updated: 2026-06-19
+Last updated: 2026-06-20
 
 ## Purpose
 
@@ -86,7 +86,7 @@ Before the first tagged release, these versions may change. After the first tagg
 
 The normalized occurrence schema is the canonical project-level representation for accepted geospatial occurrence records. It is independent of any single file format and is versioned by `occurrence_schema_version`.
 
-The canonical schema uses stable snake_case field names. Darwin Core source terms, GBIF fields, OBIS fields and enrichment fields should be mapped into these project field names through `metadata/processing.json.field_mapping`; generated output columns should not mix source camelCase terms into the normalized schema. For example, the normalized field is `iucn_red_list_category`, even when the source term or enrichment provider uses a different spelling.
+The canonical schema uses stable snake_case field names. Darwin Core source terms, GBIF fields, OBIS fields, IUCN terms and enrichment fields should be mapped into these project field names through `metadata/processing.json.field_mapping`; generated output columns should not mix source camelCase terms into the normalized schema. For example, the normalized field is `iucn_red_list_category`, even when the source term or enrichment provider uses a different spelling such as `http://iucn.org/terms/iucnRedListCategory`.
 
 The canonical schema includes these field groups:
 
@@ -348,7 +348,7 @@ Required fields:
 | `generator` | object | Converter name, version, commit and runtime information. |
 | `input` | object | Input archive path, checksum and detected format. |
 | `configuration` | object | Effective conversion configuration and config hash. |
-| `field_mapping` | object | Darwin Core terms mapped into normalized fields. |
+| `field_mapping` | object | Source terms mapped into normalized fields. Includes supported Darwin Core, Dublin Core, GBIF, OBIS and IUCN terms where applicable. |
 | `quality_rules` | object | Coordinate, date and required-field rule versions. |
 | `counts` | object | Source, accepted, rejected and output row counts. |
 | `type_conversion_failures` | array | Type conversion failures counted by field and reason. |
@@ -496,7 +496,7 @@ Required GeoParquet projection fields:
 | `kingdom` | string or null | Darwin Core `kingdom`. |
 | `taxon_id` | string or null | Darwin Core `taxonID`. |
 | `basis_of_record` | string or null | Darwin Core `basisOfRecord`. |
-| `iucn_red_list_category` | string or null | IUCN Red List category when present in source data or accepted enrichment. |
+| `iucn_red_list_category` | string or null | IUCN Red List category when present in source data or accepted enrichment. Current source terms include `http://iucn.org/terms/iucnRedListCategory`, `http://rs.gbif.org/terms/1.0/iucnRedListCategory` and `http://rs.tdwg.org/dwc/terms/iucnRedListCategory`. |
 | `event_date` | string or null | Darwin Core `eventDate`, normalized where possible. |
 | `event_year` | integer or null | Year derived from `eventDate` or `year`. |
 | `decimal_longitude` | double | Parsed longitude. |
@@ -603,7 +603,7 @@ Required FlatGeobuf projection columns:
 | `taxon_rank` | string or null | Darwin Core `taxonRank`. |
 | `basis_of_record` | string or null | Darwin Core `basisOfRecord`. |
 | `degree_of_establishment` | string or null | Darwin Core `degreeOfEstablishment`. |
-| `iucn_red_list_category` | string or null | IUCN Red List category when present in source data or accepted enrichment. |
+| `iucn_red_list_category` | string or null | IUCN Red List category when present in source data or accepted enrichment. Current source terms include `http://iucn.org/terms/iucnRedListCategory`, `http://rs.gbif.org/terms/1.0/iucnRedListCategory` and `http://rs.tdwg.org/dwc/terms/iucnRedListCategory`. |
 | `event_date` | string or null | Darwin Core `eventDate`, normalized where possible. |
 | `event_year` | integer or null | Year derived from `eventDate` or `year`. |
 | `decimal_longitude` | double | Parsed longitude. |
@@ -837,4 +837,4 @@ Current validator scope and limitations:
 
 This MVP contract intentionally excludes PMTiles. PMTiles remains an intended MVP+ output and should be added by extending `manifest.layers` and `manifest.files`, not by changing the GeoParquet or FlatGeobuf contract.
 
-The bundle must remain useful for non-GBIF and non-OBIS DwC-A archives. GBIF and OBIS fields are preserved when available, but they are nullable and not required for successful conversion.
+The bundle must remain useful for non-GBIF and non-OBIS DwC-A archives. GBIF, OBIS and IUCN-sourced fields are preserved when available, but they are nullable and not required for successful conversion.

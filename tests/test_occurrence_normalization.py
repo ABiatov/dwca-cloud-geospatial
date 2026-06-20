@@ -58,6 +58,30 @@ def test_valid_coordinates_become_normalized_occurrence_records() -> None:
     assert "scientificName" not in record.to_dict()
 
 
+def test_iucn_red_list_category_accepts_iucn_namespace_term() -> None:
+    record = OccurrenceSourceRecord(
+        source_file="occurrence.txt",
+        source_row_number=2,
+        source_data_row_number=1,
+        source_record_id=None,
+        values_by_term={
+            "http://rs.tdwg.org/dwc/terms/occurrenceID": "occ-iucn",
+            "http://rs.tdwg.org/dwc/terms/scientificName": "IUCN namespace species",
+            "http://rs.tdwg.org/dwc/terms/decimalLatitude": "20.057964",
+            "http://rs.tdwg.org/dwc/terms/decimalLongitude": "-72.80522",
+            "http://iucn.org/terms/iucnRedListCategory": "LC",
+        },
+        raw_values=(),
+        field_metadata=(),
+        relationship_keys={},
+    )
+
+    result = normalize_occurrence_records((record,))
+
+    assert result.counts.accepted_records == 1
+    assert result.accepted_records[0].iucn_red_list_category == "LC"
+
+
 def test_event_date_is_normalized_and_year_is_derived_when_practical() -> None:
     read_result = read_occurrence_rows(NORMALIZATION_FIXTURE_DIR)
     result = normalize_occurrence_records(read_result.records)

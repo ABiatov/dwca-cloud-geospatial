@@ -17,6 +17,7 @@ DWC_TERM_BASE = "http://rs.tdwg.org/dwc/terms/"
 DC_TERMS_BASE = "http://purl.org/dc/terms/"
 GBIF_TERM_BASE = "http://rs.gbif.org/terms/1.0/"
 OBIS_TERM_BASE = "http://rs.iobis.org/obis/terms/"
+IUCN_TERM_BASE = "http://iucn.org/terms/"
 
 MISSING_COORDINATES = "missing_coordinates"
 INVALID_LATITUDE = "invalid_latitude"
@@ -220,6 +221,10 @@ def _obis(local_name: str) -> str:
     return f"{OBIS_TERM_BASE}{local_name}"
 
 
+def _iucn(local_name: str) -> str:
+    return f"{IUCN_TERM_BASE}{local_name}"
+
+
 NORMALIZED_FIELD_TERMS: Mapping[str, tuple[str, ...]] = {
     "occurrence_id": (_dwc("occurrenceID"),),
     "scientific_name": (_dwc("scientificName"),),
@@ -251,6 +256,7 @@ NORMALIZED_FIELD_TERMS: Mapping[str, tuple[str, ...]] = {
     "rights_holder": (_dwc("rightsHolder"), _dc("rightsHolder")),
     "references": (_dc("references"), _dwc("references")),
     "iucn_red_list_category": (
+        _iucn("iucnRedListCategory"),
         _gbif("iucnRedListCategory"),
         _dwc("iucnRedListCategory"),
     ),
