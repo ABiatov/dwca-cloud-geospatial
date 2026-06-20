@@ -51,6 +51,7 @@ def test_static_viewer_implements_no_flatgeobuf_and_artifact_only_states() -> No
     script = (VIEWER_DIR / "app.js").read_text(encoding="utf-8")
 
     assert "No FlatGeobuf map layer is available for this bundle." in script
+    assert "generate the bundle with the FlatGeobuf output format selected" in script
     assert "source_format === \"flatgeobuf\"" in script
     assert "source_format === \"geoparquet\"" not in script
     assert "not loaded as the MVP browser map layer" in script

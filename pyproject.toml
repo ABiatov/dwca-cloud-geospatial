@@ -50,6 +50,7 @@ validation = [
 
 [project.scripts]
 dwca-cloud-geospatial = "dwca_cloud_geospatial.cli:main"
+dwca-cloud-geospatial-gui = "dwca_cloud_geospatial.gui:main"
 
 [tool.setuptools]
 package-dir = { "" = "src" }

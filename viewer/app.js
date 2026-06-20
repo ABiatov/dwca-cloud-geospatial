@@ -6,7 +6,7 @@
   const SOURCE_METADATA_PATH = "metadata/source.json";
   const PROCESSING_METADATA_PATH = "metadata/processing.json";
   const NO_MAP_LAYER_MESSAGE =
-    "No FlatGeobuf map layer is available for this bundle.";
+    "No FlatGeobuf map layer is available for this bundle. To display occurrence points on the map, generate the bundle with the FlatGeobuf output format selected.";
   const KINGDOM_COLOR_EXPRESSION = [
     "match",
     ["coalesce", ["get", "kingdom"], ""],

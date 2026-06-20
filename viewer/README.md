@@ -38,7 +38,9 @@ http://localhost:8000/viewer/?bundle=../scratch/sample-bundle/
 
 For an explicit GeoParquet-only bundle, use `--format geoparquet`; the same
 viewer URL loads metadata, counts, processing warnings and generated-file
-inventory, then shows the accepted no-FlatGeobuf map state.
+inventory, then shows the accepted no-FlatGeobuf map state. That state tells
+users to generate the bundle with the FlatGeobuf output format selected if
+they want occurrence points to appear on the map.
 
 The browser loads MapLibre GL JS and FlatGeobuf JavaScript from public CDN
 URLs. The map uses the public OpenStreetMap raster tile endpoint as a basemap

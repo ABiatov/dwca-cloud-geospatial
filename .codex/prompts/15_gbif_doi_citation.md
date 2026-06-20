@@ -24,7 +24,9 @@
 - `.codex/prompts/08_manifest_metadata_writers.md`
 - `.codex/prompts/10_core_api_cli.md`
 - `.codex/prompts/12_static_viewer.md`
+- `.codex/prompts/13_tkinter_gui.md`
 - `.codex/prompts/14_demo_docs_hardening.md`
+- `session_logs/2026-06-20_13_tkinter_gui.md`
 - `src/dwca_cloud_geospatial/bundle.py`
 - `src/dwca_cloud_geospatial/conversion.py`
 - `src/dwca_cloud_geospatial/cli.py`
@@ -35,6 +37,8 @@
 - `tests/test_conversion.py`
 - `tests/test_cli.py`
 - `tests/test_static_viewer.py`
+- `tests/test_gui.py` if conversion option names, converter docs or GUI
+  handoff behavior are changed.
 - Example archive and generated bundle:
   - `examples/dwca/0038004-260519110011954.zip`
   - `examples/dwca/0038004-260519110011954/`
@@ -57,6 +61,15 @@
   must happen during conversion or through explicitly supplied metadata.
 - Missing DOI/citation must remain valid for non-GBIF archives and GBIF
   archives where metadata is unavailable.
+- Existing viewer no-map-layer behavior must remain intact. GeoParquet-only
+  bundles are valid and the viewer message should continue telling users that
+  no FlatGeobuf map layer is available and that occurrence points require
+  generating the bundle with the FlatGeobuf output format selected.
+- Existing GUI behavior must remain intact unless deliberately changed:
+  `dwca-cloud-geospatial-gui` calls the same core conversion/validation APIs,
+  does not start a backend service, and currently relies on context-menu copy
+  plus `Copy Text` for copying status/viewer instructions. Do not promise
+  keyboard copy in Prompt 15 docs unless it is actually verified.
 
 ## Problem
 
@@ -204,6 +217,8 @@ that citation in Provenance with an active `doi.org` link.
   CLI/core option behavior without live network dependency.
 - Documentation describes the citation workflow and cites the official GBIF
   citation guidelines.
+- Existing static viewer no-map-layer tests and GUI-adjacent tests still pass
+  when viewer provenance rendering or conversion option docs change.
 
 ## Constraints
 
@@ -215,6 +230,12 @@ that citation in Provenance with an active `doi.org` link.
 - Do not duplicate manifest/source summary logic in CLI handlers.
 - Do not use `innerHTML` for citation rendering.
 - Preserve safe static-hosting behavior and existing viewer no-map-layer states.
+- If new conversion options are added for manual GBIF DOI/citation metadata or
+  opt-in enrichment, update `docs/converter.md` and assess whether
+  `src/dwca_cloud_geospatial/gui.py` / `tests/test_gui.py` need corresponding
+  GUI handoff text or explicit non-support notes. The GUI is not required to
+  expose GBIF citation controls unless Prompt 15 deliberately accepts that UI
+  scope.
 
 ## Required Session Log
 
@@ -234,5 +255,8 @@ Write `session_logs/YYYY-MM-DD_15_gbif_doi_citation.md` with:
 
 - Update `.codex/prompts/14_demo_docs_hardening.md` if final demo/docs
   hardening should mention the GBIF citation workflow.
+- Update Prompt 13 GUI docs/tests if accepted conversion option names,
+  source metadata schema or viewer guidance affect GUI behavior or user-facing
+  GUI instructions.
 - Update future prompts if conversion option names, source metadata schema or
   viewer provenance behavior changes.

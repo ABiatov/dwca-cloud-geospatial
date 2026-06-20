@@ -523,11 +523,17 @@ Goal: provide a simple desktop entry point for non-CLI users.
 
 Deliverables:
 
-- `tkinter` GUI that lets a user choose input archive and output directory.
+- Implemented `tkinter` GUI that lets a user choose input archive and output
+  directory.
 - Overwrite checkbox that must be selected before replacing an existing output path.
 - Progress and status reporting.
 - Error display that preserves actionable messages.
 - Link or button to open generated output directory or viewer instructions.
+- Copy affordances for status/viewer instructions through right-click context
+  menu and `Copy Text`; `Ctrl+C` / `Cmd+C` remains a documented MVP
+  limitation on the current Tk/macOS path.
+- Viewer no-map guidance for GeoParquet-only bundles explains that map points
+  require generating FlatGeobuf output.
 
 Acceptance criteria:
 
@@ -584,6 +590,6 @@ No open questions remain for the accepted MVP plan.
 
 ## Immediate Next Actions
 
-1. Implement the primitive `tkinter` GUI over the same core conversion API.
-2. Preserve the viewer launch guidance from `viewer/README.md` when adding GUI
-   instructions for opening or inspecting generated bundles.
+1. Complete Prompt 14 demo, documentation and MVP hardening.
+2. Preserve the implemented GUI launch, copy and viewer no-map guidance in
+   final docs and demo evidence.

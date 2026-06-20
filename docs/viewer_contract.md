@@ -130,8 +130,10 @@ When no FlatGeobuf point layer is declared:
 - Load and display `manifest.json`, `metadata/source.json` and
   `metadata/processing.json`.
 - Show provenance, counts, generated-file inventory and processing warnings.
-- Show a clear no-map-layer state such as: "No FlatGeobuf map layer is
-  available for this bundle."
+- Show a clear no-map-layer state. The current implementation says:
+  "No FlatGeobuf map layer is available for this bundle. To display
+  occurrence points on the map, generate the bundle with the FlatGeobuf output
+  format selected."
 - Expose declared GeoParquet files as analytical/download artifacts.
 - Do not attempt browser GeoParquet loading in the MVP.
 

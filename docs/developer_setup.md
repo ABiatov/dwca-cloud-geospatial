@@ -319,6 +319,38 @@ dwca-cloud-geospatial convert --help
 dwca-cloud-geospatial validate --help
 ```
 
+The primitive Tkinter GUI entry point is:
+
+```bash
+dwca-cloud-geospatial-gui
+```
+
+If `zsh` reports `command not found`, the virtual environment is not active
+or the editable install has not been refreshed since the GUI script was added.
+Activate `.venv/` first, or use the explicit script path:
+
+```bash
+source "${REPO}/.venv/bin/activate"
+dwca-cloud-geospatial-gui
+```
+
+```bash
+"${REPO}/.venv/bin/dwca-cloud-geospatial-gui"
+```
+
+or:
+
+```bash
+python -m dwca_cloud_geospatial.gui
+```
+
+Headless test runs do not require a GUI display; GUI-adjacent tests cover the
+non-visual request validation and status-formatting helpers.
+
+In the GUI status panel, use the right-click context menu or the `Copy Text`
+button to copy viewer instructions. `Ctrl+C` / `Cmd+C` copy shortcuts are a
+known MVP limitation on the current Tk/macOS path.
+
 Without installing the console script, the module entry point is:
 
 ```bash

@@ -210,6 +210,12 @@
   the map; point color styling follows `kingdom`; and selected-record details
   derive a clickable `source record URL` after `source_record_id` using
   `https://www.gbif.org/occurrence/{source_record_id}` with `target="_blank"`.
+- Current static viewer no-FlatGeobuf message to preserve in final docs and
+  tests: when a valid bundle has no FlatGeobuf layer, the viewer says
+  `No FlatGeobuf map layer is available for this bundle. To display occurrence
+  points on the map, generate the bundle with the FlatGeobuf output format
+  selected.` This prevents GUI users who uncheck FlatGeobuf from interpreting
+  a GeoParquet-only bundle as a broken viewer.
 - Prompt 12 verification to preserve:
   `.venv/bin/python -m pytest tests/test_static_viewer.py -q` covers static
   viewer smoke inputs for generated FlatGeobuf-with-GeoPackage and
@@ -218,6 +224,59 @@
   files, OpenStreetMap basemap wiring, derived source-record links, kingdom
   colors, selected-feature highlighting, hidden empty-state behavior and
   FlatGeobuf `Uint8Array` loading.
+- Prompt 13 Tkinter GUI implementation to preserve:
+  `src/dwca_cloud_geospatial/gui.py` provides the primitive desktop GUI and
+  the console script `dwca-cloud-geospatial-gui`. The module entry point is
+  `python -m dwca_cloud_geospatial.gui`. The GUI collects an input archive or
+  unpacked DwC-A directory, an output bundle directory, FlatGeobuf and
+  GeoParquet format checkboxes, an overwrite checkbox, optional validation
+  after conversion, GeoParquet large-output mode and chunk size.
+- Prompt 13 GUI launch behavior to preserve:
+  `dwca-cloud-geospatial-gui` is created by refreshing the editable install.
+  A bare `dwca-cloud-geospatial-gui` shell command requires `.venv/bin` on
+  `PATH`, normally after `source "${REPO}/.venv/bin/activate"`. Users can also
+  run `"${REPO}/.venv/bin/dwca-cloud-geospatial-gui"` directly. If the script
+  is missing after `pyproject.toml` changes, refresh the editable install from
+  the documented `.venv/`; this local session used
+  `.venv/bin/python -m pip install -e . --no-deps --no-build-isolation` after
+  ensuring the `.venv` had `setuptools` and `wheel`.
+- Prompt 13 core API reuse to preserve:
+  GUI conversion calls `dwca_cloud_geospatial.conversion.convert_dwca_archive`
+  with `ConversionOptions` built by GUI helper functions. GUI validation calls
+  `dwca_cloud_geospatial.validation.validate_output_bundle`. The GUI does not
+  duplicate DwC-A parsing, normalization, geospatial writing, metadata writing
+  or bundle validation logic.
+- Prompt 13 GUI behavior to preserve:
+  existing output paths are rejected before conversion unless the overwrite
+  checkbox is selected; core `ConversionError` messages and diagnostics are
+  shown as actionable errors; non-fatal normalization and FlatGeobuf writer
+  warnings, including `large_indexed_flatgeobuf_write`, are displayed
+  separately from failures; retained `data/occurrences.gpkg` staging artifact
+  paths are shown when present; validation display separates required errors,
+  warnings and dependency-dependent skipped checks.
+- Prompt 13 GUI viewer guidance to preserve:
+  generated bundles should point users at the copied `<output>/index.html`
+  viewer entry. FlatGeobuf bundles should be described as having an MVP map
+  layer at `data/occurrences.fgb`; retained `data/occurrences.gpkg` remains
+  artifact/download metadata only. GeoParquet-only bundles remain valid and
+  open in the copied viewer as a metadata/provenance/artifact inventory state
+  with no MVP map layer. The viewer no-map state now explicitly tells users to
+  generate with FlatGeobuf selected if they want occurrence points on the map.
+  The GUI must not imply that Python starts a backend service or bundles
+  offline frontend assets.
+- Prompt 13 GUI copy behavior and limitation to preserve:
+  context-menu copy works in the status/viewer-instructions text area and the
+  GUI also exposes a `Copy Text` button for copying the full current status
+  panel. `Ctrl+C`/`Cmd+C` remained unreliable in manual Tk/macOS testing and
+  is accepted as an MVP limitation because context-menu copy and `Copy Text`
+  satisfy the workflow. Final docs should not promise keyboard-copy behavior
+  until it is verified interactively.
+- Prompt 13 verification to preserve:
+  `.venv/bin/python -m pytest tests/test_gui.py -q` covers headless-safe
+  GUI-adjacent logic: format selection, overwrite guard, core
+  `ConversionOptions` construction, GeoParquet large-output option gating,
+  chunk-size validation, warning summaries, validation summary grouping and
+  viewer instruction copy.
 - Prompt 11 viewer-contract fixtures:
   `tests/fixtures/output_bundles/viewer_contract/flatgeobuf_with_geopackage_manifest.json`
   and
@@ -248,6 +307,9 @@ Make the MVP understandable, repeatable and ready for external review.
   installation, CLI, GUI and viewer usage.
 - Complete or update `docs/dwca_parser.md`, `docs/converter.md`, `docs/viewer_contract.md` and `docs/deployment.md`.
 - Confirm `docs/output_format.md` matches implemented bundle behavior.
+- Confirm GUI docs mention `dwca-cloud-geospatial-gui`, explicit
+  `.venv/bin/dwca-cloud-geospatial-gui` fallback, context-menu/`Copy Text`
+  copy behavior and the current `Ctrl+C`/`Cmd+C` limitation.
 - Confirm docs and viewer guidance distinguish default FlatGeobuf bundles,
   explicit GeoParquet-only bundles and GeoParquet-only large-output bundles.
 - If Prompt 10c has been completed, confirm docs describe

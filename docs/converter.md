@@ -151,6 +151,99 @@ directly. It exits non-zero only when required validation errors are present.
 Dependency-dependent optional reader skips are reported as warnings or skipped
 checks, not as failures.
 
+## Tkinter GUI
+
+A primitive desktop GUI is available for non-CLI users through the console
+script:
+
+```bash
+dwca-cloud-geospatial-gui
+```
+
+If the shell reports `command not found`, activate the documented local
+environment first or call the script by explicit path:
+
+```bash
+source "${REPO}/.venv/bin/activate"
+dwca-cloud-geospatial-gui
+```
+
+```bash
+"${REPO}/.venv/bin/dwca-cloud-geospatial-gui"
+```
+
+The module entry point is also available:
+
+```bash
+python -m dwca_cloud_geospatial.gui
+```
+
+The GUI uses the same core conversion API as the CLI:
+`dwca_cloud_geospatial.conversion.convert_dwca_archive` with
+`ConversionOptions`. It does not parse DwC-A rows, normalize records, write
+geospatial files, write bundle metadata or validate bundles independently.
+
+GUI controls:
+
+- Input DwC-A archive or unpacked archive directory.
+- Output bundle directory.
+- Output formats: FlatGeobuf is selected by default; GeoParquet is explicit.
+- Overwrite checkbox. Existing output paths are rejected unless this checkbox
+  is selected, matching CLI `--overwrite` behavior.
+- Optional validation after conversion, using
+  `dwca_cloud_geospatial.validation.validate_output_bundle`.
+- GeoParquet large-output mode, labeled as GeoParquet-only behavior. This maps
+  to `GeoParquetWriterOptions(large_output_mode=True)` and the configured
+  conversion chunk size. Partitioned GeoParquet output is not exposed because
+  it is not implemented.
+
+The GUI status panel reports accepted and rejected counts from the core
+conversion result, generated paths, non-fatal conversion warnings and
+validation results. FlatGeobuf large indexed-write warnings such as
+`large_indexed_flatgeobuf_write` are shown separately from conversion
+failures. When FlatGeobuf conversion returns a retained GeoPackage staging
+artifact, the GUI shows the `data/occurrences.gpkg` path as an artifact.
+
+Validation output separates required validation errors from warnings and
+dependency-dependent skipped checks. Required errors indicate an invalid
+bundle; skipped optional reader checks indicate local validation tooling or
+driver support was unavailable.
+
+The GUI can open the generated output directory and shows static viewer
+instructions. Generated bundles include the copied viewer entry point at:
+
+```text
+<output>/index.html
+```
+
+For a local browser check, serve the output parent and open the copied viewer:
+
+```bash
+python -m http.server 8000 --directory /path/to/output-parent
+```
+
+```text
+http://localhost:8000/output-bundle/index.html
+```
+
+FlatGeobuf bundles use `data/occurrences.fgb` as the MVP browser map source.
+The retained `data/occurrences.gpkg` file is artifact/download metadata only.
+GeoParquet-only bundles are valid and open in the copied viewer as a
+metadata/provenance/artifact inventory state with no MVP map layer. In that
+state, the viewer tells users to generate the bundle with the FlatGeobuf
+output format selected if they want occurrence points to appear on the map.
+
+The GUI status and viewer-instructions text can be copied with the right-click
+context menu (`Copy` / `Copy all`) or the `Copy Text` button. Keyboard copy
+shortcuts (`Ctrl+C` / `Cmd+C`) are currently a Tk/macOS limitation in this MVP
+and should not be relied on until they are verified interactively.
+
+The Python GUI does not start a backend service and does not bundle offline
+frontend assets. The copied static viewer still references MapLibre GL JS and
+FlatGeobuf JavaScript from public CDN URLs and uses OpenStreetMap raster tiles
+as its default basemap; see `viewer/README.md` for viewer launch details and
+offline-hosting considerations.
+
 ## Overwrite Behavior
 
 Conversion rejects any existing output path by default, including an existing
