@@ -71,4 +71,4 @@ At the end of each prompt:
 
 ## Current next work item
 
-`14_gbif_doi_citation.md`
+-
