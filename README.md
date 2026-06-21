@@ -79,6 +79,8 @@ http://localhost:8000/scratch/sample-bundle/index.html
 
 More setup details are documented in [docs/developer_setup.md](docs/developer_setup.md).
 Converter usage is documented in [docs/converter.md](docs/converter.md).
+Static hosting and demo review steps are documented in
+[docs/deployment.md](docs/deployment.md).
 For non-CLI users, a primitive Tkinter entry point is available as
 `dwca-cloud-geospatial-gui`; it calls the same core conversion and validation
 APIs as the CLI.

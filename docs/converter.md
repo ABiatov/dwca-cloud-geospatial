@@ -391,3 +391,7 @@ from GeoPackage and FlatGeobuf spatial-index status.
 The bundle metadata is written only through
 `dwca_cloud_geospatial.bundle.write_bundle_metadata`; CLI handlers do not
 duplicate manifest, processing metadata or rejected-report logic.
+
+Static hosting and external demo review steps, including default FlatGeobuf
+bundles, explicit GeoParquet-only bundles and checklist negative examples, are
+documented in `docs/deployment.md`.

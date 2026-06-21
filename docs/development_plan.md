@@ -604,6 +604,7 @@ No open questions remain for the accepted MVP plan.
 
 ## Immediate Next Actions
 
-1. Complete Prompt 14 demo, documentation and MVP hardening.
-2. Preserve the implemented GUI launch, copy and viewer no-map guidance in
-   final docs and demo evidence.
+1. Review Prompt 15 demo evidence with an external reviewer.
+2. Decide whether the next MVP+ prompt should address PMTiles, partitioned
+   GeoParquet manifests, multi-file occurrence-core streaming or offline
+   viewer assets.

@@ -35,6 +35,20 @@ def test_viewer_contract_document_exists_and_records_mvp_boundaries() -> None:
     assert "live OBIS API" in contract
 
 
+def test_deployment_document_records_static_mvp_review_boundaries() -> None:
+    deployment_path = REPOSITORY_ROOT / "docs" / "deployment.md"
+    deployment = deployment_path.read_text(encoding="utf-8")
+
+    assert deployment_path.exists()
+    assert "No Python backend" in deployment
+    assert "`data/occurrences.gpkg`" in deployment
+    assert "retained GeoPackage staging artifact" in deployment
+    assert "No FlatGeobuf map layer is available for this bundle." in deployment
+    assert "PMTiles generation is deferred to MVP+" in deployment
+    assert "Checklist DwC-A archives with `Taxon` cores" in deployment
+    assert "large_indexed_flatgeobuf_write" in deployment
+
+
 def test_flatgeobuf_fixture_declares_geopackage_as_inventory_only() -> None:
     manifest = _load_fixture("flatgeobuf_with_geopackage_manifest.json")
 
