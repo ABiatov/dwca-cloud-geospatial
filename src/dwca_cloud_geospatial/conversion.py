@@ -67,7 +67,7 @@ from dwca_cloud_geospatial.occurrence import (
 FLATGEOBUF_FORMAT = "flatgeobuf"
 GEOPARQUET_FORMAT = "geoparquet"
 SUPPORTED_OUTPUT_FORMATS = (FLATGEOBUF_FORMAT, GEOPARQUET_FORMAT)
-VIEWER_ASSET_FILENAMES = ("index.html", "styles.css", "app.js", "README.md")
+VIEWER_ASSET_FILENAMES = ("index.html", "styles.css", "app.js")
 
 
 class ConversionError(RuntimeError):
@@ -197,6 +197,7 @@ def convert_dwca_archive(
             extra_warnings=gbif_enrichment.warnings,
         )
         _copy_static_viewer(output_root)
+        _write_output_bundle_readme(output_root)
     except (FlatGeobufDependencyError, GeoParquetDependencyError) as exc:
         raise ConversionError(
             f"{exc} Install the documented optional dependencies for the selected output format.",
@@ -324,6 +325,7 @@ def _convert_dwca_archive_streaming_outputs(
             extra_warnings=gbif_enrichment.warnings,
         )
         _copy_static_viewer(output_root)
+        _write_output_bundle_readme(output_root)
     except (FlatGeobufDependencyError, GeoParquetDependencyError) as exc:
         raise ConversionError(
             f"{exc} Install the documented optional dependencies for the selected output format.",
@@ -589,6 +591,57 @@ def _copy_static_viewer(output_root: Path) -> None:
         shutil.copy2(source, output_root / filename)
 
 
+def _write_output_bundle_readme(output_root: Path) -> None:
+    (output_root / "README.md").write_text(
+        """# Generated DwC-A Geospatial Bundle
+
+This directory is a generated output bundle from `dwca-cloud-geospatial`.
+
+## Open The Viewer
+
+Serve this directory, or any parent directory that contains it, with ordinary
+static file hosting and open `index.html` in a browser.
+
+For local review from the repository root:
+
+```bash
+python -m http.server 8000 --directory .
+```
+
+Then open the bundle-relative viewer URL, for example:
+
+```text
+http://localhost:8000/path/to/output-bundle/index.html
+```
+
+## Bundle Contents
+
+- `manifest.json`: discovery document for tools and the static viewer.
+- `metadata/source.json`: source archive, dataset, rights and provenance
+  metadata.
+- `metadata/processing.json`: converter configuration, counts, validation
+  summary, warnings and parser diagnostics.
+- `data/`: generated geospatial outputs such as FlatGeobuf, GeoPackage and
+  GeoParquet when selected.
+- `reports/`: rejected-record reports when source rows are rejected or skipped.
+- `index.html`, `styles.css` and `app.js`: static viewer assets copied into
+  the bundle.
+
+The viewer does not require a project backend, database, scheduler or live
+GBIF/OBIS API. Optional external frontend assets and basemap tiles depend on
+the copied viewer configuration.
+
+## Citation And License
+
+Dataset DOI, citation, license, rights holder and GBIF/OBIS provenance are
+recorded in `metadata/source.json` and summarized in `manifest.json` when
+available. Preserve those fields when publishing or redistributing this
+generated bundle.
+""",
+        encoding="utf-8",
+    )
+
+
 def _raise_for_occurrence_read_errors(occurrence_result: OccurrenceReadResult) -> None:
     if not occurrence_result.has_errors:
         return
@@ -655,6 +708,7 @@ def _bundle_options(
             "download_key": conversion_options.gbif.download_key,
             "doi": conversion_options.gbif.doi,
             "citation": conversion_options.gbif.citation,
+            "license": conversion_options.gbif.license,
             "enrich": conversion_options.gbif.enrich,
             "api_base_url": conversion_options.gbif.api_base_url,
             "connect_timeout_seconds": (

@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+title: "DwC-A to Cloud-Optimized Geospatial Formats"
+authors:
+  - family-names: "Biatov"
+    given-names: "Anton"
+    orcid: "https://orcid.org/0000-0002-4853-3485"
+    alias: "ABiatov"
+    website: "https://www.linkedin.com/in/anton-biatov/"
+abstract: "A local converter that transforms Darwin Core Archive occurrence datasets into portable cloud-friendly geospatial outputs, metadata, validation reports and a lightweight static viewer."
+keywords:
+  - Darwin Core Archive
+  - DwC-A
+  - biodiversity
+  - geospatial
+  - GeoParquet
+  - FlatGeobuf
+  - MapLibre
+license: AGPL-3.0-only
+version: 0.1.0
+date-released: 2026-06-21
+repository-code: "https://github.com/ABiatov/dwca-cloud-geospatial"
+url: "https://github.com/ABiatov/dwca-cloud-geospatial"

@@ -45,6 +45,7 @@ class GbifDownloadOptions:
     download_key: str | None = None
     doi: str | None = None
     citation: str | None = None
+    license: str | None = None
     enrich: bool = False
     api_base_url: str = GBIF_API_BASE_URL
     connect_timeout_seconds: float = 5.0
@@ -319,6 +320,7 @@ def resolve_gbif_download_metadata(
         download_key=download_key,
         doi=explicit_doi,
         citation=_clean_text(options.citation),
+        license=_clean_text(options.license),
     )
     warnings: list[dict[str, Any]] = []
 
@@ -357,7 +359,11 @@ def resolve_gbif_download_metadata(
                         or citation_metadata.citation
                         or api_metadata.citation
                     ),
-                    license=api_metadata.license or citation_metadata.license,
+                    license=(
+                        metadata.license
+                        or api_metadata.license
+                        or citation_metadata.license
+                    ),
                 )
             except GbifDownloadMetadataError as exc:
                 warnings.append(_warning("gbif_download_metadata_lookup_failed", str(exc)))

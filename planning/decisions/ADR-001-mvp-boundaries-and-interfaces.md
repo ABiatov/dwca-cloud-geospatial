@@ -6,7 +6,7 @@ Date: 2026-06-04
 
 ## Context
 
-The project is preparing a practical submission for the 2026 Ebbe Nielsen Challenge while keeping the repository reusable as a standalone DwC-A conversion component and as a future building block for `ABiatov/biodiversity-viewer-serverless`.
+The project is preparing for public prototype review while keeping the repository reusable as a standalone DwC-A conversion component and as a future building block for `ABiatov/biodiversity-viewer-serverless`.
 
 The intended product should let users convert already downloaded Darwin Core Archive files into portable geospatial outputs and a simple static viewer without requiring deep technical expertise.
 
@@ -49,7 +49,7 @@ Installation strategy for the MVP is:
 - `pipx` for simple cross-platform command-line installation.
 - Python package/library usage for integrators.
 
-Standalone desktop binaries for macOS, Windows and Linux are deferred until the core converter, CLI, library API, GUI and viewer are working and there is enough time before the Challenge submission.
+Standalone desktop binaries for macOS, Windows and Linux are deferred until the core converter, CLI, library API, GUI and viewer are working and there is enough time before public prototype review.
 
 ## Consequences
 

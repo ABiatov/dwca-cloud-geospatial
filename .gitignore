@@ -25,6 +25,6 @@ dist/
 
 # Local data, database volumes, and generated artifacts
 test_dwca/
-data/
+# data/
 examples/
 *.log

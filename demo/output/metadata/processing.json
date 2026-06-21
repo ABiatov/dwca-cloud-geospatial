@@ -1,0 +1,253 @@
+{
+  "configuration": {
+    "flatgeobuf": {
+      "generated_from_geopackage": true,
+      "helper_strategy": "pyogrio.open_arrow_to_write_arrow",
+      "relative_path": "data/occurrences.fgb",
+      "spatial_index": true
+    },
+    "geopackage_staging": {
+      "enabled": true,
+      "flatgeobuf_generated_from_geopackage": true,
+      "flatgeobuf_spatial_index": true,
+      "gdal_ogr_helper_strategy": "pyogrio.open_arrow_to_write_arrow",
+      "layer": "occurrences",
+      "relative_path": "data/occurrences.gpkg",
+      "writer_backend": "pyogrio.write_arrow"
+    },
+    "geoparquet": {
+      "compression": null,
+      "covering_bbox_column": {
+        "enabled": false,
+        "strategy": null,
+        "threshold": null
+      },
+      "large_output_mode": false,
+      "partitioned_dataset": {
+        "enabled": false,
+        "partition_key": null,
+        "threshold": null
+      },
+      "relative_path": null,
+      "row_group_size": null,
+      "spatial_sorting": {
+        "enabled": false,
+        "strategy": null,
+        "threshold": null
+      }
+    },
+    "outputs": {
+      "flatgeobuf": true,
+      "geoparquet": false
+    },
+    "user": {
+      "formats": [
+        "flatgeobuf"
+      ],
+      "gbif": {
+        "api_base_url": "https://api.gbif.org/v1",
+        "citation": null,
+        "connect_timeout_seconds": 5.0,
+        "doi": null,
+        "download_key": null,
+        "enrich": true,
+        "license": null,
+        "max_retries": 2,
+        "read_timeout_seconds": 20.0
+      }
+    }
+  },
+  "configuration_hash": "6f9c6f227d556eab0fb19580a2786a249d8171fa19c2ac13530ae3a3b2a52d69",
+  "counts": {
+    "accepted_records": 1168,
+    "flatgeobuf_records": 1168,
+    "geopackage_records": 1168,
+    "geoparquet_records": 0,
+    "parsed_records": 1168,
+    "rejected_records": 0,
+    "source_records": 1168,
+    "warning_count": 0
+  },
+  "created_at": "2026-06-21T17:26:53Z",
+  "field_mapping": {
+    "normalized_fields": {
+      "basis_of_record": [
+        "http://rs.tdwg.org/dwc/terms/basisOfRecord"
+      ],
+      "catalog_number": [
+        "http://rs.tdwg.org/dwc/terms/catalogNumber"
+      ],
+      "class": [
+        "http://rs.tdwg.org/dwc/terms/class"
+      ],
+      "collection_code": [
+        "http://rs.tdwg.org/dwc/terms/collectionCode"
+      ],
+      "coordinate_uncertainty_in_meters": [
+        "http://rs.tdwg.org/dwc/terms/coordinateUncertaintyInMeters"
+      ],
+      "country_code": [
+        "http://rs.tdwg.org/dwc/terms/countryCode"
+      ],
+      "dataset_key": [
+        "http://rs.gbif.org/terms/1.0/datasetKey",
+        "http://rs.tdwg.org/dwc/terms/datasetKey",
+        "http://rs.iobis.org/obis/terms/dataset_id"
+      ],
+      "dataset_name": [
+        "http://rs.tdwg.org/dwc/terms/datasetName"
+      ],
+      "decimal_latitude": [
+        "http://rs.tdwg.org/dwc/terms/decimalLatitude"
+      ],
+      "decimal_longitude": [
+        "http://rs.tdwg.org/dwc/terms/decimalLongitude"
+      ],
+      "degree_of_establishment": [
+        "http://rs.tdwg.org/dwc/terms/degreeOfEstablishment"
+      ],
+      "event_date": [
+        "http://rs.tdwg.org/dwc/terms/eventDate"
+      ],
+      "family": [
+        "http://rs.tdwg.org/dwc/terms/family"
+      ],
+      "gbif_id": [
+        "http://rs.gbif.org/terms/1.0/gbifID",
+        "http://rs.tdwg.org/dwc/terms/gbifID"
+      ],
+      "genus": [
+        "http://rs.tdwg.org/dwc/terms/genus"
+      ],
+      "geodetic_datum": [
+        "http://rs.tdwg.org/dwc/terms/geodeticDatum"
+      ],
+      "identified_by": [
+        "http://rs.tdwg.org/dwc/terms/identifiedBy"
+      ],
+      "institution_code": [
+        "http://rs.tdwg.org/dwc/terms/institutionCode"
+      ],
+      "iucn_red_list_category": [
+        "http://iucn.org/terms/iucnRedListCategory",
+        "http://rs.gbif.org/terms/1.0/iucnRedListCategory",
+        "http://rs.tdwg.org/dwc/terms/iucnRedListCategory"
+      ],
+      "kingdom": [
+        "http://rs.tdwg.org/dwc/terms/kingdom"
+      ],
+      "license": [
+        "http://purl.org/dc/terms/license",
+        "http://rs.tdwg.org/dwc/terms/license"
+      ],
+      "locality": [
+        "http://rs.tdwg.org/dwc/terms/locality"
+      ],
+      "obis_id": [
+        "http://rs.iobis.org/obis/terms/id",
+        "http://rs.iobis.org/obis/terms/obisID",
+        "http://rs.tdwg.org/dwc/terms/obisID"
+      ],
+      "occurrence_id": [
+        "http://rs.tdwg.org/dwc/terms/occurrenceID"
+      ],
+      "order": [
+        "http://rs.tdwg.org/dwc/terms/order"
+      ],
+      "organism_id": [
+        "http://rs.tdwg.org/dwc/terms/organismID"
+      ],
+      "phylum": [
+        "http://rs.tdwg.org/dwc/terms/phylum"
+      ],
+      "publisher": [
+        "http://purl.org/dc/terms/publisher",
+        "http://rs.tdwg.org/dwc/terms/publisher"
+      ],
+      "record_number": [
+        "http://rs.tdwg.org/dwc/terms/recordNumber"
+      ],
+      "recorded_by": [
+        "http://rs.tdwg.org/dwc/terms/recordedBy"
+      ],
+      "references": [
+        "http://purl.org/dc/terms/references",
+        "http://rs.tdwg.org/dwc/terms/references"
+      ],
+      "rights_holder": [
+        "http://rs.tdwg.org/dwc/terms/rightsHolder",
+        "http://purl.org/dc/terms/rightsHolder"
+      ],
+      "scientific_name": [
+        "http://rs.tdwg.org/dwc/terms/scientificName"
+      ],
+      "taxon_id": [
+        "http://rs.tdwg.org/dwc/terms/taxonID"
+      ],
+      "taxon_rank": [
+        "http://rs.tdwg.org/dwc/terms/taxonRank"
+      ],
+      "verbatim_scientific_name": [
+        "http://rs.tdwg.org/dwc/terms/verbatimScientificName"
+      ],
+      "year": [
+        "http://rs.tdwg.org/dwc/terms/year"
+      ]
+    },
+    "version": "0.1.0"
+  },
+  "generator": {
+    "commit": null,
+    "name": "dwca-cloud-geospatial",
+    "runtime": {
+      "python_package": "dwca_cloud_geospatial"
+    },
+    "version": "0.1.0"
+  },
+  "input": {
+    "archive_kind": "zip",
+    "path": "demo/source/0038004-260519110011954.zip",
+    "sha256": "8e78d106cb09a1e40abe3f37d312e1cd8fb89fb6df8bbf93f59166ecbd654e04",
+    "source_file": "occurrence.txt"
+  },
+  "output_decisions": {
+    "flatgeobuf_generated_from_geopackage": true,
+    "flatgeobuf_spatial_index": true,
+    "gdal_ogr_helper_strategy": "pyogrio.open_arrow_to_write_arrow",
+    "geopackage_staging_enabled": true,
+    "geopackage_staging_relative_path": "data/occurrences.gpkg",
+    "geopackage_staging_writer_backend": "pyogrio.write_arrow",
+    "geoparquet_written": false
+  },
+  "parser_diagnostics": [],
+  "quality_rules": {
+    "coordinate_crs": "OGC:CRS84",
+    "coordinate_order": "longitude_latitude",
+    "quality_flag_codes": [
+      "missing_scientific_name",
+      "missing_event_date",
+      "missing_coordinate_uncertainty",
+      "invalid_coordinate_uncertainty",
+      "missing_geodetic_datum",
+      "invalid_event_year"
+    ],
+    "reject_zero_zero": true,
+    "version": "0.1.0"
+  },
+  "source_provenance": {
+    "gbif": {
+      "citation": "GBIF.org (4 June 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.3xbk5b",
+      "doi": "10.15468/dl.3xbk5b",
+      "download_key": "0038004-260519110011954",
+      "license": "http://creativecommons.org/licenses/by-nc/4.0/legalcode"
+    }
+  },
+  "type_conversion_failures": [],
+  "validation": {
+    "checked_files": [],
+    "errors": [],
+    "status": "not_run",
+    "warnings": []
+  },
+  "warnings": []
+}

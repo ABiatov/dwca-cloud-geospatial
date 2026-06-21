@@ -8,7 +8,10 @@ Use an explicit repository path in commands instead of relying on the current
 working directory:
 
 ```bash
-export REPO="/Users/Alevtina/Documents/GitHub/dwca-cloud-geospatial"
+gh repo clone ABiatov/dwca-cloud-geospatial
+# or: git clone git@github.com:ABiatov/dwca-cloud-geospatial.git
+cd dwca-cloud-geospatial
+export REPO="$(pwd)"
 ```
 
 If the repository is checked out somewhere else, set `REPO` to that absolute
@@ -273,8 +276,9 @@ The static viewer source files live under:
 ${REPO}/viewer/
 ```
 
-`dwca-cloud-geospatial convert` copies those viewer files into each generated
-bundle root as `index.html`, `styles.css`, `app.js` and `README.md`.
+`dwca-cloud-geospatial convert` copies those viewer runtime files into each
+generated bundle root as `index.html`, `styles.css` and `app.js`, then writes
+a generated bundle `README.md`.
 
 For a local browser check, create a bundle under the repository root and serve
 the repository as static files:

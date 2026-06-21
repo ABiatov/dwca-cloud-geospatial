@@ -120,6 +120,7 @@ class GeoPackageWriteResult:
     geometry_column: str
     geometry_type: str
     crs: str
+    bounds: tuple[float, float, float, float] | None
     layer: str
     writer_backend: str
 
@@ -136,6 +137,7 @@ class FlatGeobufWriteResult:
     geometry_type: str
     crs: str
     spatial_index: bool
+    bounds: tuple[float, float, float, float] | None
     warnings: tuple[FlatGeobufWriterWarning, ...] = ()
     staging_result: GeoPackageWriteResult | None = None
     generated_from_geopackage: bool = False
@@ -254,6 +256,7 @@ def write_flatgeobuf_occurrences(
         geometry_type=GEOMETRY_TYPE,
         crs=FLATGEOBUF_CRS,
         spatial_index=writer_options.spatial_index,
+        bounds=_row_bounds(rows),
         warnings=writer_warnings,
         helper_strategy="pyogrio.write_arrow",
     )
@@ -311,6 +314,7 @@ class GeoPackageStagedFlatGeobufWriter:
 
         self.backend = backend or _PyogrioGeoPackageFlatGeobufBackend()
         self.record_count = 0
+        self.bounds: tuple[float, float, float, float] | None = None
         self._finished = False
 
     def write_batch(self, records: Iterable[NormalizedOccurrenceRecord]) -> int:
@@ -333,6 +337,7 @@ class GeoPackageStagedFlatGeobufWriter:
             append=self.record_count > 0,
         )
         self.record_count += len(rows)
+        self.bounds = _merge_bounds(self.bounds, _row_bounds(rows))
         return len(rows)
 
     def finish(self) -> FlatGeobufWriteResult:
@@ -370,6 +375,7 @@ class GeoPackageStagedFlatGeobufWriter:
             geometry_column=GEOMETRY_COLUMN,
             geometry_type=GEOMETRY_TYPE,
             crs=FLATGEOBUF_CRS,
+            bounds=self.bounds,
             layer=self.options.geopackage_layer,
             writer_backend=self.backend.writer_backend_name,
         )
@@ -382,6 +388,7 @@ class GeoPackageStagedFlatGeobufWriter:
             geometry_type=GEOMETRY_TYPE,
             crs=FLATGEOBUF_CRS,
             spatial_index=True,
+            bounds=self.bounds,
             warnings=writer_warnings,
             staging_result=staging_result,
             generated_from_geopackage=True,
@@ -446,6 +453,33 @@ def _point_wkb(longitude: float, latitude: float) -> bytes:
     """Return little-endian WKB for a 2D point in longitude, latitude order."""
 
     return struct.pack("<bIdd", 1, 1, longitude, latitude)
+
+
+def _row_bounds(rows: Iterable[MappingRow]) -> tuple[float, float, float, float] | None:
+    bounds: tuple[float, float, float, float] | None = None
+    for row in rows:
+        lon = row["decimal_longitude"]
+        lat = row["decimal_latitude"]
+        bounds = _merge_bounds(bounds, (lon, lat, lon, lat))
+    return bounds
+
+
+def _merge_bounds(
+    first: tuple[float, float, float, float] | None,
+    second: tuple[float, float, float, float] | None,
+) -> tuple[float, float, float, float] | None:
+    if first is None:
+        return second
+    if second is None:
+        return first
+    west_a, south_a, east_a, north_a = first
+    west_b, south_b, east_b, north_b = second
+    return (
+        min(west_a, west_b),
+        min(south_a, south_b),
+        max(east_a, east_b),
+        max(north_a, north_b),
+    )
 
 
 class _PyogrioArrowFlatGeobufBackend:

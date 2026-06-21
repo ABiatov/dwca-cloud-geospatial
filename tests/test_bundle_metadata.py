@@ -14,6 +14,8 @@ from dwca_cloud_geospatial.bundle import (
     REJECTED_RECORDS_RELATIVE_PATH,
     SOURCE_METADATA_RELATIVE_PATH,
     BundleWriterOptions,
+    build_processing_metadata,
+    build_source_metadata,
     write_bundle_metadata,
 )
 from dwca_cloud_geospatial.flatgeobuf import (
@@ -158,6 +160,12 @@ def test_flatgeobuf_only_default_bundle_omits_rejected_report_and_geoparquet(
 
     assert source["dataset"]["title"] == "Quality rules fixture"
     assert source["source_archive"]["kind"] == "directory"
+    assert source["source_archive"]["path"] == (
+        "tests/fixtures/dwca/minimal_occurrence/quality_rules"
+    )
+    assert processing["input"]["path"] == (
+        "tests/fixtures/dwca/minimal_occurrence/quality_rules"
+    )
     assert source["source_files"][0] == {"path": "metadata.xml", "role": "metadata"}
     assert processing["counts"]["flatgeobuf_records"] == 20
     assert processing["counts"]["geoparquet_records"] == 0
@@ -165,6 +173,40 @@ def test_flatgeobuf_only_default_bundle_omits_rejected_report_and_geoparquet(
     assert processing["validation"]["status"] == "not_run"
     assert "class" in processing["field_mapping"]["normalized_fields"]
     assert "class_" not in processing["field_mapping"]["normalized_fields"]
+
+
+def test_metadata_provenance_paths_stay_absolute_outside_current_working_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    read_result, normalization_result = _read_and_normalize(QUALITY_RULES_FIXTURE_DIR)
+    outside_cwd = tmp_path / "outside-cwd"
+    outside_cwd.mkdir()
+    monkeypatch.chdir(outside_cwd)
+
+    source = build_source_metadata(
+        occurrence_result=read_result,
+        normalization_result=normalization_result,
+    )
+    processing = build_processing_metadata(
+        occurrence_result=read_result,
+        normalization_result=normalization_result,
+        flatgeobuf_result=None,
+        geoparquet_result=None,
+        options=BundleWriterOptions(),
+        created_at="2026-06-21T00:00:00Z",
+        counts={
+            "source_records": 0,
+            "parsed_records": 0,
+            "accepted_records": 0,
+            "rejected_records": 0,
+            "warning_count": 0,
+            "flatgeobuf_records": 0,
+            "geoparquet_records": 0,
+        },
+    )
+
+    assert source["source_archive"]["path"] == str(QUALITY_RULES_FIXTURE_DIR.resolve())
+    assert processing["input"]["path"] == str(QUALITY_RULES_FIXTURE_DIR.resolve())
 
 
 def test_explicit_geoparquet_bundle_inventory_and_rejected_report(
@@ -320,3 +362,35 @@ def test_bundle_metadata_preserves_manual_gbif_download_citation(
         "citation": source["gbif"]["citation"],
         "license": None,
     }
+
+
+def test_bundle_summary_uses_gbif_download_license_as_authoritative_rights(
+    tmp_path: Path,
+) -> None:
+    read_result, normalization_result = _read_and_normalize(NORMALIZATION_FIXTURE_DIR)
+
+    result = write_bundle_metadata(
+        output_directory=tmp_path,
+        occurrence_result=read_result,
+        normalization_result=normalization_result,
+        options=BundleWriterOptions(
+            bundle_id="test-gbif-license",
+            created_at="2026-06-20T12:00:00Z",
+        ),
+        gbif_download_metadata=GbifDownloadMetadata(
+            download_key="0038004-260519110011954",
+            doi="10.15468/dl.3xbk5b",
+            citation=(
+                "GBIF.org (4 June 2026) GBIF Occurrence Download "
+                "https://doi.org/10.15468/dl.3xbk5b"
+            ),
+            license="CC_BY_NC_4_0",
+        ),
+    )
+
+    source = _load_json(result.source_metadata_path)
+    manifest = _load_json(result.manifest_path)
+
+    assert source["rights"]["license"] == "CC_BY_NC_4_0"
+    assert source["gbif"]["license"] == "CC_BY_NC_4_0"
+    assert manifest["source"]["license"] == "CC_BY_NC_4_0"

@@ -112,6 +112,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Explicit GBIF occurrence download citation text.",
     )
     convert_parser.add_argument(
+        "--gbif-license",
+        help="Explicit GBIF occurrence download license value or URI.",
+    )
+    convert_parser.add_argument(
         "--gbif-enrich",
         action="store_true",
         help=(
@@ -171,6 +175,7 @@ def _convert_archive(args: argparse.Namespace) -> int:
                     download_key=args.gbif_download_key,
                     doi=args.gbif_doi,
                     citation=args.gbif_citation,
+                    license=args.gbif_license,
                     enrich=args.gbif_enrich,
                 ),
             ),

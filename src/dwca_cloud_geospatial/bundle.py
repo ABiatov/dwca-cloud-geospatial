@@ -216,6 +216,7 @@ def write_bundle_metadata(
         geoparquet_result=geoparquet_result,
         bounds=(
             _accepted_bounds(normalization_result.accepted_records)
+            or (flatgeobuf_result.bounds if flatgeobuf_result else None)
             or (geoparquet_result.bounds if geoparquet_result else None)
         ),
     )
@@ -278,8 +279,11 @@ def build_source_metadata(
         "doi": eml["doi"],
         "citation": eml["citation"],
     }
+    gbif_license = gbif_download_metadata.license if gbif_download_metadata else None
     rights = {
-        "license": eml["license"] or _first_accepted_value(normalization_result, "license"),
+        "license": gbif_license
+        or eml["license"]
+        or _first_accepted_value(normalization_result, "license"),
         "rights_holder": eml["rights_holder"]
         or _first_accepted_value(normalization_result, "rights_holder"),
         "rights": eml["rights"],
@@ -293,7 +297,7 @@ def build_source_metadata(
         ),
         "doi": gbif_download_metadata.doi if gbif_download_metadata else None,
         "citation": gbif_download_metadata.citation if gbif_download_metadata else None,
-        "license": gbif_download_metadata.license if gbif_download_metadata else None,
+        "license": gbif_license,
     }
     obis = {
         "dataset_id": _first_source_value(occurrence_result, _OBIS_DATASET_ID_TERMS),
@@ -304,7 +308,7 @@ def build_source_metadata(
     }
     return {
         "source_archive": {
-            "path": str(inspection.source_path),
+            "path": _provenance_path(inspection.source_path),
             "name": inspection.source_path.name,
             "kind": inspection.archive_kind,
             "bytes": inspection.source_size_bytes,
@@ -351,7 +355,7 @@ def build_processing_metadata(
             "runtime": {"python_package": "dwca_cloud_geospatial"},
         },
         "input": {
-            "path": str(occurrence_result.inspection.source_path),
+            "path": _provenance_path(occurrence_result.inspection.source_path),
             "archive_kind": occurrence_result.inspection.archive_kind,
             "sha256": occurrence_result.inspection.source_sha256,
             "source_file": occurrence_result.source_file,
@@ -695,7 +699,7 @@ def _source_summary(source_metadata: Mapping[str, Any]) -> dict[str, Any]:
         "publisher": dataset["publisher"],
         "doi": dataset["doi"] or gbif["doi"] or obis["doi"],
         "citation": dataset["citation"] or gbif["citation"] or obis["citation"],
-        "license": rights["license"] or gbif["license"] or obis["license"],
+        "license": gbif["license"] or obis["license"] or rights["license"],
         "gbif_dataset_key": gbif["dataset_key"],
         "gbif_download_key": gbif["download_key"],
         "obis_dataset_id": obis["dataset_id"],
@@ -910,6 +914,15 @@ def _dwca_metadata(inspection: ArchiveInspection) -> dict[str, Any]:
         if metadata
         else {},
     }
+
+
+def _provenance_path(path: Path) -> str:
+    resolved_path = path.resolve()
+    cwd = Path.cwd().resolve()
+    try:
+        return resolved_path.relative_to(cwd).as_posix()
+    except ValueError:
+        return str(resolved_path)
 
 
 def _table_summary(table: Any) -> dict[str, Any] | None:

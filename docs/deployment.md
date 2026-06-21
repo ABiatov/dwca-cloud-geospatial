@@ -19,8 +19,13 @@ taxonomy service or cloud-specific runtime is required after conversion.
 Use the documented in-repository virtual environment:
 
 ```bash
-export REPO="/Users/Alevtina/Documents/GitHub/dwca-cloud-geospatial"
+gh repo clone ABiatov/dwca-cloud-geospatial
+# or: git clone git@github.com:ABiatov/dwca-cloud-geospatial.git
+cd dwca-cloud-geospatial
+export REPO="$(pwd)"
+python -m venv "${REPO}/.venv"
 source "${REPO}/.venv/bin/activate"
+python -m pip install --upgrade pip
 python -m pip install -e "${REPO}[dev,flatgeobuf,validation]"
 ```
 

@@ -2,7 +2,35 @@
 
 Convert Darwin Core Archive (DwC-A) biodiversity datasets into cloud-friendly geospatial formats, starting with GeoParquet and FlatGeobuf and later PMTiles, with a lightweight MapLibre viewer for static publishing and reuse.
 
-This project is an early standalone component of the [Biodiversity Viewer Serverless](https://github.com/ABiatov/biodiversity-viewer-serverless) roadmap.
+It helps biodiversity data publishers, data managers, researchers and tool
+builders turn DwC-A occurrence archives into ready-to-share map and analytics
+assets without running a database, geospatial server or custom backend.
+The converted bundle can be copied to ordinary static web hosting and opened
+over the internet by users. There is no application deployment, database
+setup, server provisioning, Docker stack or other infrastructure work required:
+copy the generated files to a host and the static viewer can read them.
+
+## Ways To Use
+
+The converter can be used in three ways:
+
+- GUI: run `dwca-cloud-geospatial-gui` for a simple desktop workflow.
+- CLI: run `dwca-cloud-geospatial inspect`, `convert` and `validate` for
+  repeatable command-line processing.
+- Python API: import `dwca_cloud_geospatial` and call the core conversion and
+  validation APIs from Python code.
+
+## Screenshots
+
+The GUI provides a desktop entry point for selecting an archive, output
+directory, output formats and validation options.
+
+![DwC-A Cloud Geospatial GUI](docs/assets/gui-screenshot.png)
+
+Generated bundles include a lightweight static MapLibre viewer for reviewing
+metadata, outputs and FlatGeobuf occurrence points from static files.
+
+![DwC-A Cloud Geospatial static viewer](docs/assets/viewer-screenshot.png)
 
 ## Project Status
 
@@ -14,7 +42,9 @@ This repository is at the initial prototype stage. The first goal is to prove a 
 4. Publish the generated files as static assets.
 5. Explore the result in a browser-based MapLibre viewer.
 
-APIs, file layouts and command-line interfaces should be treated as experimental until the first tagged release.
+`v0.1.0` is an initial prototype release. APIs, file layouts and
+command-line interfaces are usable for evaluation and demo workflows, but may
+change as the converter, bundle contract and viewer mature.
 
 Checklist DwC-A archives with `Taxon` cores can be inspected, but the MVP
 conversion workflow targets occurrence archives that declare coordinate terms.
@@ -28,6 +58,10 @@ that streams occurrence batches, writes a GeoParquet `bbox` covering column
 and applies bounded grid spatial ordering.
 
 The accepted MVP development plan is documented in [docs/development_plan.md](docs/development_plan.md).
+The public project overview is documented in
+[docs/project_overview.md](docs/project_overview.md).
+Release notes are documented in [CHANGELOG.md](CHANGELOG.md), and citation
+metadata is available in [CITATION.cff](CITATION.cff).
 The accepted static viewer contract is documented in
 [docs/viewer_contract.md](docs/viewer_contract.md): MVP map display uses
 declared FlatGeobuf point layers, GeoPackage artifacts are retained for
@@ -44,7 +78,10 @@ environment.
 Use an explicit repository path in local commands:
 
 ```bash
-export REPO="/Users/Alevtina/Documents/GitHub/dwca-cloud-geospatial"
+gh repo clone ABiatov/dwca-cloud-geospatial
+# or: git clone git@github.com:ABiatov/dwca-cloud-geospatial.git
+cd dwca-cloud-geospatial
+export REPO="$(pwd)"
 python -m venv "${REPO}/.venv"
 source "${REPO}/.venv/bin/activate"
 python -m pip install --upgrade pip
@@ -79,13 +116,15 @@ http://localhost:8000/scratch/sample-bundle/index.html
 
 More setup details are documented in [docs/developer_setup.md](docs/developer_setup.md).
 Converter usage is documented in [docs/converter.md](docs/converter.md).
+Demo dataset download instructions are documented in
+[demo/README.md](demo/README.md).
 Static hosting and demo review steps are documented in
 [docs/deployment.md](docs/deployment.md).
 For non-CLI users, a primitive Tkinter entry point is available as
 `dwca-cloud-geospatial-gui`; it calls the same core conversion and validation
 APIs as the CLI.
 
-GBIF occurrence download DOI/citation provenance can be supplied manually or
+GBIF occurrence download DOI/citation/license provenance can be supplied manually or
 resolved through explicit conversion-time enrichment. CLI and core conversion
 remain no-network by default; pass `--gbif-enrich` to opt in. The GUI exposes
 the same lookup as a visible `GBIF DOI citation lookup` checkbox selected by
@@ -115,6 +154,12 @@ backend.
 Biodiversity datasets are often published in Darwin Core Archive format, which is excellent for data exchange but not always convenient for direct web mapping, static hosting or browser-based exploration.
 
 This project explores a lightweight path from biodiversity data archives to portable geospatial files that can be hosted cheaply, reused by other tools and inspected without running a geospatial server.
+
+## Related Roadmap
+
+This project is an early standalone component of the
+[Biodiversity Viewer Serverless](https://github.com/ABiatov/biodiversity-viewer-serverless)
+roadmap.
 
 ## License
 

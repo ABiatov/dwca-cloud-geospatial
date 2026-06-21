@@ -75,6 +75,9 @@ def test_core_conversion_writes_default_flatgeobuf_bundle(tmp_path: Path) -> Non
     assert (tmp_path / "bundle" / "styles.css").exists()
     assert (tmp_path / "bundle" / "app.js").exists()
     assert (tmp_path / "bundle" / "README.md").exists()
+    bundle_readme = (tmp_path / "bundle" / "README.md").read_text(encoding="utf-8")
+    assert "Generated DwC-A Geospatial Bundle" in bundle_readme
+    assert "source copy of the minimal static MapLibre viewer" not in bundle_readme
     assert (tmp_path / "bundle" / DEFAULT_FLATGEOBUF_RELATIVE_PATH).exists()
     assert not (tmp_path / "bundle" / DEFAULT_GEOPARQUET_RELATIVE_PATH).exists()
 
@@ -306,6 +309,7 @@ def test_default_flatgeobuf_conversion_uses_geopackage_staging_and_streamed_reje
     assert result.flatgeobuf_result is not None
     assert result.flatgeobuf_result.generated_from_geopackage is True
     assert result.flatgeobuf_result.spatial_index is True
+    assert result.flatgeobuf_result.bounds is not None
     assert result.flatgeobuf_result.staging_result is not None
     assert (tmp_path / "bundle" / DEFAULT_GEOPACKAGE_RELATIVE_PATH).exists()
     assert (tmp_path / "bundle" / DEFAULT_FLATGEOBUF_RELATIVE_PATH).exists()
@@ -324,6 +328,8 @@ def test_default_flatgeobuf_conversion_uses_geopackage_staging_and_streamed_reje
         "reports/rejected_records.csv",
     ]
     inventory = {entry["path"]: entry for entry in manifest["files"]}
+    assert manifest["layers"][0]["bounds"] == list(result.flatgeobuf_result.bounds)
+    assert manifest["viewer"]["initial_bounds"] == manifest["layers"][0]["bounds"]
     assert inventory["data/occurrences.gpkg"]["role"] == "geopackage"
     assert inventory["data/occurrences.gpkg"]["media_type"] == (
         "application/geopackage+sqlite3"

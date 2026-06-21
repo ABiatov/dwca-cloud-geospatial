@@ -81,6 +81,8 @@ def test_convert_command_passes_gbif_citation_options_to_core(
             "https://doi.org/10.15468/dl.3xbk5b",
             "--gbif-citation",
             "GBIF.org (4 June 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.3xbk5b",
+            "--gbif-license",
+            "CC_BY_NC_4_0",
             "--gbif-enrich",
         ]
     )
@@ -91,6 +93,7 @@ def test_convert_command_passes_gbif_citation_options_to_core(
     assert options.gbif.download_key == "0038004-260519110011954"
     assert options.gbif.doi == "https://doi.org/10.15468/dl.3xbk5b"
     assert options.gbif.citation.startswith("GBIF.org (4 June 2026)")
+    assert options.gbif.license == "CC_BY_NC_4_0"
     assert options.gbif.enrich is True
 
 

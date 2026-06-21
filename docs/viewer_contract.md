@@ -153,7 +153,7 @@ The dataset provenance panel should display these fields when available:
 | Homepage | `metadata/source.json.dataset.homepage`. |
 | DOI | `metadata/source.json.dataset.doi`, `metadata/source.json.gbif.doi`, `metadata/source.json.obis.doi`, then `manifest.source.doi`. |
 | Citation | `metadata/source.json.dataset.citation`, GBIF citation, OBIS citation, then `manifest.source.citation`. |
-| License | `metadata/source.json.rights.license`, GBIF license, OBIS license, then `manifest.source.license`. |
+| License | GBIF download license, OBIS license, `metadata/source.json.rights.license`, then `manifest.source.license`. |
 | Rights holder | `metadata/source.json.rights.rights_holder`. |
 | Source archive | `metadata/source.json.source_archive.name`, path, kind, bytes and checksum when present. |
 | GBIF dataset key | `metadata/source.json.gbif.dataset_key` or `manifest.source.gbif_dataset_key`. |
@@ -351,9 +351,10 @@ viewer/
   README.md
 ```
 
-`dwca-cloud-geospatial convert` copies these files into each generated bundle
-root. Opening the copied `index.html` from a static HTTP server reads the
-neighboring `manifest.json`. The browser entry point also accepts
+`dwca-cloud-geospatial convert` copies the runtime viewer files into each
+generated bundle root and writes a generated bundle `README.md`. Opening the
+copied `index.html` from a static HTTP server reads the neighboring
+`manifest.json`. The browser entry point also accepts
 `?bundle=<bundle-root-url>` or `?manifest=<manifest-json-url>` when the shared
 source viewer under `viewer/` is served separately.
 

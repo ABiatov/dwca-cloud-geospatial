@@ -135,11 +135,13 @@ def test_resolve_gbif_download_metadata_uses_manual_values_without_network() -> 
                 "GBIF.org (4 June 2026) GBIF Occurrence Download "
                 "https://doi.org/10.15468/dl.3xbk5b"
             ),
+            license="CC_BY_NC_4_0",
         )
     )
 
     assert result.metadata.download_key == "0038004-260519110011954"
     assert result.metadata.doi == "10.15468/dl.3xbk5b"
+    assert result.metadata.license == "CC_BY_NC_4_0"
     assert result.warnings == ()
 
 

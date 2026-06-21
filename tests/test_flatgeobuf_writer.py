@@ -205,6 +205,7 @@ def test_real_flatgeobuf_write_when_optional_dependencies_are_available(
     assert info["geometry_type"] == "Point"
     assert info["features"] == len(accepted_records)
     assert set(FLATGEOBUF_PROJECTION_COLUMNS).issubset(set(info["fields"]))
+    assert result.bounds == (-9.1393, 38.7223, -8.2, 40.1)
     assert info["total_bounds"] is not None
     west, south, east, north = info["total_bounds"]
     assert math.isclose(west, -9.1393)
@@ -240,6 +241,8 @@ def test_real_geopackage_staged_flatgeobuf_write_reconciles_records(
     assert result.staging_result.path == tmp_path / DEFAULT_GEOPACKAGE_RELATIVE_PATH
     assert result.staging_result.path.exists()
     assert result.staging_result.record_count == result.record_count == 2
+    assert result.bounds == (-9.1393, 38.7223, -8.2, 40.1)
+    assert result.staging_result.bounds == result.bounds
 
     gpkg_info = pyogrio.read_info(
         result.staging_result.path,

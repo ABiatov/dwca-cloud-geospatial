@@ -34,9 +34,12 @@ output/
 
 MVP files:
 
-- `index.html`, `styles.css`, `app.js` and `README.md`: static viewer files
-  copied into the bundle root by `convert`. These files are convenience
-  publishing assets and are not listed in `manifest.files`.
+- `index.html`, `styles.css` and `app.js`: static viewer runtime files copied
+  into the bundle root by `convert`.
+- `README.md`: generated bundle launch, contents and citation notes written
+  into the bundle root by `convert`.
+  These files are convenience publishing assets and are not listed in
+  `manifest.files`.
 - `manifest.json`: top-level discovery document for tools and the viewer.
 - `metadata/source.json`: source archive, DwC-A, GBIF and OBIS provenance when available.
 - `metadata/processing.json`: converter version, configuration, counts, warnings and validation summary.
@@ -80,7 +83,9 @@ Initial MVP versions:
 }
 ```
 
-Before the first tagged release, these versions may change. After the first tagged release, breaking changes require a new schema version and migration notes.
+In `v0.1.0`, these versions identify the initial prototype schemas and
+viewer contract. Breaking changes after `v0.1.0` require a new schema or
+contract version and migration notes.
 
 ## Canonical Occurrence Schema And Projections
 
@@ -295,7 +300,7 @@ Required fields:
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `source_archive` | object | Input archive path, name, size and checksum when known. |
+| `source_archive` | object | Input archive path, name, size and checksum when known. The path is written relative to the converter's current working directory when the archive is inside that directory; otherwise it remains absolute. |
 | `dwca` | object | DwC-A metadata parsed from `meta.xml` and EML when available. |
 | `dataset` | object | Normalized dataset identity and citation fields. |
 | `rights` | object | License and rights fields. |
@@ -334,12 +339,15 @@ Recommended `obis` fields:
 | `citation` | string or null | OBIS citation text. |
 | `license` | string or null | OBIS license value. |
 
-GBIF occurrence download DOI/citation metadata belongs in `gbif`, not in
-`dataset`, unless the source EML itself provides a dataset-level DOI or
-citation. The converter may populate `gbif.download_key`, `gbif.doi` and
-`gbif.citation` from explicit conversion options or from opt-in
-conversion-time GBIF API enrichment. Ordinary conversion remains no-network
-and missing values should be stored as `null`.
+GBIF occurrence download DOI/citation/license metadata belongs in `gbif`, not
+in `dataset`, unless the source EML itself provides a dataset-level DOI or
+citation. The converter may populate `gbif.download_key`, `gbif.doi`,
+`gbif.citation` and `gbif.license` from explicit conversion options or from
+opt-in conversion-time GBIF API enrichment. Ordinary conversion remains
+no-network and missing values should be stored as `null`.
+When `gbif.license` is present, the converter treats it as the authoritative
+download license for the generated bundle and also writes it to
+`rights.license`.
 
 The converter must not invent GBIF or OBIS identifiers. Missing values should be stored as `null`.
 
@@ -353,7 +361,7 @@ Required fields:
 | --- | --- | --- |
 | `created_at` | string | UTC ISO 8601 timestamp. |
 | `generator` | object | Converter name, version, commit and runtime information. |
-| `input` | object | Input archive path, checksum and detected format. |
+| `input` | object | Input archive path, checksum and detected format. The path follows the same relative-when-inside-current-working-directory rule as `metadata/source.json.source_archive.path`. |
 | `configuration` | object | Effective conversion configuration and config hash. |
 | `source_provenance` | object | Resolved optional source-enrichment metadata used during conversion, including GBIF download DOI/citation metadata when supplied or enriched. |
 | `field_mapping` | object | Source terms mapped into normalized fields. Includes supported Darwin Core, Dublin Core, GBIF, OBIS and IUCN terms where applicable. |
@@ -721,7 +729,7 @@ The viewer must display these dataset/provenance fields when available:
 | Publisher | `metadata/source.json.dataset.publisher`. |
 | DOI | `metadata/source.json.dataset.doi`, GBIF DOI or OBIS DOI. |
 | Citation | `metadata/source.json.dataset.citation`, GBIF citation or OBIS citation. |
-| License | `metadata/source.json.rights.license`, GBIF license or OBIS license. |
+| License | GBIF download license, OBIS license, then `metadata/source.json.rights.license`. |
 | GBIF dataset key | `metadata/source.json.gbif.dataset_key`. |
 | GBIF download key | `metadata/source.json.gbif.download_key`. |
 | OBIS dataset id | `metadata/source.json.obis.dataset_id`. |

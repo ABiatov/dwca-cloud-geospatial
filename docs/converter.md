@@ -77,7 +77,8 @@ into `data/occurrences.gpkg`, then creates `data/occurrences.fgb` from the
 GeoPackage with `SPATIAL_INDEX=YES`. The GeoPackage remains in the bundle and
 is inventoried in `manifest.files`.
 
-Conversion also copies the static viewer files into the output directory:
+Conversion also copies the static viewer runtime files into the output
+directory and writes a generated bundle README:
 
 ```text
 index.html
@@ -86,9 +87,11 @@ app.js
 README.md
 ```
 
-These viewer files are not listed in `manifest.files`; that inventory remains
-reserved for generated data, metadata and report artifacts. Opening
-`index.html` from a static HTTP server reads the neighboring `manifest.json`.
+These publishing convenience files are not listed in `manifest.files`; that
+inventory remains reserved for generated data, metadata and report artifacts.
+Opening `index.html` from a static HTTP server reads the neighboring
+`manifest.json`. `README.md` describes the generated bundle and should not be
+confused with the source `viewer/README.md`.
 
 Large GeoParquet output is enabled through `GeoParquetWriterOptions` on the
 core API. It keeps the CLI default unchanged and writes single-file
@@ -130,6 +133,7 @@ ConversionOptions(
             "GBIF.org (4 June 2026) GBIF Occurrence Download "
             "https://doi.org/10.15468/dl.3xbk5b"
         ),
+        license="CC_BY_NC_4_0",
     )
 )
 ```
@@ -183,7 +187,8 @@ no network access:
 dwca-cloud-geospatial convert /path/to/0038004-260519110011954.zip /path/to/output-bundle \
   --gbif-download-key 0038004-260519110011954 \
   --gbif-doi 10.15468/dl.3xbk5b \
-  --gbif-citation "GBIF.org (4 June 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.3xbk5b"
+  --gbif-citation "GBIF.org (4 June 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.3xbk5b" \
+  --gbif-license CC_BY_NC_4_0
 ```
 
 Opt in to GBIF API enrichment when a download key can be inferred or supplied:
