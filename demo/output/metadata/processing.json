@@ -16,7 +16,7 @@
       "writer_backend": "pyogrio.write_arrow"
     },
     "geoparquet": {
-      "compression": null,
+      "compression": "zstd",
       "covering_bbox_column": {
         "enabled": false,
         "strategy": null,
@@ -28,8 +28,8 @@
         "partition_key": null,
         "threshold": null
       },
-      "relative_path": null,
-      "row_group_size": null,
+      "relative_path": "data/occurrences.parquet",
+      "row_group_size": 100000,
       "spatial_sorting": {
         "enabled": false,
         "strategy": null,
@@ -38,11 +38,12 @@
     },
     "outputs": {
       "flatgeobuf": true,
-      "geoparquet": false
+      "geoparquet": true
     },
     "user": {
       "formats": [
-        "flatgeobuf"
+        "flatgeobuf",
+        "geoparquet"
       ],
       "gbif": {
         "api_base_url": "https://api.gbif.org/v1",
@@ -57,18 +58,18 @@
       }
     }
   },
-  "configuration_hash": "6f9c6f227d556eab0fb19580a2786a249d8171fa19c2ac13530ae3a3b2a52d69",
+  "configuration_hash": "41926449963c29b58b2e028efc7305427a21c3f0d48bb868053bcb86340463cd",
   "counts": {
     "accepted_records": 1168,
     "flatgeobuf_records": 1168,
     "geopackage_records": 1168,
-    "geoparquet_records": 0,
+    "geoparquet_records": 1168,
     "parsed_records": 1168,
     "rejected_records": 0,
     "source_records": 1168,
     "warning_count": 0
   },
-  "created_at": "2026-06-21T17:26:53Z",
+  "created_at": "2026-06-21T19:25:51Z",
   "field_mapping": {
     "normalized_fields": {
       "basis_of_record": [
@@ -217,7 +218,7 @@
     "geopackage_staging_enabled": true,
     "geopackage_staging_relative_path": "data/occurrences.gpkg",
     "geopackage_staging_writer_backend": "pyogrio.write_arrow",
-    "geoparquet_written": false
+    "geoparquet_written": true
   },
   "parser_diagnostics": [],
   "quality_rules": {

@@ -771,7 +771,7 @@ The viewer must be able to show these feature fields in popups or a details pane
 | `source_data_row_number` |
 | `quality_flags` |
 
-The current viewer also derives a display-only `source record URL` row from
+The current viewer also derives a display-only `Source Record URL` row from
 `source_record_id` when available, using
 `https://www.gbif.org/occurrence/{source_record_id}`. This derived link is not
 a generated occurrence column and is not required in FlatGeobuf or

@@ -5,6 +5,24 @@
   const SUPPORTED_VIEWER_CONTRACT_VERSION = "0.1.0";
   const SOURCE_METADATA_PATH = "metadata/source.json";
   const PROCESSING_METADATA_PATH = "metadata/processing.json";
+  const ARTIFACT_DISPLAY_ORDER = [
+    "data/occurrences.fgb",
+    "data/occurrences.gpkg",
+    "data/occurrences.parquet",
+    SOURCE_METADATA_PATH,
+    PROCESSING_METADATA_PATH,
+  ];
+  const FIELD_LABEL_OVERRIDES = {
+    iucn_red_list_category: "IUCN Red List Categories",
+  };
+  const FIELD_LABEL_ACRONYMS = {
+    doi: "DOI",
+    gbif: "GBIF",
+    id: "ID",
+    iucn: "IUCN",
+    obis: "OBIS",
+    url: "URL",
+  };
   const NO_MAP_LAYER_MESSAGE =
     "No FlatGeobuf map layer is available for this bundle. To display occurrence points on the map, generate the bundle with the FlatGeobuf output format selected.";
   const KINGDOM_COLOR_EXPRESSION = [
@@ -395,37 +413,43 @@
     }
   }
 
-  function artifactDescription(entry) {
-    if (entry.role === "geopackage") {
-      return "Retained GeoPackage staging/source artifact; not loaded as the MVP browser map layer.";
+  function artifactDisplayRank(path) {
+    const index = ARTIFACT_DISPLAY_ORDER.indexOf(path);
+    return index === -1 ? ARTIFACT_DISPLAY_ORDER.length : index;
+  }
+
+  function artifactLinkLabel(path) {
+    if (path === SOURCE_METADATA_PATH) {
+      return "source.json (metadata)";
     }
-    if (entry.role === "geoparquet") {
-      return "Analytical GeoParquet artifact; browser loading is not part of the MVP viewer contract.";
+    if (path === PROCESSING_METADATA_PATH) {
+      return "processing.json (metadata)";
     }
-    if (entry.role === "flatgeobuf") {
-      return "MVP browser point layer when declared in manifest.layers.";
-    }
-    if (entry.role === "report") {
-      return "Rejected-record report.";
-    }
-    return entry.media_type || "Generated file.";
+    return path.startsWith("data/") ? path.slice("data/".length) : path;
   }
 
   function renderArtifacts() {
     const container = byId("artifact-list");
     container.replaceChildren();
-    for (const entry of state.manifest.files || []) {
+    const files = (state.manifest.files || [])
+      .map((entry, index) => ({ entry, index }))
+      .sort(
+        (left, right) =>
+          artifactDisplayRank(left.entry.path) -
+            artifactDisplayRank(right.entry.path) || left.index - right.index
+      )
+      .map((item) => item.entry);
+    for (const entry of files) {
       const item = document.createElement("article");
       item.className = "artifact";
       const link = document.createElement("a");
       link.href = urlForBundlePath(entry.path).href;
-      link.textContent = entry.path;
+      link.textContent = artifactLinkLabel(entry.path);
       const description = document.createElement("p");
       description.textContent = [
         entry.role,
         `${displayValue(entry.record_count)} records`,
         entry.bytes ? `${entry.bytes} bytes` : null,
-        artifactDescription(entry),
       ]
         .filter(Boolean)
         .join(" | ");
@@ -602,7 +626,7 @@
         paint: {
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 1, 8, 8, 14],
           "circle-color": "rgba(255, 255, 255, 0)",
-          "circle-stroke-width": 4,
+          "circle-stroke-width": 2,
           "circle-stroke-color": "#111827",
           "circle-opacity": 1,
         },
@@ -663,7 +687,7 @@
     }
 
     if (available.includes("scientific_name")) {
-      const group = createFilterGroup("Scientific name");
+      const group = createFilterGroup("Scientific Name");
       const input = document.createElement("input");
       input.type = "search";
       input.placeholder = "Contains";
@@ -676,14 +700,16 @@
       container.append(group);
     }
 
-    for (const field of ["kingdom", "basis_of_record", "iucn_red_list_category"]) {
-      if (available.includes(field)) {
-        container.append(createCategoricalFilter(field));
-      }
+    if (available.includes("kingdom")) {
+      container.append(createCategoricalFilter("kingdom"));
+    }
+
+    if (available.includes("iucn_red_list_category")) {
+      container.append(createCategoricalFilter("iucn_red_list_category"));
     }
 
     if (available.includes("event_year")) {
-      const group = createFilterGroup("Event year");
+      const group = createFilterGroup("Event Year");
       const min = document.createElement("input");
       const max = document.createElement("input");
       min.type = "number";
@@ -704,6 +730,10 @@
       container.append(group);
     }
 
+    if (available.includes("basis_of_record")) {
+      container.append(createCategoricalFilter("basis_of_record"));
+    }
+
     if (available.includes("quality_flags")) {
       container.append(createQualityFilter());
     }
@@ -718,8 +748,25 @@
     return group;
   }
 
+  function fieldLabel(field) {
+    if (FIELD_LABEL_OVERRIDES[field]) {
+      return FIELD_LABEL_OVERRIDES[field];
+    }
+    return field
+      .split("_")
+      .filter(Boolean)
+      .map((token) => {
+        const normalized = token.toLowerCase();
+        return (
+          FIELD_LABEL_ACRONYMS[normalized] ||
+          `${normalized.charAt(0).toUpperCase()}${normalized.slice(1)}`
+        );
+      })
+      .join(" ");
+  }
+
   function createCategoricalFilter(field) {
-    const group = createFilterGroup(field.replaceAll("_", " "));
+    const group = createFilterGroup(fieldLabel(field));
     const stack = document.createElement("div");
     stack.className = "checkbox-stack";
     state.filters.categories[field] = state.filters.categories[field] || new Set();
@@ -744,7 +791,7 @@
   }
 
   function createQualityFilter() {
-    const group = createFilterGroup("Quality flags");
+    const group = createFilterGroup("Quality Flags");
     const mode = document.createElement("select");
     for (const [value, label] of [
       ["all", "All records"],
@@ -907,12 +954,12 @@
     const ordered = Array.from(new Set([...displayFields, ...knownDetailFields]));
     for (const field of ordered) {
       if (Object.prototype.hasOwnProperty.call(properties, field)) {
-        addDefinition(list, field.replaceAll("_", " "), properties[field]);
+        addDefinition(list, fieldLabel(field), properties[field]);
         if (field === "source_record_id" && properties[field]) {
           const occurrenceUrl = `https://www.gbif.org/occurrence/${encodeURIComponent(
             properties[field]
           )}`;
-          addLinkDefinition(list, "source record URL", occurrenceUrl, occurrenceUrl);
+          addLinkDefinition(list, "Source Record URL", occurrenceUrl, occurrenceUrl);
         }
       }
     }

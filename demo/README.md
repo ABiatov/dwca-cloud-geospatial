@@ -40,5 +40,7 @@ dwca-cloud-geospatial convert \
   --gbif-citation "GBIF.org (4 June 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.3xbk5b" \
   --gbif-license CC_BY_NC_4_0 \
   --gbif-enrich \
+  --format flatgeobuf \
+  --format geoparquet \
   --overwrite
 ```

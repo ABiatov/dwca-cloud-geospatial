@@ -112,8 +112,6 @@ GeoPackage-staged FlatGeobuf path. The viewer should:
 - show it in an output/artifacts list when `manifest.files` declares role
   `geopackage`;
 - show its record count, byte size and checksum when present;
-- describe it as the retained staging/source artifact for the FlatGeobuf
-  output;
 - offer it as a download link when static hosting permits direct file access.
 
 The MVP viewer must not load GeoPackage as the default browser map layer.
@@ -190,11 +188,48 @@ preserved without contradiction: `large_output_mode`,
 GeoParquet output is currently deferred and should be shown as disabled for
 valid MVP bundles.
 
+## Generated Files Panel
+
+The generated-file inventory is a user-facing download list backed by
+`manifest.files`. It must keep file links bundle-relative and should not hide
+declared artifacts, but the visible link labels may be simplified for
+readability.
+
+Accepted display order for the primary bundle artifacts:
+
+1. `data/occurrences.fgb`
+2. `data/occurrences.gpkg`
+3. `data/occurrences.parquet`
+4. `metadata/source.json`
+5. `metadata/processing.json`
+
+Additional declared files follow after those primary artifacts in their
+manifest order. The link target still uses the full manifest path. For files
+under `data/`, the visible link label omits the `data/` prefix; for example,
+`data/occurrences.fgb` is displayed as `occurrences.fgb`. Required metadata
+files use short labels with their purpose: `metadata/source.json` is displayed
+as `source.json (metadata)`, and `metadata/processing.json` is displayed as
+`processing.json (metadata)`.
+
+The inventory row should stay concise for non-technical users. It may display
+role, record count and bytes when present, but should not append implementation
+or viewer-contract explanations such as FlatGeobuf being the MVP browser
+layer, GeoPackage being retained staging, or GeoParquet browser loading being
+outside the MVP contract. Those details remain documented here instead of
+being shown inline in the viewer.
+
 ## Feature Details Panel
 
 When a FlatGeobuf feature is selected, the viewer should show fields from
 `manifest.viewer.display_fields` in that order, then any remaining known
 details that are present and useful. Missing properties are omitted.
+
+Feature-detail labels are user-facing labels and should render normalized
+snake_case field names in Title Case. Preserve known acronyms in uppercase:
+`IUCN`, `GBIF`, `OBIS`, `DOI`, `ID` and `URL`. For example:
+`scientific_name` -> `Scientific Name`, `source_record_id` ->
+`Source Record ID`, and `iucn_red_list_category` ->
+`IUCN Red List Categories`.
 
 Known details:
 
@@ -232,10 +267,10 @@ Known details:
 | `has_quality_flags` |
 
 The normalized output field is `class`. Viewer code must not look for the
-Python implementation attribute name `class_`.
+Python implementation attribute name `class_`. The visible label is `Class`.
 
 When `source_record_id` is present, the current viewer derives an additional
-`source record URL` detail row after it. The link target is:
+`Source Record URL` detail row after it. The link target is:
 
 ```text
 https://www.gbif.org/occurrence/{source_record_id}
@@ -253,14 +288,14 @@ The viewer should create filters only for fields present in
 `manifest.viewer.filter_fields` and available on the loaded layer. The current
 MVP filter fields are:
 
-| Field | Behavior |
-| --- | --- |
-| `scientific_name` | Case-insensitive text contains search. Empty query matches all records. |
-| `kingdom` | Exact categorical match over non-empty values. |
-| `event_year` | Numeric year range or exact year values. Null/non-numeric values are excluded only when a year filter is active. |
-| `basis_of_record` | Exact categorical match over non-empty values. |
-| `iucn_red_list_category` | Exact categorical match over non-empty values. |
-| `quality_flags` | Flag presence and exact flag-token filters as described below. |
+| Display order | Field | Label | Behavior |
+| --- | --- | --- | --- |
+| 1 | `scientific_name` | Scientific Name | Case-insensitive text contains search. Empty query matches all records. |
+| 2 | `kingdom` | Kingdom | Exact categorical match over non-empty values. |
+| 3 | `iucn_red_list_category` | IUCN Red List Categories | Exact categorical match over non-empty values. |
+| 4 | `event_year` | Event Year | Numeric year range or exact year values. Null/non-numeric values are excluded only when a year filter is active. |
+| 5 | `basis_of_record` | Basis of Record | Exact categorical match over non-empty values. |
+| 6 | `quality_flags` | Quality Flags | Flag presence and exact flag-token filters as described below. |
 
 Filter combination semantics are AND across active filter fields. Multiple
 selected values within a categorical field are OR.

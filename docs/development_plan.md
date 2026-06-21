@@ -341,12 +341,16 @@ The first static viewer should provide only simple browser-side filters over fie
 
 Accepted filters:
 
-- `scientific_name`: simple text search using contains matching.
-- `kingdom`: select/dropdown when the field is present.
-- `event_year`: min/max controls or a list of available years.
-- `basis_of_record`: select/dropdown.
-- `iucn_red_list_category`: select/dropdown when the field is present.
-- `quality_flags`: show/hide records with quality flags when the field is present.
+- `scientific_name` (`Scientific Name`): simple text search using contains
+  matching.
+- `kingdom` (`Kingdom`): categorical checkbox filter when the field is
+  present.
+- `iucn_red_list_category` (`IUCN Red List Categories`): categorical checkbox
+  filter when the field is present.
+- `event_year` (`Event Year`): min/max controls or a list of available years.
+- `basis_of_record` (`Basis of Record`): categorical checkbox filter.
+- `quality_flags` (`Quality Flags`): show/hide records with quality flags and
+  exact token filters when the field is present.
 
 Fields absent from the generated bundle must be omitted from the viewer UI without error.
 
@@ -505,7 +509,9 @@ Deliverables:
   MVP browser map layer.
 - Dataset provenance panel.
 - Feature details panel for viewer-required fields.
-- MVP browser-side filters for `scientific_name`, `kingdom`, `event_year`, `basis_of_record`, `iucn_red_list_category` and `quality_flags` where those fields are present.
+- MVP browser-side filters for `scientific_name`, `kingdom`,
+  `iucn_red_list_category`, `event_year`, `basis_of_record` and
+  `quality_flags` where those fields are present.
 
 Acceptance criteria:
 
@@ -516,7 +522,9 @@ Acceptance criteria:
   a clear no-map-layer state instead of failing.
 - Missing optional metadata is handled gracefully.
 - Missing filter fields are omitted from the viewer UI without error.
-- The viewer supports text contains search for `scientific_name`, select/dropdown filters for categorical fields, year filtering and a show/hide control for records with quality flags where supported by the bundle.
+- The viewer supports text contains search for `scientific_name`, checkbox
+  filters for categorical fields, year filtering and show/hide plus exact
+  token controls for records with quality flags where supported by the bundle.
 - Quality flag filters split nullable `quality_flags` on `|` and match exact
   tokens, using `has_quality_flags` when present for flagged/unflagged
   controls.
