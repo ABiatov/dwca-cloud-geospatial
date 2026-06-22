@@ -21,10 +21,12 @@ dist/
 .DS_Store
 .idea/
 .vscode/
-# .codex/
+.codex/
 
 # Local data, database volumes, and generated artifacts
+docs/knowledge_base/
 test_dwca/
 # data/
 examples/
+session_logs/
 *.log
