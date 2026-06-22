@@ -8,7 +8,7 @@ Last updated: 2026-06-20
 
 This document records the development plan for the DwC-A to cloud-optimized geospatial conversion prototype.
 
-The plan follows the accepted project boundaries in `README.md`, `.codex/AGENTS.md`, `docs/output_format.md` and `planning/decisions/ADR-001-mvp-boundaries-and-interfaces.md`.
+The plan follows the accepted project boundaries in `README.md`, `docs/output_format.md`, `docs/viewer_contract.md` and `planning/decisions/ADR-001-mvp-boundaries-and-interfaces.md`.
 
 The large-archive GeoParquet strategy is documented in
 `planning/decisions/ADR-002-large-archive-geoparquet-strategy.md`.
