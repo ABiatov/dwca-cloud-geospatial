@@ -26,6 +26,7 @@ dist/
 # Local data, database volumes, and generated artifacts
 docs/knowledge_base/
 test_dwca/
+TODO/
 # data/
 examples/
 session_logs/
