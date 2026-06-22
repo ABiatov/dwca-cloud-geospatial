@@ -29,4 +29,5 @@ test_dwca/
 # data/
 examples/
 session_logs/
+scratch/
 *.log
