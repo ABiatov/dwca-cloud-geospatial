@@ -1,0 +1,21 @@
+occurrenceID	scientificName	eventDate	year	decimalLatitude	decimalLongitude	coordinateUncertaintyInMeters	geodeticDatum	countryCode	basisOfRecord
+q-no-flags	Clean species	2020-01-02		10	20	30	WGS84	PT	HUMAN_OBSERVATION
+q-missing-uncertainty	Missing uncertainty species	2020-01-02		10.1	20.1		WGS84	PT	HUMAN_OBSERVATION
+q-missing-datum	Missing datum species	2020-01-02		10.2	20.2	30		PT	HUMAN_OBSERVATION
+q-missing-date	Missing date species			10.3	20.3	30	WGS84	PT	HUMAN_OBSERVATION
+q-missing-name		2020-01-02		10.4	20.4	30	WGS84	PT	HUMAN_OBSERVATION
+q-multiple-flags	Multiple flag species			10.5	20.5		WGS84	PT	HUMAN_OBSERVATION
+q-invalid-uncertainty	Invalid uncertainty species	2020-01-02		10.6	20.6	about 30	WGS84	PT	HUMAN_OBSERVATION
+q-invalid-year	Invalid year species		nineteen	10.7	20.7	30	WGS84	PT	HUMAN_OBSERVATION
+q-clean-09	Clean species 09	2020-01-02		10.9	20.9	30	WGS84	PT	HUMAN_OBSERVATION
+q-clean-10	Clean species 10	2020-01-02		11.0	21.0	30	WGS84	PT	HUMAN_OBSERVATION
+q-clean-11	Clean species 11	2020-01-02		11.1	21.1	30	WGS84	PT	HUMAN_OBSERVATION
+q-clean-12	Clean species 12	2020-01-02		11.2	21.2	30	WGS84	PT	HUMAN_OBSERVATION
+q-clean-13	Clean species 13	2020-01-02		11.3	21.3	30	WGS84	PT	HUMAN_OBSERVATION
+q-clean-14	Clean species 14	2020-01-02		11.4	21.4	30	WGS84	PT	HUMAN_OBSERVATION
+q-clean-15	Clean species 15	2020-01-02		11.5	21.5	30	WGS84	PT	HUMAN_OBSERVATION
+q-clean-16	Clean species 16	2020-01-02		11.6	21.6	30	WGS84	PT	HUMAN_OBSERVATION
+q-clean-17	Clean species 17	2020-01-02		11.7	21.7	30	WGS84	PT	HUMAN_OBSERVATION
+q-clean-18	Clean species 18	2020-01-02		11.8	21.8	30	WGS84	PT	HUMAN_OBSERVATION
+q-clean-19	Clean species 19	2020-01-02		11.9	21.9	30	WGS84	PT	HUMAN_OBSERVATION
+q-clean-20	Clean species 20	2020-01-02		12.0	22.0	30	WGS84	PT	HUMAN_OBSERVATION

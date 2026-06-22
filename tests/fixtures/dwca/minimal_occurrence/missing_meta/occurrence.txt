@@ -1,0 +1,2 @@
+occurrenceID	scientificName	decimalLatitude	decimalLongitude
+occ-1	Example species	38.7223	-9.1393

@@ -1,0 +1,4170 @@
+{
+  "dataset": {
+    "citation": null,
+    "description": "A dataset containing all occurrences available in GBIF matching the query:\n{\n  \"and\" : [\n    \"GadmGid is HTI.6.2.3_1\",\n    \"OccurrenceStatus is Present\"\n  ]\n}\nThe dataset includes records from the following constituent datasets. The full metadata for each constituent is also included in this archive:\n41 records from NOAA Southeast Fisheries Science Center (SEFSC) Fisheries Log Book System (FLS) Commercial Pelagic Logbook Data\n52 records from CM Herps Collection\n84 records from Echinoderms of Hispaniola Island\n117 records from Museum of Comparative Zoology, Harvard University\n1 records from UF Invertebrate Zoology\n101 records from EOD \u2013 eBird Observation Dataset\n58 records from Tropicos Specimens Non-MO\n26 records from USDA United States National Fungus Collections\n19 records from Tropicos MO Specimen Data\n244 records from KUBI Herpetology Collection\n19 records from University of Vermont Zadock Thompson Zoological Collection-Invertebrates\n1 records from AntWeb\n4 records from Paleobiology Database\n3 records from LACM Vertebrate Collection\n1 records from University of South Florida Herbarium (USF)\n26 records from Royal Botanic Gardens, Kew - Herbarium Specimens\n14 records from Academy of Natural Sciences of Philadelphia Ornithology Collection\n91 records from University of Florida Vertebrate Paleontology\n2 records from The New York Botanical Garden Herbarium (NY)\n1 records from University of Michigan Museum of Zoology, Division of Reptiles & Amphibians\n127 records from NMNH Extant Specimen Records (USNM, US)\n7 records from Malacology Collection at the Academy of Natural Sciences of Philadelphia\n1 records from iNaturalist Research-grade Observations\n5 records from SIO Benthic Invertebrate Collection\n123 records from The fishes collection (IC) of the Mus\u00e9um national d'Histoire naturelle (MNHN - Paris)",
+    "doi": null,
+    "homepage": null,
+    "publisher": "GBIF Download Service",
+    "title": "GBIF Occurrence Download 0038004-260519110011954"
+  },
+  "dwca": {
+    "archive_kind": "zip",
+    "coordinate_terms_present": {
+      "http://rs.tdwg.org/dwc/terms/decimalLatitude": true,
+      "http://rs.tdwg.org/dwc/terms/decimalLongitude": true
+    },
+    "core": {
+      "coreid_index": null,
+      "field_count": 231,
+      "fields": [
+        {
+          "default": "WGS84",
+          "delimited_by": null,
+          "index": null,
+          "term": "http://rs.tdwg.org/dwc/terms/geodeticDatum"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 0,
+          "term": "http://rs.gbif.org/terms/1.0/gbifID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 1,
+          "term": "http://purl.org/dc/terms/accessRights"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 2,
+          "term": "http://purl.org/dc/terms/bibliographicCitation"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 3,
+          "term": "http://purl.org/dc/terms/language"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 4,
+          "term": "http://purl.org/dc/terms/license"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 5,
+          "term": "http://purl.org/dc/terms/modified"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 6,
+          "term": "http://purl.org/dc/terms/publisher"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 7,
+          "term": "http://purl.org/dc/terms/references"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 8,
+          "term": "http://purl.org/dc/terms/rightsHolder"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 9,
+          "term": "http://purl.org/dc/terms/type"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 10,
+          "term": "http://rs.tdwg.org/dwc/terms/institutionID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 11,
+          "term": "http://rs.tdwg.org/dwc/terms/collectionID"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 12,
+          "term": "http://rs.tdwg.org/dwc/terms/datasetID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 13,
+          "term": "http://rs.tdwg.org/dwc/terms/institutionCode"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 14,
+          "term": "http://rs.tdwg.org/dwc/terms/collectionCode"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 15,
+          "term": "http://rs.tdwg.org/dwc/terms/datasetName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 16,
+          "term": "http://rs.tdwg.org/dwc/terms/ownerInstitutionCode"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 17,
+          "term": "http://rs.tdwg.org/dwc/terms/basisOfRecord"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 18,
+          "term": "http://rs.tdwg.org/dwc/terms/informationWithheld"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 19,
+          "term": "http://rs.tdwg.org/dwc/terms/dataGeneralizations"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 20,
+          "term": "http://rs.tdwg.org/dwc/terms/dynamicProperties"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 21,
+          "term": "http://rs.tdwg.org/dwc/terms/occurrenceID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 22,
+          "term": "http://rs.tdwg.org/dwc/terms/catalogNumber"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 23,
+          "term": "http://rs.tdwg.org/dwc/terms/recordNumber"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 24,
+          "term": "http://rs.tdwg.org/dwc/terms/recordedBy"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 25,
+          "term": "http://rs.tdwg.org/dwc/terms/recordedByID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 26,
+          "term": "http://rs.tdwg.org/dwc/terms/individualCount"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 27,
+          "term": "http://rs.tdwg.org/dwc/terms/organismQuantity"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 28,
+          "term": "http://rs.tdwg.org/dwc/terms/organismQuantityType"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 29,
+          "term": "http://rs.tdwg.org/dwc/terms/sex"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 30,
+          "term": "http://rs.tdwg.org/dwc/terms/lifeStage"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 31,
+          "term": "http://rs.tdwg.org/dwc/terms/reproductiveCondition"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 32,
+          "term": "http://rs.tdwg.org/dwc/terms/caste"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 33,
+          "term": "http://rs.tdwg.org/dwc/terms/behavior"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 34,
+          "term": "http://rs.tdwg.org/dwc/terms/vitality"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 35,
+          "term": "http://rs.tdwg.org/dwc/terms/establishmentMeans"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 36,
+          "term": "http://rs.tdwg.org/dwc/terms/degreeOfEstablishment"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 37,
+          "term": "http://rs.tdwg.org/dwc/terms/pathway"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 38,
+          "term": "http://rs.tdwg.org/dwc/terms/georeferenceVerificationStatus"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 39,
+          "term": "http://rs.tdwg.org/dwc/terms/occurrenceStatus"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 40,
+          "term": "http://rs.tdwg.org/dwc/terms/preparations"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 41,
+          "term": "http://rs.tdwg.org/dwc/terms/disposition"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 42,
+          "term": "http://rs.tdwg.org/dwc/terms/associatedOccurrences"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 43,
+          "term": "http://rs.tdwg.org/dwc/terms/associatedReferences"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 44,
+          "term": "http://rs.tdwg.org/dwc/terms/associatedSequences"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 45,
+          "term": "http://rs.tdwg.org/dwc/terms/associatedTaxa"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 46,
+          "term": "http://rs.tdwg.org/dwc/terms/otherCatalogNumbers"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 47,
+          "term": "http://rs.tdwg.org/dwc/terms/occurrenceRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 48,
+          "term": "http://rs.tdwg.org/dwc/terms/organismID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 49,
+          "term": "http://rs.tdwg.org/dwc/terms/organismName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 50,
+          "term": "http://rs.tdwg.org/dwc/terms/organismScope"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 51,
+          "term": "http://rs.tdwg.org/dwc/terms/associatedOrganisms"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 52,
+          "term": "http://rs.tdwg.org/dwc/terms/previousIdentifications"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 53,
+          "term": "http://rs.tdwg.org/dwc/terms/organismRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 54,
+          "term": "http://rs.tdwg.org/dwc/terms/materialEntityID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 55,
+          "term": "http://rs.tdwg.org/dwc/terms/materialEntityRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 56,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimLabel"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 57,
+          "term": "http://rs.tdwg.org/dwc/terms/materialSampleID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 58,
+          "term": "http://rs.tdwg.org/dwc/terms/eventID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 59,
+          "term": "http://rs.tdwg.org/dwc/terms/parentEventID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 60,
+          "term": "http://rs.tdwg.org/dwc/terms/eventType"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 61,
+          "term": "http://rs.tdwg.org/dwc/terms/fieldNumber"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 62,
+          "term": "http://rs.tdwg.org/dwc/terms/eventDate"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 63,
+          "term": "http://rs.tdwg.org/dwc/terms/eventTime"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 64,
+          "term": "http://rs.tdwg.org/dwc/terms/startDayOfYear"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 65,
+          "term": "http://rs.tdwg.org/dwc/terms/endDayOfYear"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 66,
+          "term": "http://rs.tdwg.org/dwc/terms/year"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 67,
+          "term": "http://rs.tdwg.org/dwc/terms/month"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 68,
+          "term": "http://rs.tdwg.org/dwc/terms/day"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 69,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimEventDate"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 70,
+          "term": "http://rs.tdwg.org/dwc/terms/habitat"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 71,
+          "term": "http://rs.tdwg.org/dwc/terms/samplingProtocol"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 72,
+          "term": "http://rs.tdwg.org/dwc/terms/sampleSizeValue"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 73,
+          "term": "http://rs.tdwg.org/dwc/terms/sampleSizeUnit"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 74,
+          "term": "http://rs.tdwg.org/dwc/terms/samplingEffort"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 75,
+          "term": "http://rs.tdwg.org/dwc/terms/fieldNotes"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 76,
+          "term": "http://rs.tdwg.org/dwc/terms/eventRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 77,
+          "term": "http://rs.tdwg.org/dwc/terms/locationID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 78,
+          "term": "http://rs.tdwg.org/dwc/terms/higherGeographyID"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 79,
+          "term": "http://rs.tdwg.org/dwc/terms/higherGeography"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 80,
+          "term": "http://rs.tdwg.org/dwc/terms/continent"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 81,
+          "term": "http://rs.tdwg.org/dwc/terms/waterBody"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 82,
+          "term": "http://rs.tdwg.org/dwc/terms/islandGroup"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 83,
+          "term": "http://rs.tdwg.org/dwc/terms/island"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 84,
+          "term": "http://rs.tdwg.org/dwc/terms/countryCode"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 85,
+          "term": "http://rs.tdwg.org/dwc/terms/stateProvince"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 86,
+          "term": "http://rs.tdwg.org/dwc/terms/county"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 87,
+          "term": "http://rs.tdwg.org/dwc/terms/municipality"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 88,
+          "term": "http://rs.tdwg.org/dwc/terms/locality"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 89,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimLocality"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 90,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimElevation"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 91,
+          "term": "http://rs.tdwg.org/dwc/terms/verticalDatum"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 92,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimDepth"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 93,
+          "term": "http://rs.tdwg.org/dwc/terms/minimumDistanceAboveSurfaceInMeters"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 94,
+          "term": "http://rs.tdwg.org/dwc/terms/maximumDistanceAboveSurfaceInMeters"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 95,
+          "term": "http://rs.tdwg.org/dwc/terms/locationAccordingTo"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 96,
+          "term": "http://rs.tdwg.org/dwc/terms/locationRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 97,
+          "term": "http://rs.tdwg.org/dwc/terms/decimalLatitude"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 98,
+          "term": "http://rs.tdwg.org/dwc/terms/decimalLongitude"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 99,
+          "term": "http://rs.tdwg.org/dwc/terms/coordinateUncertaintyInMeters"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 100,
+          "term": "http://rs.tdwg.org/dwc/terms/coordinatePrecision"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 101,
+          "term": "http://rs.tdwg.org/dwc/terms/pointRadiusSpatialFit"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 102,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimCoordinateSystem"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 103,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimSRS"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 104,
+          "term": "http://rs.tdwg.org/dwc/terms/footprintWKT"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 105,
+          "term": "http://rs.tdwg.org/dwc/terms/footprintSRS"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 106,
+          "term": "http://rs.tdwg.org/dwc/terms/footprintSpatialFit"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 107,
+          "term": "http://rs.tdwg.org/dwc/terms/georeferencedBy"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 108,
+          "term": "http://rs.tdwg.org/dwc/terms/georeferencedDate"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 109,
+          "term": "http://rs.tdwg.org/dwc/terms/georeferenceProtocol"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 110,
+          "term": "http://rs.tdwg.org/dwc/terms/georeferenceSources"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 111,
+          "term": "http://rs.tdwg.org/dwc/terms/georeferenceRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 112,
+          "term": "http://rs.tdwg.org/dwc/terms/geologicalContextID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 113,
+          "term": "http://rs.tdwg.org/dwc/terms/earliestEonOrLowestEonothem"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 114,
+          "term": "http://rs.tdwg.org/dwc/terms/latestEonOrHighestEonothem"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 115,
+          "term": "http://rs.tdwg.org/dwc/terms/earliestEraOrLowestErathem"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 116,
+          "term": "http://rs.tdwg.org/dwc/terms/latestEraOrHighestErathem"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 117,
+          "term": "http://rs.tdwg.org/dwc/terms/earliestPeriodOrLowestSystem"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 118,
+          "term": "http://rs.tdwg.org/dwc/terms/latestPeriodOrHighestSystem"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 119,
+          "term": "http://rs.tdwg.org/dwc/terms/earliestEpochOrLowestSeries"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 120,
+          "term": "http://rs.tdwg.org/dwc/terms/latestEpochOrHighestSeries"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 121,
+          "term": "http://rs.tdwg.org/dwc/terms/earliestAgeOrLowestStage"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 122,
+          "term": "http://rs.tdwg.org/dwc/terms/latestAgeOrHighestStage"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 123,
+          "term": "http://rs.tdwg.org/dwc/terms/lowestBiostratigraphicZone"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 124,
+          "term": "http://rs.tdwg.org/dwc/terms/highestBiostratigraphicZone"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 125,
+          "term": "http://rs.tdwg.org/dwc/terms/lithostratigraphicTerms"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 126,
+          "term": "http://rs.tdwg.org/dwc/terms/group"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 127,
+          "term": "http://rs.tdwg.org/dwc/terms/formation"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 128,
+          "term": "http://rs.tdwg.org/dwc/terms/member"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 129,
+          "term": "http://rs.tdwg.org/dwc/terms/bed"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 130,
+          "term": "http://rs.tdwg.org/dwc/terms/identificationID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 131,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimIdentification"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 132,
+          "term": "http://rs.tdwg.org/dwc/terms/identificationQualifier"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 133,
+          "term": "http://rs.tdwg.org/dwc/terms/typeStatus"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 134,
+          "term": "http://rs.tdwg.org/dwc/terms/identifiedBy"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 135,
+          "term": "http://rs.tdwg.org/dwc/terms/identifiedByID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 136,
+          "term": "http://rs.tdwg.org/dwc/terms/dateIdentified"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 137,
+          "term": "http://rs.tdwg.org/dwc/terms/identificationReferences"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 138,
+          "term": "http://rs.tdwg.org/dwc/terms/identificationVerificationStatus"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 139,
+          "term": "http://rs.tdwg.org/dwc/terms/identificationRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 140,
+          "term": "http://rs.tdwg.org/dwc/terms/taxonID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 141,
+          "term": "http://rs.tdwg.org/dwc/terms/scientificNameID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 142,
+          "term": "http://rs.tdwg.org/dwc/terms/acceptedNameUsageID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 143,
+          "term": "http://rs.tdwg.org/dwc/terms/parentNameUsageID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 144,
+          "term": "http://rs.tdwg.org/dwc/terms/originalNameUsageID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 145,
+          "term": "http://rs.tdwg.org/dwc/terms/nameAccordingToID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 146,
+          "term": "http://rs.tdwg.org/dwc/terms/namePublishedInID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 147,
+          "term": "http://rs.tdwg.org/dwc/terms/taxonConceptID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 148,
+          "term": "http://rs.tdwg.org/dwc/terms/scientificName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 149,
+          "term": "http://rs.tdwg.org/dwc/terms/acceptedNameUsage"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 150,
+          "term": "http://rs.tdwg.org/dwc/terms/parentNameUsage"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 151,
+          "term": "http://rs.tdwg.org/dwc/terms/originalNameUsage"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 152,
+          "term": "http://rs.tdwg.org/dwc/terms/nameAccordingTo"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 153,
+          "term": "http://rs.tdwg.org/dwc/terms/namePublishedIn"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 154,
+          "term": "http://rs.tdwg.org/dwc/terms/namePublishedInYear"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 155,
+          "term": "http://rs.tdwg.org/dwc/terms/higherClassification"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 156,
+          "term": "http://rs.tdwg.org/dwc/terms/kingdom"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 157,
+          "term": "http://rs.tdwg.org/dwc/terms/phylum"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 158,
+          "term": "http://rs.tdwg.org/dwc/terms/class"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 159,
+          "term": "http://rs.tdwg.org/dwc/terms/order"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 160,
+          "term": "http://rs.tdwg.org/dwc/terms/superfamily"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 161,
+          "term": "http://rs.tdwg.org/dwc/terms/family"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 162,
+          "term": "http://rs.tdwg.org/dwc/terms/subfamily"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 163,
+          "term": "http://rs.tdwg.org/dwc/terms/tribe"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 164,
+          "term": "http://rs.tdwg.org/dwc/terms/subtribe"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 165,
+          "term": "http://rs.tdwg.org/dwc/terms/genus"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 166,
+          "term": "http://rs.tdwg.org/dwc/terms/genericName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 167,
+          "term": "http://rs.tdwg.org/dwc/terms/subgenus"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 168,
+          "term": "http://rs.tdwg.org/dwc/terms/infragenericEpithet"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 169,
+          "term": "http://rs.tdwg.org/dwc/terms/specificEpithet"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 170,
+          "term": "http://rs.tdwg.org/dwc/terms/infraspecificEpithet"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 171,
+          "term": "http://rs.tdwg.org/dwc/terms/cultivarEpithet"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 172,
+          "term": "http://rs.tdwg.org/dwc/terms/taxonRank"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 173,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimTaxonRank"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 174,
+          "term": "http://rs.tdwg.org/dwc/terms/vernacularName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 175,
+          "term": "http://rs.tdwg.org/dwc/terms/nomenclaturalCode"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 176,
+          "term": "http://rs.tdwg.org/dwc/terms/taxonomicStatus"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 177,
+          "term": "http://rs.tdwg.org/dwc/terms/nomenclaturalStatus"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 178,
+          "term": "http://rs.tdwg.org/dwc/terms/taxonRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 179,
+          "term": "http://rs.gbif.org/terms/1.0/datasetKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 180,
+          "term": "http://rs.gbif.org/terms/1.0/publishingCountry"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 181,
+          "term": "http://rs.gbif.org/terms/1.0/lastInterpreted"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 182,
+          "term": "http://rs.gbif.org/terms/1.0/elevation"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 183,
+          "term": "http://rs.gbif.org/terms/1.0/elevationAccuracy"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 184,
+          "term": "http://rs.gbif.org/terms/1.0/depth"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 185,
+          "term": "http://rs.gbif.org/terms/1.0/depthAccuracy"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 186,
+          "term": "http://rs.gbif.org/terms/1.0/distanceFromCentroidInMeters"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 187,
+          "term": "http://rs.gbif.org/terms/1.0/issue"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 188,
+          "term": "http://rs.gbif.org/terms/1.0/taxonomicIssue"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 189,
+          "term": "http://rs.gbif.org/terms/1.0/nonTaxonomicIssue"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 190,
+          "term": "http://rs.gbif.org/terms/1.0/mediaType"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 191,
+          "term": "http://rs.gbif.org/terms/1.0/hasCoordinate"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 192,
+          "term": "http://rs.gbif.org/terms/1.0/hasGeospatialIssues"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 193,
+          "term": "http://rs.gbif.org/terms/1.0/taxonKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 194,
+          "term": "http://rs.gbif.org/terms/1.0/acceptedTaxonKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 195,
+          "term": "http://rs.gbif.org/terms/1.0/kingdomKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 196,
+          "term": "http://rs.gbif.org/terms/1.0/phylumKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 197,
+          "term": "http://rs.gbif.org/terms/1.0/classKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 198,
+          "term": "http://rs.gbif.org/terms/1.0/orderKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 199,
+          "term": "http://rs.gbif.org/terms/1.0/superfamilyKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 200,
+          "term": "http://rs.gbif.org/terms/1.0/familyKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 201,
+          "term": "http://rs.gbif.org/terms/1.0/subfamilyKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 202,
+          "term": "http://rs.gbif.org/terms/1.0/tribeKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 203,
+          "term": "http://rs.gbif.org/terms/1.0/subtribeKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 204,
+          "term": "http://rs.gbif.org/terms/1.0/genusKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 205,
+          "term": "http://rs.gbif.org/terms/1.0/subgenusKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 206,
+          "term": "http://rs.gbif.org/terms/1.0/speciesKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 207,
+          "term": "http://rs.gbif.org/terms/1.0/species"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 208,
+          "term": "http://rs.gbif.org/terms/1.0/acceptedScientificName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 209,
+          "term": "http://rs.gbif.org/terms/1.0/verbatimScientificName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 210,
+          "term": "http://rs.gbif.org/terms/1.0/typifiedName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 211,
+          "term": "http://rs.gbif.org/terms/1.0/protocol"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 212,
+          "term": "http://rs.gbif.org/terms/1.0/lastParsed"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 213,
+          "term": "http://rs.gbif.org/terms/1.0/lastCrawled"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 214,
+          "term": "http://rs.gbif.org/terms/1.0/isInvasive"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 215,
+          "term": "http://rs.gbif.org/terms/1.0/repatriated"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 216,
+          "term": "http://rs.gbif.org/terms/1.0/relativeOrganismQuantity"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 217,
+          "term": "http://rs.gbif.org/terms/1.0/projectId"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 218,
+          "term": "http://rs.gbif.org/terms/1.0/isSequenced"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 219,
+          "term": "http://rs.gbif.org/terms/1.0/gbifRegion"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 220,
+          "term": "http://rs.gbif.org/terms/1.0/publishedByGbifRegion"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 221,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level0Gid"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 222,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level0Name"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 223,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level1Gid"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 224,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level1Name"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 225,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level2Gid"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 226,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level2Name"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 227,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level3Gid"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 228,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level3Name"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 229,
+          "term": "http://iucn.org/terms/iucnRedListCategory"
+        }
+      ],
+      "files": [
+        "occurrence.txt"
+      ],
+      "id_index": 0,
+      "role": "core",
+      "row_type": "http://rs.tdwg.org/dwc/terms/Occurrence",
+      "text_format": {
+        "encoding": "UTF-8",
+        "fields_enclosed_by": null,
+        "fields_terminated_by": "\t",
+        "ignore_header_lines": 1,
+        "lines_terminated_by": "\n"
+      }
+    },
+    "extensions": [
+      {
+        "coreid_index": 0,
+        "field_count": 194,
+        "fields": [
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 0,
+            "term": "http://rs.gbif.org/terms/1.0/gbifID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 1,
+            "term": "http://purl.org/dc/terms/accessRights"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 2,
+            "term": "http://purl.org/dc/terms/bibliographicCitation"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 3,
+            "term": "http://purl.org/dc/terms/language"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 4,
+            "term": "http://purl.org/dc/terms/license"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 5,
+            "term": "http://purl.org/dc/terms/modified"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 6,
+            "term": "http://purl.org/dc/terms/publisher"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 7,
+            "term": "http://purl.org/dc/terms/references"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 8,
+            "term": "http://purl.org/dc/terms/rightsHolder"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 9,
+            "term": "http://purl.org/dc/terms/type"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 10,
+            "term": "http://rs.tdwg.org/dwc/terms/institutionID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 11,
+            "term": "http://rs.tdwg.org/dwc/terms/collectionID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 12,
+            "term": "http://rs.tdwg.org/dwc/terms/datasetID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 13,
+            "term": "http://rs.tdwg.org/dwc/terms/institutionCode"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 14,
+            "term": "http://rs.tdwg.org/dwc/terms/collectionCode"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 15,
+            "term": "http://rs.tdwg.org/dwc/terms/datasetName"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 16,
+            "term": "http://rs.tdwg.org/dwc/terms/ownerInstitutionCode"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 17,
+            "term": "http://rs.tdwg.org/dwc/terms/basisOfRecord"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 18,
+            "term": "http://rs.tdwg.org/dwc/terms/informationWithheld"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 19,
+            "term": "http://rs.tdwg.org/dwc/terms/dataGeneralizations"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 20,
+            "term": "http://rs.tdwg.org/dwc/terms/dynamicProperties"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 21,
+            "term": "http://rs.tdwg.org/dwc/terms/occurrenceID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 22,
+            "term": "http://rs.tdwg.org/dwc/terms/catalogNumber"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 23,
+            "term": "http://rs.tdwg.org/dwc/terms/recordNumber"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 24,
+            "term": "http://rs.tdwg.org/dwc/terms/recordedBy"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 25,
+            "term": "http://rs.tdwg.org/dwc/terms/recordedByID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 26,
+            "term": "http://rs.tdwg.org/dwc/terms/individualCount"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 27,
+            "term": "http://rs.tdwg.org/dwc/terms/organismQuantity"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 28,
+            "term": "http://rs.tdwg.org/dwc/terms/organismQuantityType"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 29,
+            "term": "http://rs.tdwg.org/dwc/terms/sex"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 30,
+            "term": "http://rs.tdwg.org/dwc/terms/lifeStage"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 31,
+            "term": "http://rs.tdwg.org/dwc/terms/reproductiveCondition"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 32,
+            "term": "http://rs.tdwg.org/dwc/terms/caste"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 33,
+            "term": "http://rs.tdwg.org/dwc/terms/behavior"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 34,
+            "term": "http://rs.tdwg.org/dwc/terms/vitality"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 35,
+            "term": "http://rs.tdwg.org/dwc/terms/establishmentMeans"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 36,
+            "term": "http://rs.tdwg.org/dwc/terms/degreeOfEstablishment"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 37,
+            "term": "http://rs.tdwg.org/dwc/terms/pathway"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 38,
+            "term": "http://rs.tdwg.org/dwc/terms/georeferenceVerificationStatus"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 39,
+            "term": "http://rs.tdwg.org/dwc/terms/occurrenceStatus"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 40,
+            "term": "http://rs.tdwg.org/dwc/terms/preparations"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 41,
+            "term": "http://rs.tdwg.org/dwc/terms/disposition"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 42,
+            "term": "http://rs.tdwg.org/dwc/terms/associatedMedia"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 43,
+            "term": "http://rs.tdwg.org/dwc/terms/associatedOccurrences"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 44,
+            "term": "http://rs.tdwg.org/dwc/terms/associatedReferences"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 45,
+            "term": "http://rs.tdwg.org/dwc/terms/associatedSequences"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 46,
+            "term": "http://rs.tdwg.org/dwc/terms/associatedTaxa"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 47,
+            "term": "http://rs.tdwg.org/dwc/terms/otherCatalogNumbers"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 48,
+            "term": "http://rs.tdwg.org/dwc/terms/occurrenceRemarks"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 49,
+            "term": "http://rs.tdwg.org/dwc/terms/organismID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 50,
+            "term": "http://rs.tdwg.org/dwc/terms/organismName"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 51,
+            "term": "http://rs.tdwg.org/dwc/terms/organismScope"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 52,
+            "term": "http://rs.tdwg.org/dwc/terms/associatedOrganisms"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 53,
+            "term": "http://rs.tdwg.org/dwc/terms/previousIdentifications"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 54,
+            "term": "http://rs.tdwg.org/dwc/terms/organismRemarks"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 55,
+            "term": "http://rs.tdwg.org/dwc/terms/materialEntityID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 56,
+            "term": "http://rs.tdwg.org/dwc/terms/materialEntityRemarks"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 57,
+            "term": "http://rs.tdwg.org/dwc/terms/verbatimLabel"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 58,
+            "term": "http://rs.tdwg.org/dwc/terms/materialSampleID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 59,
+            "term": "http://rs.tdwg.org/dwc/terms/eventID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 60,
+            "term": "http://rs.tdwg.org/dwc/terms/parentEventID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 61,
+            "term": "http://rs.tdwg.org/dwc/terms/eventType"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 62,
+            "term": "http://rs.tdwg.org/dwc/terms/fieldNumber"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 63,
+            "term": "http://rs.tdwg.org/dwc/terms/eventDate"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 64,
+            "term": "http://rs.tdwg.org/dwc/terms/eventTime"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 65,
+            "term": "http://rs.tdwg.org/dwc/terms/startDayOfYear"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 66,
+            "term": "http://rs.tdwg.org/dwc/terms/endDayOfYear"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 67,
+            "term": "http://rs.tdwg.org/dwc/terms/year"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 68,
+            "term": "http://rs.tdwg.org/dwc/terms/month"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 69,
+            "term": "http://rs.tdwg.org/dwc/terms/day"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 70,
+            "term": "http://rs.tdwg.org/dwc/terms/verbatimEventDate"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 71,
+            "term": "http://rs.tdwg.org/dwc/terms/habitat"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 72,
+            "term": "http://rs.tdwg.org/dwc/terms/samplingProtocol"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 73,
+            "term": "http://rs.tdwg.org/dwc/terms/sampleSizeValue"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 74,
+            "term": "http://rs.tdwg.org/dwc/terms/sampleSizeUnit"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 75,
+            "term": "http://rs.tdwg.org/dwc/terms/samplingEffort"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 76,
+            "term": "http://rs.tdwg.org/dwc/terms/fieldNotes"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 77,
+            "term": "http://rs.tdwg.org/dwc/terms/eventRemarks"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 78,
+            "term": "http://rs.tdwg.org/dwc/terms/projectTitle"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 79,
+            "term": "http://rs.tdwg.org/dwc/terms/projectID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 80,
+            "term": "http://rs.tdwg.org/dwc/terms/fundingAttribution"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 81,
+            "term": "http://rs.tdwg.org/dwc/terms/fundingAttributionID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 82,
+            "term": "http://rs.tdwg.org/dwc/terms/locationID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 83,
+            "term": "http://rs.tdwg.org/dwc/terms/higherGeographyID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 84,
+            "term": "http://rs.tdwg.org/dwc/terms/higherGeography"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 85,
+            "term": "http://rs.tdwg.org/dwc/terms/continent"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 86,
+            "term": "http://rs.tdwg.org/dwc/terms/waterBody"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 87,
+            "term": "http://rs.tdwg.org/dwc/terms/islandGroup"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 88,
+            "term": "http://rs.tdwg.org/dwc/terms/island"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 89,
+            "term": "http://rs.tdwg.org/dwc/terms/country"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 90,
+            "term": "http://rs.tdwg.org/dwc/terms/countryCode"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 91,
+            "term": "http://rs.tdwg.org/dwc/terms/stateProvince"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 92,
+            "term": "http://rs.tdwg.org/dwc/terms/county"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 93,
+            "term": "http://rs.tdwg.org/dwc/terms/municipality"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 94,
+            "term": "http://rs.tdwg.org/dwc/terms/locality"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 95,
+            "term": "http://rs.tdwg.org/dwc/terms/verbatimLocality"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 96,
+            "term": "http://rs.tdwg.org/dwc/terms/minimumElevationInMeters"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 97,
+            "term": "http://rs.tdwg.org/dwc/terms/maximumElevationInMeters"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 98,
+            "term": "http://rs.tdwg.org/dwc/terms/verbatimElevation"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 99,
+            "term": "http://rs.tdwg.org/dwc/terms/verticalDatum"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 100,
+            "term": "http://rs.tdwg.org/dwc/terms/minimumDepthInMeters"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 101,
+            "term": "http://rs.tdwg.org/dwc/terms/maximumDepthInMeters"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 102,
+            "term": "http://rs.tdwg.org/dwc/terms/verbatimDepth"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 103,
+            "term": "http://rs.tdwg.org/dwc/terms/minimumDistanceAboveSurfaceInMeters"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 104,
+            "term": "http://rs.tdwg.org/dwc/terms/maximumDistanceAboveSurfaceInMeters"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 105,
+            "term": "http://rs.tdwg.org/dwc/terms/locationAccordingTo"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 106,
+            "term": "http://rs.tdwg.org/dwc/terms/locationRemarks"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 107,
+            "term": "http://rs.tdwg.org/dwc/terms/decimalLatitude"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 108,
+            "term": "http://rs.tdwg.org/dwc/terms/decimalLongitude"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 109,
+            "term": "http://rs.tdwg.org/dwc/terms/geodeticDatum"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 110,
+            "term": "http://rs.tdwg.org/dwc/terms/coordinateUncertaintyInMeters"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 111,
+            "term": "http://rs.tdwg.org/dwc/terms/coordinatePrecision"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 112,
+            "term": "http://rs.tdwg.org/dwc/terms/pointRadiusSpatialFit"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 113,
+            "term": "http://rs.tdwg.org/dwc/terms/verbatimCoordinates"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 114,
+            "term": "http://rs.tdwg.org/dwc/terms/verbatimLatitude"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 115,
+            "term": "http://rs.tdwg.org/dwc/terms/verbatimLongitude"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 116,
+            "term": "http://rs.tdwg.org/dwc/terms/verbatimCoordinateSystem"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 117,
+            "term": "http://rs.tdwg.org/dwc/terms/verbatimSRS"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 118,
+            "term": "http://rs.tdwg.org/dwc/terms/footprintWKT"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 119,
+            "term": "http://rs.tdwg.org/dwc/terms/footprintSRS"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 120,
+            "term": "http://rs.tdwg.org/dwc/terms/footprintSpatialFit"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 121,
+            "term": "http://rs.tdwg.org/dwc/terms/georeferencedBy"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 122,
+            "term": "http://rs.tdwg.org/dwc/terms/georeferencedDate"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 123,
+            "term": "http://rs.tdwg.org/dwc/terms/georeferenceProtocol"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 124,
+            "term": "http://rs.tdwg.org/dwc/terms/georeferenceSources"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 125,
+            "term": "http://rs.tdwg.org/dwc/terms/georeferenceRemarks"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 126,
+            "term": "http://rs.tdwg.org/dwc/terms/geologicalContextID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 127,
+            "term": "http://rs.tdwg.org/dwc/terms/earliestEonOrLowestEonothem"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 128,
+            "term": "http://rs.tdwg.org/dwc/terms/latestEonOrHighestEonothem"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 129,
+            "term": "http://rs.tdwg.org/dwc/terms/earliestEraOrLowestErathem"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 130,
+            "term": "http://rs.tdwg.org/dwc/terms/latestEraOrHighestErathem"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 131,
+            "term": "http://rs.tdwg.org/dwc/terms/earliestPeriodOrLowestSystem"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 132,
+            "term": "http://rs.tdwg.org/dwc/terms/latestPeriodOrHighestSystem"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 133,
+            "term": "http://rs.tdwg.org/dwc/terms/earliestEpochOrLowestSeries"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 134,
+            "term": "http://rs.tdwg.org/dwc/terms/latestEpochOrHighestSeries"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 135,
+            "term": "http://rs.tdwg.org/dwc/terms/earliestAgeOrLowestStage"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 136,
+            "term": "http://rs.tdwg.org/dwc/terms/latestAgeOrHighestStage"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 137,
+            "term": "http://rs.tdwg.org/dwc/terms/lowestBiostratigraphicZone"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 138,
+            "term": "http://rs.tdwg.org/dwc/terms/highestBiostratigraphicZone"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 139,
+            "term": "http://rs.tdwg.org/dwc/terms/lithostratigraphicTerms"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 140,
+            "term": "http://rs.tdwg.org/dwc/terms/group"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 141,
+            "term": "http://rs.tdwg.org/dwc/terms/formation"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 142,
+            "term": "http://rs.tdwg.org/dwc/terms/member"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 143,
+            "term": "http://rs.tdwg.org/dwc/terms/bed"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 144,
+            "term": "http://rs.tdwg.org/dwc/terms/identificationID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 145,
+            "term": "http://rs.tdwg.org/dwc/terms/verbatimIdentification"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 146,
+            "term": "http://rs.tdwg.org/dwc/terms/identificationQualifier"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 147,
+            "term": "http://rs.tdwg.org/dwc/terms/typeStatus"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 148,
+            "term": "http://rs.tdwg.org/dwc/terms/identifiedBy"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 149,
+            "term": "http://rs.tdwg.org/dwc/terms/identifiedByID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 150,
+            "term": "http://rs.tdwg.org/dwc/terms/dateIdentified"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 151,
+            "term": "http://rs.tdwg.org/dwc/terms/identificationReferences"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 152,
+            "term": "http://rs.tdwg.org/dwc/terms/identificationVerificationStatus"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 153,
+            "term": "http://rs.tdwg.org/dwc/terms/identificationRemarks"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 154,
+            "term": "http://rs.tdwg.org/dwc/terms/taxonID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 155,
+            "term": "http://rs.tdwg.org/dwc/terms/scientificNameID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 156,
+            "term": "http://rs.tdwg.org/dwc/terms/acceptedNameUsageID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 157,
+            "term": "http://rs.tdwg.org/dwc/terms/parentNameUsageID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 158,
+            "term": "http://rs.tdwg.org/dwc/terms/originalNameUsageID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 159,
+            "term": "http://rs.tdwg.org/dwc/terms/nameAccordingToID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 160,
+            "term": "http://rs.tdwg.org/dwc/terms/namePublishedInID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 161,
+            "term": "http://rs.tdwg.org/dwc/terms/taxonConceptID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 162,
+            "term": "http://rs.tdwg.org/dwc/terms/scientificName"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 163,
+            "term": "http://rs.tdwg.org/dwc/terms/acceptedNameUsage"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 164,
+            "term": "http://rs.tdwg.org/dwc/terms/parentNameUsage"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 165,
+            "term": "http://rs.tdwg.org/dwc/terms/originalNameUsage"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 166,
+            "term": "http://rs.tdwg.org/dwc/terms/nameAccordingTo"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 167,
+            "term": "http://rs.tdwg.org/dwc/terms/namePublishedIn"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 168,
+            "term": "http://rs.tdwg.org/dwc/terms/namePublishedInYear"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 169,
+            "term": "http://rs.tdwg.org/dwc/terms/higherClassification"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 170,
+            "term": "http://rs.tdwg.org/dwc/terms/kingdom"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 171,
+            "term": "http://rs.tdwg.org/dwc/terms/phylum"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 172,
+            "term": "http://rs.tdwg.org/dwc/terms/class"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 173,
+            "term": "http://rs.tdwg.org/dwc/terms/order"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 174,
+            "term": "http://rs.tdwg.org/dwc/terms/superfamily"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 175,
+            "term": "http://rs.tdwg.org/dwc/terms/family"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 176,
+            "term": "http://rs.tdwg.org/dwc/terms/subfamily"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 177,
+            "term": "http://rs.tdwg.org/dwc/terms/tribe"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 178,
+            "term": "http://rs.tdwg.org/dwc/terms/subtribe"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 179,
+            "term": "http://rs.tdwg.org/dwc/terms/genus"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 180,
+            "term": "http://rs.tdwg.org/dwc/terms/genericName"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 181,
+            "term": "http://rs.tdwg.org/dwc/terms/subgenus"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 182,
+            "term": "http://rs.tdwg.org/dwc/terms/infragenericEpithet"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 183,
+            "term": "http://rs.tdwg.org/dwc/terms/specificEpithet"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 184,
+            "term": "http://rs.tdwg.org/dwc/terms/infraspecificEpithet"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 185,
+            "term": "http://rs.tdwg.org/dwc/terms/cultivarEpithet"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 186,
+            "term": "http://rs.tdwg.org/dwc/terms/taxonRank"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 187,
+            "term": "http://rs.tdwg.org/dwc/terms/verbatimTaxonRank"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 188,
+            "term": "http://rs.tdwg.org/dwc/terms/scientificNameAuthorship"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 189,
+            "term": "http://rs.tdwg.org/dwc/terms/vernacularName"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 190,
+            "term": "http://rs.tdwg.org/dwc/terms/nomenclaturalCode"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 191,
+            "term": "http://rs.tdwg.org/dwc/terms/taxonomicStatus"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 192,
+            "term": "http://rs.tdwg.org/dwc/terms/nomenclaturalStatus"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 193,
+            "term": "http://rs.tdwg.org/dwc/terms/taxonRemarks"
+          }
+        ],
+        "files": [
+          "verbatim.txt"
+        ],
+        "id_index": null,
+        "role": "extension",
+        "row_type": "http://rs.tdwg.org/dwc/terms/Occurrence",
+        "text_format": {
+          "encoding": "UTF-8",
+          "fields_enclosed_by": null,
+          "fields_terminated_by": "\t",
+          "ignore_header_lines": 1,
+          "lines_terminated_by": "\n"
+        }
+      },
+      {
+        "coreid_index": 0,
+        "field_count": 15,
+        "fields": [
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 0,
+            "term": "http://rs.gbif.org/terms/1.0/gbifID"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 1,
+            "term": "http://purl.org/dc/terms/type"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 2,
+            "term": "http://purl.org/dc/terms/format"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 3,
+            "term": "http://purl.org/dc/terms/identifier"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 4,
+            "term": "http://purl.org/dc/terms/references"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 5,
+            "term": "http://purl.org/dc/terms/title"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 6,
+            "term": "http://purl.org/dc/terms/description"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 7,
+            "term": "http://purl.org/dc/terms/source"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 8,
+            "term": "http://purl.org/dc/terms/audience"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 9,
+            "term": "http://purl.org/dc/terms/created"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 10,
+            "term": "http://purl.org/dc/terms/creator"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 11,
+            "term": "http://purl.org/dc/terms/contributor"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 12,
+            "term": "http://purl.org/dc/terms/publisher"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 13,
+            "term": "http://purl.org/dc/terms/license"
+          },
+          {
+            "default": null,
+            "delimited_by": null,
+            "index": 14,
+            "term": "http://purl.org/dc/terms/rightsHolder"
+          }
+        ],
+        "files": [
+          "multimedia.txt"
+        ],
+        "id_index": null,
+        "role": "extension",
+        "row_type": "http://rs.gbif.org/terms/1.0/Multimedia",
+        "text_format": {
+          "encoding": "UTF-8",
+          "fields_enclosed_by": null,
+          "fields_terminated_by": "\t",
+          "ignore_header_lines": 1,
+          "lines_terminated_by": "\n"
+        }
+      }
+    ],
+    "meta_path": "meta.xml",
+    "metadata_file": "metadata.xml",
+    "occurrence_core": {
+      "coreid_index": null,
+      "field_count": 231,
+      "fields": [
+        {
+          "default": "WGS84",
+          "delimited_by": null,
+          "index": null,
+          "term": "http://rs.tdwg.org/dwc/terms/geodeticDatum"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 0,
+          "term": "http://rs.gbif.org/terms/1.0/gbifID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 1,
+          "term": "http://purl.org/dc/terms/accessRights"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 2,
+          "term": "http://purl.org/dc/terms/bibliographicCitation"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 3,
+          "term": "http://purl.org/dc/terms/language"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 4,
+          "term": "http://purl.org/dc/terms/license"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 5,
+          "term": "http://purl.org/dc/terms/modified"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 6,
+          "term": "http://purl.org/dc/terms/publisher"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 7,
+          "term": "http://purl.org/dc/terms/references"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 8,
+          "term": "http://purl.org/dc/terms/rightsHolder"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 9,
+          "term": "http://purl.org/dc/terms/type"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 10,
+          "term": "http://rs.tdwg.org/dwc/terms/institutionID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 11,
+          "term": "http://rs.tdwg.org/dwc/terms/collectionID"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 12,
+          "term": "http://rs.tdwg.org/dwc/terms/datasetID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 13,
+          "term": "http://rs.tdwg.org/dwc/terms/institutionCode"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 14,
+          "term": "http://rs.tdwg.org/dwc/terms/collectionCode"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 15,
+          "term": "http://rs.tdwg.org/dwc/terms/datasetName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 16,
+          "term": "http://rs.tdwg.org/dwc/terms/ownerInstitutionCode"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 17,
+          "term": "http://rs.tdwg.org/dwc/terms/basisOfRecord"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 18,
+          "term": "http://rs.tdwg.org/dwc/terms/informationWithheld"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 19,
+          "term": "http://rs.tdwg.org/dwc/terms/dataGeneralizations"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 20,
+          "term": "http://rs.tdwg.org/dwc/terms/dynamicProperties"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 21,
+          "term": "http://rs.tdwg.org/dwc/terms/occurrenceID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 22,
+          "term": "http://rs.tdwg.org/dwc/terms/catalogNumber"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 23,
+          "term": "http://rs.tdwg.org/dwc/terms/recordNumber"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 24,
+          "term": "http://rs.tdwg.org/dwc/terms/recordedBy"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 25,
+          "term": "http://rs.tdwg.org/dwc/terms/recordedByID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 26,
+          "term": "http://rs.tdwg.org/dwc/terms/individualCount"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 27,
+          "term": "http://rs.tdwg.org/dwc/terms/organismQuantity"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 28,
+          "term": "http://rs.tdwg.org/dwc/terms/organismQuantityType"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 29,
+          "term": "http://rs.tdwg.org/dwc/terms/sex"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 30,
+          "term": "http://rs.tdwg.org/dwc/terms/lifeStage"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 31,
+          "term": "http://rs.tdwg.org/dwc/terms/reproductiveCondition"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 32,
+          "term": "http://rs.tdwg.org/dwc/terms/caste"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 33,
+          "term": "http://rs.tdwg.org/dwc/terms/behavior"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 34,
+          "term": "http://rs.tdwg.org/dwc/terms/vitality"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 35,
+          "term": "http://rs.tdwg.org/dwc/terms/establishmentMeans"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 36,
+          "term": "http://rs.tdwg.org/dwc/terms/degreeOfEstablishment"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 37,
+          "term": "http://rs.tdwg.org/dwc/terms/pathway"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 38,
+          "term": "http://rs.tdwg.org/dwc/terms/georeferenceVerificationStatus"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 39,
+          "term": "http://rs.tdwg.org/dwc/terms/occurrenceStatus"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 40,
+          "term": "http://rs.tdwg.org/dwc/terms/preparations"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 41,
+          "term": "http://rs.tdwg.org/dwc/terms/disposition"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 42,
+          "term": "http://rs.tdwg.org/dwc/terms/associatedOccurrences"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 43,
+          "term": "http://rs.tdwg.org/dwc/terms/associatedReferences"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 44,
+          "term": "http://rs.tdwg.org/dwc/terms/associatedSequences"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 45,
+          "term": "http://rs.tdwg.org/dwc/terms/associatedTaxa"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 46,
+          "term": "http://rs.tdwg.org/dwc/terms/otherCatalogNumbers"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 47,
+          "term": "http://rs.tdwg.org/dwc/terms/occurrenceRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 48,
+          "term": "http://rs.tdwg.org/dwc/terms/organismID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 49,
+          "term": "http://rs.tdwg.org/dwc/terms/organismName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 50,
+          "term": "http://rs.tdwg.org/dwc/terms/organismScope"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 51,
+          "term": "http://rs.tdwg.org/dwc/terms/associatedOrganisms"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 52,
+          "term": "http://rs.tdwg.org/dwc/terms/previousIdentifications"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 53,
+          "term": "http://rs.tdwg.org/dwc/terms/organismRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 54,
+          "term": "http://rs.tdwg.org/dwc/terms/materialEntityID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 55,
+          "term": "http://rs.tdwg.org/dwc/terms/materialEntityRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 56,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimLabel"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 57,
+          "term": "http://rs.tdwg.org/dwc/terms/materialSampleID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 58,
+          "term": "http://rs.tdwg.org/dwc/terms/eventID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 59,
+          "term": "http://rs.tdwg.org/dwc/terms/parentEventID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 60,
+          "term": "http://rs.tdwg.org/dwc/terms/eventType"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 61,
+          "term": "http://rs.tdwg.org/dwc/terms/fieldNumber"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 62,
+          "term": "http://rs.tdwg.org/dwc/terms/eventDate"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 63,
+          "term": "http://rs.tdwg.org/dwc/terms/eventTime"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 64,
+          "term": "http://rs.tdwg.org/dwc/terms/startDayOfYear"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 65,
+          "term": "http://rs.tdwg.org/dwc/terms/endDayOfYear"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 66,
+          "term": "http://rs.tdwg.org/dwc/terms/year"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 67,
+          "term": "http://rs.tdwg.org/dwc/terms/month"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 68,
+          "term": "http://rs.tdwg.org/dwc/terms/day"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 69,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimEventDate"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 70,
+          "term": "http://rs.tdwg.org/dwc/terms/habitat"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 71,
+          "term": "http://rs.tdwg.org/dwc/terms/samplingProtocol"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 72,
+          "term": "http://rs.tdwg.org/dwc/terms/sampleSizeValue"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 73,
+          "term": "http://rs.tdwg.org/dwc/terms/sampleSizeUnit"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 74,
+          "term": "http://rs.tdwg.org/dwc/terms/samplingEffort"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 75,
+          "term": "http://rs.tdwg.org/dwc/terms/fieldNotes"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 76,
+          "term": "http://rs.tdwg.org/dwc/terms/eventRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 77,
+          "term": "http://rs.tdwg.org/dwc/terms/locationID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 78,
+          "term": "http://rs.tdwg.org/dwc/terms/higherGeographyID"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 79,
+          "term": "http://rs.tdwg.org/dwc/terms/higherGeography"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 80,
+          "term": "http://rs.tdwg.org/dwc/terms/continent"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 81,
+          "term": "http://rs.tdwg.org/dwc/terms/waterBody"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 82,
+          "term": "http://rs.tdwg.org/dwc/terms/islandGroup"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 83,
+          "term": "http://rs.tdwg.org/dwc/terms/island"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 84,
+          "term": "http://rs.tdwg.org/dwc/terms/countryCode"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 85,
+          "term": "http://rs.tdwg.org/dwc/terms/stateProvince"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 86,
+          "term": "http://rs.tdwg.org/dwc/terms/county"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 87,
+          "term": "http://rs.tdwg.org/dwc/terms/municipality"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 88,
+          "term": "http://rs.tdwg.org/dwc/terms/locality"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 89,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimLocality"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 90,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimElevation"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 91,
+          "term": "http://rs.tdwg.org/dwc/terms/verticalDatum"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 92,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimDepth"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 93,
+          "term": "http://rs.tdwg.org/dwc/terms/minimumDistanceAboveSurfaceInMeters"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 94,
+          "term": "http://rs.tdwg.org/dwc/terms/maximumDistanceAboveSurfaceInMeters"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 95,
+          "term": "http://rs.tdwg.org/dwc/terms/locationAccordingTo"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 96,
+          "term": "http://rs.tdwg.org/dwc/terms/locationRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 97,
+          "term": "http://rs.tdwg.org/dwc/terms/decimalLatitude"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 98,
+          "term": "http://rs.tdwg.org/dwc/terms/decimalLongitude"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 99,
+          "term": "http://rs.tdwg.org/dwc/terms/coordinateUncertaintyInMeters"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 100,
+          "term": "http://rs.tdwg.org/dwc/terms/coordinatePrecision"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 101,
+          "term": "http://rs.tdwg.org/dwc/terms/pointRadiusSpatialFit"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 102,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimCoordinateSystem"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 103,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimSRS"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 104,
+          "term": "http://rs.tdwg.org/dwc/terms/footprintWKT"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 105,
+          "term": "http://rs.tdwg.org/dwc/terms/footprintSRS"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 106,
+          "term": "http://rs.tdwg.org/dwc/terms/footprintSpatialFit"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 107,
+          "term": "http://rs.tdwg.org/dwc/terms/georeferencedBy"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 108,
+          "term": "http://rs.tdwg.org/dwc/terms/georeferencedDate"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 109,
+          "term": "http://rs.tdwg.org/dwc/terms/georeferenceProtocol"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 110,
+          "term": "http://rs.tdwg.org/dwc/terms/georeferenceSources"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 111,
+          "term": "http://rs.tdwg.org/dwc/terms/georeferenceRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 112,
+          "term": "http://rs.tdwg.org/dwc/terms/geologicalContextID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 113,
+          "term": "http://rs.tdwg.org/dwc/terms/earliestEonOrLowestEonothem"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 114,
+          "term": "http://rs.tdwg.org/dwc/terms/latestEonOrHighestEonothem"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 115,
+          "term": "http://rs.tdwg.org/dwc/terms/earliestEraOrLowestErathem"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 116,
+          "term": "http://rs.tdwg.org/dwc/terms/latestEraOrHighestErathem"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 117,
+          "term": "http://rs.tdwg.org/dwc/terms/earliestPeriodOrLowestSystem"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 118,
+          "term": "http://rs.tdwg.org/dwc/terms/latestPeriodOrHighestSystem"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 119,
+          "term": "http://rs.tdwg.org/dwc/terms/earliestEpochOrLowestSeries"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 120,
+          "term": "http://rs.tdwg.org/dwc/terms/latestEpochOrHighestSeries"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 121,
+          "term": "http://rs.tdwg.org/dwc/terms/earliestAgeOrLowestStage"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 122,
+          "term": "http://rs.tdwg.org/dwc/terms/latestAgeOrHighestStage"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 123,
+          "term": "http://rs.tdwg.org/dwc/terms/lowestBiostratigraphicZone"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 124,
+          "term": "http://rs.tdwg.org/dwc/terms/highestBiostratigraphicZone"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 125,
+          "term": "http://rs.tdwg.org/dwc/terms/lithostratigraphicTerms"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 126,
+          "term": "http://rs.tdwg.org/dwc/terms/group"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 127,
+          "term": "http://rs.tdwg.org/dwc/terms/formation"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 128,
+          "term": "http://rs.tdwg.org/dwc/terms/member"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 129,
+          "term": "http://rs.tdwg.org/dwc/terms/bed"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 130,
+          "term": "http://rs.tdwg.org/dwc/terms/identificationID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 131,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimIdentification"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 132,
+          "term": "http://rs.tdwg.org/dwc/terms/identificationQualifier"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 133,
+          "term": "http://rs.tdwg.org/dwc/terms/typeStatus"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 134,
+          "term": "http://rs.tdwg.org/dwc/terms/identifiedBy"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 135,
+          "term": "http://rs.tdwg.org/dwc/terms/identifiedByID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 136,
+          "term": "http://rs.tdwg.org/dwc/terms/dateIdentified"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 137,
+          "term": "http://rs.tdwg.org/dwc/terms/identificationReferences"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 138,
+          "term": "http://rs.tdwg.org/dwc/terms/identificationVerificationStatus"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 139,
+          "term": "http://rs.tdwg.org/dwc/terms/identificationRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 140,
+          "term": "http://rs.tdwg.org/dwc/terms/taxonID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 141,
+          "term": "http://rs.tdwg.org/dwc/terms/scientificNameID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 142,
+          "term": "http://rs.tdwg.org/dwc/terms/acceptedNameUsageID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 143,
+          "term": "http://rs.tdwg.org/dwc/terms/parentNameUsageID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 144,
+          "term": "http://rs.tdwg.org/dwc/terms/originalNameUsageID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 145,
+          "term": "http://rs.tdwg.org/dwc/terms/nameAccordingToID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 146,
+          "term": "http://rs.tdwg.org/dwc/terms/namePublishedInID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 147,
+          "term": "http://rs.tdwg.org/dwc/terms/taxonConceptID"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 148,
+          "term": "http://rs.tdwg.org/dwc/terms/scientificName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 149,
+          "term": "http://rs.tdwg.org/dwc/terms/acceptedNameUsage"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 150,
+          "term": "http://rs.tdwg.org/dwc/terms/parentNameUsage"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 151,
+          "term": "http://rs.tdwg.org/dwc/terms/originalNameUsage"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 152,
+          "term": "http://rs.tdwg.org/dwc/terms/nameAccordingTo"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 153,
+          "term": "http://rs.tdwg.org/dwc/terms/namePublishedIn"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 154,
+          "term": "http://rs.tdwg.org/dwc/terms/namePublishedInYear"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 155,
+          "term": "http://rs.tdwg.org/dwc/terms/higherClassification"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 156,
+          "term": "http://rs.tdwg.org/dwc/terms/kingdom"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 157,
+          "term": "http://rs.tdwg.org/dwc/terms/phylum"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 158,
+          "term": "http://rs.tdwg.org/dwc/terms/class"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 159,
+          "term": "http://rs.tdwg.org/dwc/terms/order"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 160,
+          "term": "http://rs.tdwg.org/dwc/terms/superfamily"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 161,
+          "term": "http://rs.tdwg.org/dwc/terms/family"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 162,
+          "term": "http://rs.tdwg.org/dwc/terms/subfamily"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 163,
+          "term": "http://rs.tdwg.org/dwc/terms/tribe"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 164,
+          "term": "http://rs.tdwg.org/dwc/terms/subtribe"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 165,
+          "term": "http://rs.tdwg.org/dwc/terms/genus"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 166,
+          "term": "http://rs.tdwg.org/dwc/terms/genericName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 167,
+          "term": "http://rs.tdwg.org/dwc/terms/subgenus"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 168,
+          "term": "http://rs.tdwg.org/dwc/terms/infragenericEpithet"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 169,
+          "term": "http://rs.tdwg.org/dwc/terms/specificEpithet"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 170,
+          "term": "http://rs.tdwg.org/dwc/terms/infraspecificEpithet"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 171,
+          "term": "http://rs.tdwg.org/dwc/terms/cultivarEpithet"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 172,
+          "term": "http://rs.tdwg.org/dwc/terms/taxonRank"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 173,
+          "term": "http://rs.tdwg.org/dwc/terms/verbatimTaxonRank"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 174,
+          "term": "http://rs.tdwg.org/dwc/terms/vernacularName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 175,
+          "term": "http://rs.tdwg.org/dwc/terms/nomenclaturalCode"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 176,
+          "term": "http://rs.tdwg.org/dwc/terms/taxonomicStatus"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 177,
+          "term": "http://rs.tdwg.org/dwc/terms/nomenclaturalStatus"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 178,
+          "term": "http://rs.tdwg.org/dwc/terms/taxonRemarks"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 179,
+          "term": "http://rs.gbif.org/terms/1.0/datasetKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 180,
+          "term": "http://rs.gbif.org/terms/1.0/publishingCountry"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 181,
+          "term": "http://rs.gbif.org/terms/1.0/lastInterpreted"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 182,
+          "term": "http://rs.gbif.org/terms/1.0/elevation"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 183,
+          "term": "http://rs.gbif.org/terms/1.0/elevationAccuracy"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 184,
+          "term": "http://rs.gbif.org/terms/1.0/depth"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 185,
+          "term": "http://rs.gbif.org/terms/1.0/depthAccuracy"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 186,
+          "term": "http://rs.gbif.org/terms/1.0/distanceFromCentroidInMeters"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 187,
+          "term": "http://rs.gbif.org/terms/1.0/issue"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 188,
+          "term": "http://rs.gbif.org/terms/1.0/taxonomicIssue"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 189,
+          "term": "http://rs.gbif.org/terms/1.0/nonTaxonomicIssue"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 190,
+          "term": "http://rs.gbif.org/terms/1.0/mediaType"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 191,
+          "term": "http://rs.gbif.org/terms/1.0/hasCoordinate"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 192,
+          "term": "http://rs.gbif.org/terms/1.0/hasGeospatialIssues"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 193,
+          "term": "http://rs.gbif.org/terms/1.0/taxonKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 194,
+          "term": "http://rs.gbif.org/terms/1.0/acceptedTaxonKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 195,
+          "term": "http://rs.gbif.org/terms/1.0/kingdomKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 196,
+          "term": "http://rs.gbif.org/terms/1.0/phylumKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 197,
+          "term": "http://rs.gbif.org/terms/1.0/classKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 198,
+          "term": "http://rs.gbif.org/terms/1.0/orderKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 199,
+          "term": "http://rs.gbif.org/terms/1.0/superfamilyKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 200,
+          "term": "http://rs.gbif.org/terms/1.0/familyKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 201,
+          "term": "http://rs.gbif.org/terms/1.0/subfamilyKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 202,
+          "term": "http://rs.gbif.org/terms/1.0/tribeKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 203,
+          "term": "http://rs.gbif.org/terms/1.0/subtribeKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 204,
+          "term": "http://rs.gbif.org/terms/1.0/genusKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 205,
+          "term": "http://rs.gbif.org/terms/1.0/subgenusKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 206,
+          "term": "http://rs.gbif.org/terms/1.0/speciesKey"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 207,
+          "term": "http://rs.gbif.org/terms/1.0/species"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 208,
+          "term": "http://rs.gbif.org/terms/1.0/acceptedScientificName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 209,
+          "term": "http://rs.gbif.org/terms/1.0/verbatimScientificName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 210,
+          "term": "http://rs.gbif.org/terms/1.0/typifiedName"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 211,
+          "term": "http://rs.gbif.org/terms/1.0/protocol"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 212,
+          "term": "http://rs.gbif.org/terms/1.0/lastParsed"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 213,
+          "term": "http://rs.gbif.org/terms/1.0/lastCrawled"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 214,
+          "term": "http://rs.gbif.org/terms/1.0/isInvasive"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 215,
+          "term": "http://rs.gbif.org/terms/1.0/repatriated"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 216,
+          "term": "http://rs.gbif.org/terms/1.0/relativeOrganismQuantity"
+        },
+        {
+          "default": null,
+          "delimited_by": ";",
+          "index": 217,
+          "term": "http://rs.gbif.org/terms/1.0/projectId"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 218,
+          "term": "http://rs.gbif.org/terms/1.0/isSequenced"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 219,
+          "term": "http://rs.gbif.org/terms/1.0/gbifRegion"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 220,
+          "term": "http://rs.gbif.org/terms/1.0/publishedByGbifRegion"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 221,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level0Gid"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 222,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level0Name"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 223,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level1Gid"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 224,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level1Name"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 225,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level2Gid"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 226,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level2Name"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 227,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level3Gid"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 228,
+          "term": "http://rs.gbif.org/terms/gadm/3.0/level3Name"
+        },
+        {
+          "default": null,
+          "delimited_by": null,
+          "index": 229,
+          "term": "http://iucn.org/terms/iucnRedListCategory"
+        }
+      ],
+      "files": [
+        "occurrence.txt"
+      ],
+      "id_index": 0,
+      "role": "core",
+      "row_type": "http://rs.tdwg.org/dwc/terms/Occurrence",
+      "text_format": {
+        "encoding": "UTF-8",
+        "fields_enclosed_by": null,
+        "fields_terminated_by": "\t",
+        "ignore_header_lines": 1,
+        "lines_terminated_by": "\n"
+      }
+    }
+  },
+  "gbif": {
+    "citation": "GBIF.org (4 June 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.3xbk5b",
+    "dataset_key": "cd6e21c8-9e8a-493a-8a76-fbf7862069e5",
+    "doi": "10.15468/dl.3xbk5b",
+    "download_key": "0038004-260519110011954",
+    "license": "http://creativecommons.org/licenses/by-nc/4.0/legalcode"
+  },
+  "obis": {
+    "citation": null,
+    "dataset_id": null,
+    "doi": null,
+    "license": null,
+    "resource_id": null
+  },
+  "rights": {
+    "license": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "rights": null,
+    "rights_holder": "GBIF Download Service"
+  },
+  "source_archive": {
+    "bytes": 267415,
+    "kind": "zip",
+    "name": "0038004-260519110011954.zip",
+    "path": "demo/source/0038004-260519110011954.zip",
+    "sha256": "8e78d106cb09a1e40abe3f37d312e1cd8fb89fb6df8bbf93f59166ecbd654e04"
+  },
+  "source_files": [
+    {
+      "path": "metadata.xml",
+      "role": "metadata"
+    },
+    {
+      "path": "occurrence.txt",
+      "role": "core",
+      "row_type": "http://rs.tdwg.org/dwc/terms/Occurrence"
+    },
+    {
+      "path": "verbatim.txt",
+      "role": "extension",
+      "row_type": "http://rs.tdwg.org/dwc/terms/Occurrence"
+    },
+    {
+      "path": "multimedia.txt",
+      "role": "extension",
+      "row_type": "http://rs.gbif.org/terms/1.0/Multimedia"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DwC-A Static Viewer</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="viewer-shell">
+      <aside class="sidebar" aria-label="Bundle inspection controls">
+        <header class="app-header">
+          <p class="eyebrow">DwC-A output bundle</p>
+          <h1 id="dataset-title">Loading bundle</h1>
+          <p id="bundle-status" class="status-line">Reading manifest.json</p>
+        </header>
+
+        <section class="panel" aria-labelledby="counts-heading">
+          <h2 id="counts-heading">Counts</h2>
+          <dl id="counts-list" class="metric-grid"></dl>
+        </section>
+
+        <section class="panel" aria-labelledby="filters-heading">
+          <div class="panel-title-row">
+            <h2 id="filters-heading">Filters</h2>
+            <button id="reset-filters" type="button">Reset</button>
+          </div>
+          <div id="filters" class="filters"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="provenance-heading">
+          <h2 id="provenance-heading">Provenance</h2>
+          <dl id="provenance-list" class="metadata-list"></dl>
+        </section>
+
+        <section class="panel" aria-labelledby="artifacts-heading">
+          <h2 id="artifacts-heading">Generated Files</h2>
+          <div id="artifact-list" class="artifact-list"></div>
+        </section>
+      </aside>
+
+      <section class="workspace" aria-label="Occurrence map and records">
+        <div class="map-wrap">
+          <div id="map" class="map" role="region" aria-label="Occurrence map"></div>
+          <div id="map-empty-state" class="empty-state" hidden></div>
+        </div>
+
+        <section class="record-panel" aria-labelledby="record-heading">
+          <div class="record-panel-header">
+            <div>
+              <p id="feature-count" class="status-line">No records loaded</p>
+              <h2 id="record-heading">Feature Details</h2>
+            </div>
+          </div>
+          <div class="record-grid">
+            <div>
+              <h3>Records</h3>
+              <ol id="record-list" class="record-list"></ol>
+            </div>
+            <div>
+              <h3>Selected Feature</h3>
+              <dl id="feature-details" class="metadata-list"></dl>
+            </div>
+          </div>
+        </section>
+
+        <section class="record-panel" aria-labelledby="processing-heading">
+          <h2 id="processing-heading">Processing</h2>
+          <div id="processing-summary" class="processing-summary"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script src="https://unpkg.com/flatgeobuf@4.3.3/dist/flatgeobuf-geojson.min.js"></script>
+    <script src="app.js" defer></script>
+  </body>
+</html>

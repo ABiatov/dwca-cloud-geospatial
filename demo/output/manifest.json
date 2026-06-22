@@ -1,0 +1,159 @@
+{
+  "bundle_schema_version": "0.1.0",
+  "counts": {
+    "accepted_records": 1168,
+    "occurrence_records": 1168,
+    "rejected_records": 0,
+    "source_records": 1168
+  },
+  "created_at": "2026-06-21T19:28:34Z",
+  "files": [
+    {
+      "bytes": 120578,
+      "media_type": "application/json",
+      "path": "metadata/source.json",
+      "record_count": null,
+      "role": "metadata",
+      "sha256": "34f4991f920dc01dad9dc9a1323113f01118288a8649893125ee68a387478a59"
+    },
+    {
+      "bytes": 7378,
+      "media_type": "application/json",
+      "path": "metadata/processing.json",
+      "record_count": null,
+      "role": "metadata",
+      "sha256": "f898d862247d936ac3c12efafbab51c5e420663e0bd17e48de3e4043cb8bc0fd"
+    },
+    {
+      "bytes": 80709,
+      "media_type": "application/vnd.apache.parquet",
+      "path": "data/occurrences.parquet",
+      "record_count": 1168,
+      "role": "geoparquet",
+      "sha256": "8d6f29f61fd3772f950f0fb35385df5100f6c4cfc3ab90b729ec267b6f65dfe1"
+    },
+    {
+      "bytes": 618496,
+      "media_type": "application/geopackage+sqlite3",
+      "path": "data/occurrences.gpkg",
+      "record_count": 1168,
+      "role": "geopackage",
+      "sha256": "6a83a1c0f8789072de8146aa0235a9779e9c94622849699045092d658ef04c06"
+    },
+    {
+      "bytes": 651192,
+      "media_type": "application/octet-stream",
+      "path": "data/occurrences.fgb",
+      "record_count": 1168,
+      "role": "flatgeobuf",
+      "sha256": "3456af5ef55947d9f92d471518e759b4b73988be82ce46fcb68cb598757dc628"
+    }
+  ],
+  "generator": {
+    "commit": null,
+    "name": "dwca-cloud-geospatial",
+    "version": "0.1.0"
+  },
+  "id": "dwca-geo-570eb19ae1a5",
+  "layers": [
+    {
+      "bounds": [
+        -73.0,
+        19.9975,
+        -72.622907,
+        20.083333
+      ],
+      "geometry": {
+        "column": "geometry",
+        "coordinate_order": "longitude_latitude",
+        "crs": "OGC:CRS84"
+      },
+      "id": "occurrences",
+      "path": "data/occurrences.fgb",
+      "record_count": 1168,
+      "source_format": "flatgeobuf",
+      "title": "Occurrences",
+      "type": "point"
+    },
+    {
+      "bounds": [
+        -73.0,
+        19.9975,
+        -72.622907,
+        20.083333
+      ],
+      "geometry": {
+        "column": "geometry",
+        "coordinate_order": "longitude_latitude",
+        "crs": "OGC:CRS84"
+      },
+      "id": "occurrences_geoparquet",
+      "path": "data/occurrences.parquet",
+      "record_count": 1168,
+      "source_format": "geoparquet",
+      "title": "Occurrences",
+      "type": "point"
+    }
+  ],
+  "occurrence_schema_version": "0.1.0",
+  "source": {
+    "citation": "GBIF.org (4 June 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.3xbk5b",
+    "doi": "10.15468/dl.3xbk5b",
+    "gbif_dataset_key": "cd6e21c8-9e8a-493a-8a76-fbf7862069e5",
+    "gbif_download_key": "0038004-260519110011954",
+    "license": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "obis_dataset_id": null,
+    "publisher": "GBIF Download Service",
+    "title": "GBIF Occurrence Download 0038004-260519110011954"
+  },
+  "title": "GBIF Occurrence Download 0038004-260519110011954",
+  "viewer": {
+    "default_layer": "occurrences",
+    "display_fields": [
+      "scientific_name",
+      "verbatim_scientific_name",
+      "kingdom",
+      "phylum",
+      "class",
+      "order",
+      "family",
+      "genus",
+      "taxon_rank",
+      "iucn_red_list_category",
+      "event_date",
+      "event_year",
+      "basis_of_record",
+      "degree_of_establishment",
+      "decimal_longitude",
+      "decimal_latitude",
+      "coordinate_uncertainty_in_meters",
+      "country_code",
+      "locality",
+      "identified_by",
+      "dataset_name",
+      "license",
+      "references",
+      "rights_holder",
+      "source_record_id",
+      "source_file",
+      "source_row_number",
+      "source_data_row_number",
+      "quality_flags"
+    ],
+    "filter_fields": [
+      "scientific_name",
+      "kingdom",
+      "event_year",
+      "basis_of_record",
+      "iucn_red_list_category",
+      "quality_flags"
+    ],
+    "initial_bounds": [
+      -73.0,
+      19.9975,
+      -72.622907,
+      20.083333
+    ]
+  },
+  "viewer_contract_version": "0.1.0"
+}

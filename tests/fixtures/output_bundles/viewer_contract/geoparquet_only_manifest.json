@@ -1,0 +1,100 @@
+{
+  "bundle_schema_version": "0.1.0",
+  "viewer_contract_version": "0.1.0",
+  "occurrence_schema_version": "0.1.0",
+  "id": "viewer-contract-geoparquet-only",
+  "title": "Viewer contract GeoParquet-only fixture",
+  "created_at": "2026-06-19T12:00:00Z",
+  "generator": {
+    "name": "dwca-cloud-geospatial",
+    "version": "0.1.0",
+    "commit": null
+  },
+  "source": {
+    "title": "Viewer contract GeoParquet-only fixture",
+    "publisher": null,
+    "doi": null,
+    "citation": null,
+    "license": null,
+    "gbif_dataset_key": null,
+    "gbif_download_key": null,
+    "obis_dataset_id": null
+  },
+  "files": [
+    {
+      "path": "metadata/source.json",
+      "role": "metadata",
+      "media_type": "application/json",
+      "bytes": 100,
+      "sha256": null,
+      "record_count": null
+    },
+    {
+      "path": "metadata/processing.json",
+      "role": "metadata",
+      "media_type": "application/json",
+      "bytes": 100,
+      "sha256": null,
+      "record_count": null
+    },
+    {
+      "path": "data/occurrences.parquet",
+      "role": "geoparquet",
+      "media_type": "application/vnd.apache.parquet",
+      "bytes": 4096,
+      "sha256": null,
+      "record_count": 2
+    }
+  ],
+  "layers": [
+    {
+      "id": "occurrences_geoparquet",
+      "title": "Occurrences",
+      "type": "point",
+      "source_format": "geoparquet",
+      "path": "data/occurrences.parquet",
+      "geometry": {
+        "column": "geometry",
+        "crs": "OGC:CRS84",
+        "coordinate_order": "longitude_latitude"
+      },
+      "record_count": 2,
+      "bounds": [
+        -10.0,
+        35.0,
+        5.0,
+        60.0
+      ]
+    }
+  ],
+  "viewer": {
+    "default_layer": "occurrences_geoparquet",
+    "initial_bounds": [
+      -10.0,
+      35.0,
+      5.0,
+      60.0
+    ],
+    "display_fields": [
+      "scientific_name",
+      "class",
+      "event_year",
+      "source_record_id",
+      "quality_flags"
+    ],
+    "filter_fields": [
+      "scientific_name",
+      "kingdom",
+      "event_year",
+      "basis_of_record",
+      "iucn_red_list_category",
+      "quality_flags"
+    ]
+  },
+  "counts": {
+    "source_records": 7,
+    "accepted_records": 2,
+    "rejected_records": 5,
+    "occurrence_records": 2
+  }
+}
