@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from conftest import MINIMAL_OCCURRENCE_FIXTURE_DIR, REPOSITORY_ROOT
+from conftest import DWCA_FIXTURES_DIR, MINIMAL_OCCURRENCE_FIXTURE_DIR
 from dwca_cloud_geospatial.inspection import (
     DECIMAL_LATITUDE_TERM,
     DECIMAL_LONGITUDE_TERM,
@@ -14,12 +14,7 @@ from dwca_cloud_geospatial.occurrence import (
 VALID_FIXTURE_DIR = MINIMAL_OCCURRENCE_FIXTURE_DIR / "valid"
 MALFORMED_ROW_FIXTURE_DIR = MINIMAL_OCCURRENCE_FIXTURE_DIR / "malformed_row"
 MULTI_FILE_CORE_FIXTURE_DIR = MINIMAL_OCCURRENCE_FIXTURE_DIR / "multi_file_core"
-CHECKLIST_EXAMPLE_ZIP = (
-    REPOSITORY_ROOT
-    / "examples"
-    / "dwca"
-    / "dwca-reddatabookofukraine_plants-fungi-algae_checklist-v1.1.zip"
-)
+CHECKLIST_EXAMPLE_ZIP = DWCA_FIXTURES_DIR / "dwca-appendixiibernconventionua-v1.2.zip"
 
 
 def test_occurrence_rows_are_read_through_declared_field_terms() -> None:

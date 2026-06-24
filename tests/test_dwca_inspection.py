@@ -5,7 +5,7 @@ import zipfile
 
 import pytest
 
-from conftest import MINIMAL_OCCURRENCE_FIXTURE_DIR, REPOSITORY_ROOT
+from conftest import DWCA_FIXTURES_DIR, MINIMAL_OCCURRENCE_FIXTURE_DIR
 from dwca_cloud_geospatial.inspection import (
     DECIMAL_LATITUDE_TERM,
     DECIMAL_LONGITUDE_TERM,
@@ -17,7 +17,7 @@ from dwca_cloud_geospatial.inspection import (
 VALID_FIXTURE_DIR = MINIMAL_OCCURRENCE_FIXTURE_DIR / "valid"
 MISSING_META_FIXTURE_DIR = MINIMAL_OCCURRENCE_FIXTURE_DIR / "missing_meta"
 MALFORMED_META_FIXTURE_DIR = MINIMAL_OCCURRENCE_FIXTURE_DIR / "malformed_meta"
-EXAMPLE_ZIP = REPOSITORY_ROOT / "examples" / "dwca" / "0038004-260519110011954.zip"
+EXAMPLE_ZIP = DWCA_FIXTURES_DIR / "0038004-260519110011954.zip"
 
 
 def test_valid_unpacked_archive_inspection_parses_meta_xml() -> None:
