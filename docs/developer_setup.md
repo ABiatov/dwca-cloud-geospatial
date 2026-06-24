@@ -8,8 +8,7 @@ Use an explicit repository path in commands instead of relying on the current
 working directory:
 
 ```bash
-gh repo clone ABiatov/dwca-cloud-geospatial
-# or: git clone git@github.com:ABiatov/dwca-cloud-geospatial.git
+git clone https://github.com/ABiatov/dwca-cloud-geospatial.git
 cd dwca-cloud-geospatial
 export REPO="$(pwd)"
 ```
