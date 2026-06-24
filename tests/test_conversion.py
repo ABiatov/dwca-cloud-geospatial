@@ -274,6 +274,7 @@ def test_large_geoparquet_conversion_streams_chunks_and_rejected_report(
         "strategy": "grid",
         "threshold": None,
     }
+    assert processing["configuration"]["user"]["chunk_size"] == 2
     assert processing["counts"]["source_records"] == 7
     assert processing["counts"]["accepted_records"] == 2
     assert processing["counts"]["rejected_records"] == 5

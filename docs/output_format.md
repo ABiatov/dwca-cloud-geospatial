@@ -2,7 +2,7 @@
 
 Status: Accepted baseline for MVP
 
-Last updated: 2026-06-20
+Last updated: 2026-06-24
 
 ## Purpose
 
@@ -467,8 +467,10 @@ Geometry:
 
 Large-output behavior:
 
-- The implemented bounded-memory large-archive path applies to GeoParquet-only
-  conversions with `GeoParquetWriterOptions.large_output_mode=True`.
+- The implemented bounded-memory large-archive path applies to GeoParquet
+  output when `GeoParquetWriterOptions.large_output_mode=True` is selected.
+  When FlatGeobuf is also selected, the same accepted streaming handoff writes
+  the GeoPackage-staged FlatGeobuf artifact path.
 - Implemented large-archive pipeline shape:
   - streaming/chunked occurrence reader;
   - chunked normalization result handoff;
@@ -490,6 +492,9 @@ Large-output behavior:
 - Processing metadata must record whether covering bbox, spatial sorting or
   partitioned output was used, including the selected strategy, threshold or
   partition key when applicable.
+- Processing metadata records the conversion chunk size under
+  `metadata/processing.json.configuration.user.chunk_size` when conversion is
+  run through the core API, CLI or GUI option builders.
 
 Large-output processing configuration fields under
 `metadata/processing.json.configuration.geoparquet`:

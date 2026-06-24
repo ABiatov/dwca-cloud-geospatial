@@ -44,6 +44,19 @@ def test_parser_exposes_expected_subcommands() -> None:
     assert "COMMAND" in help_text
 
 
+def test_convert_help_documents_large_geoparquet_and_chunk_size(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit) as excinfo:
+        main(["convert", "--help"])
+
+    captured = capsys.readouterr()
+
+    assert excinfo.value.code == 0
+    assert "--geoparquet-large-output" in captured.out
+    assert "--chunk-size" in captured.out
+
+
 def test_convert_command_passes_gbif_citation_options_to_core(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -95,6 +108,150 @@ def test_convert_command_passes_gbif_citation_options_to_core(
     assert options.gbif.citation.startswith("GBIF.org (4 June 2026)")
     assert options.gbif.license == "CC_BY_NC_4_0"
     assert options.gbif.enrich is True
+
+
+def test_convert_command_passes_large_geoparquet_options_to_core(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    captured_options = {}
+
+    class DummyMetadataResult:
+        manifest_path = tmp_path / "bundle" / "manifest.json"
+
+    class DummyResult:
+        input_path = VALID_OCCURRENCE_FIXTURE_DIR
+        output_directory = tmp_path / "bundle"
+        output_formats = ("geoparquet",)
+        accepted_record_count = 1
+        rejected_record_count = 0
+        metadata_result = DummyMetadataResult()
+
+    def fake_convert(archive: str, output: str, *, options):
+        captured_options["archive"] = archive
+        captured_options["output"] = output
+        captured_options["options"] = options
+        return DummyResult()
+
+    monkeypatch.setattr(cli_module, "convert_dwca_archive", fake_convert)
+
+    exit_code = main(
+        [
+            "convert",
+            str(VALID_OCCURRENCE_FIXTURE_DIR),
+            str(tmp_path / "bundle"),
+            "--format",
+            "geoparquet",
+            "--geoparquet-large-output",
+            "--chunk-size",
+            "2",
+            "--overwrite",
+        ]
+    )
+
+    capsys.readouterr()
+    options = captured_options["options"]
+    assert exit_code == 0
+    assert options.output_formats == ("geoparquet",)
+    assert options.overwrite is True
+    assert options.geoparquet.large_output_mode is True
+    assert options.chunk_size == 2
+
+
+def test_convert_command_preserves_repeated_format_with_large_geoparquet(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    captured_options = {}
+
+    class DummyMetadataResult:
+        manifest_path = tmp_path / "bundle" / "manifest.json"
+
+    class DummyResult:
+        input_path = VALID_OCCURRENCE_FIXTURE_DIR
+        output_directory = tmp_path / "bundle"
+        output_formats = ("flatgeobuf", "geoparquet")
+        accepted_record_count = 1
+        rejected_record_count = 0
+        metadata_result = DummyMetadataResult()
+
+    def fake_convert(archive: str, output: str, *, options):
+        captured_options["options"] = options
+        return DummyResult()
+
+    monkeypatch.setattr(cli_module, "convert_dwca_archive", fake_convert)
+
+    exit_code = main(
+        [
+            "convert",
+            str(VALID_OCCURRENCE_FIXTURE_DIR),
+            str(tmp_path / "bundle"),
+            "--format",
+            "flatgeobuf",
+            "--format",
+            "geoparquet",
+            "--geoparquet-large-output",
+        ]
+    )
+
+    capsys.readouterr()
+    options = captured_options["options"]
+    assert exit_code == 0
+    assert options.output_formats == ("flatgeobuf", "geoparquet")
+    assert options.geoparquet.large_output_mode is True
+    assert options.chunk_size == 10_000
+
+
+@pytest.mark.parametrize("chunk_size", ["0", "-1", "abc"])
+def test_convert_command_rejects_invalid_chunk_sizes(
+    chunk_size: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit) as excinfo:
+        main(
+            [
+                "convert",
+                str(VALID_OCCURRENCE_FIXTURE_DIR),
+                str(tmp_path / "bundle"),
+                "--chunk-size",
+                chunk_size,
+            ]
+        )
+
+    captured = capsys.readouterr()
+
+    assert excinfo.value.code == 2
+    assert "chunk size must be a positive integer" in captured.err
+
+
+def test_convert_command_rejects_large_geoparquet_without_geoparquet_format(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError("conversion should not start")
+
+    monkeypatch.setattr(cli_module, "convert_dwca_archive", fail_if_called)
+
+    with pytest.raises(SystemExit) as excinfo:
+        main(
+            [
+                "convert",
+                str(VALID_OCCURRENCE_FIXTURE_DIR),
+                str(tmp_path / "bundle"),
+                "--geoparquet-large-output",
+            ]
+        )
+
+    captured = capsys.readouterr()
+
+    assert excinfo.value.code == 2
+    assert "requires GeoParquet output" in captured.err
+    assert "--format geoparquet" in captured.err
 
 
 def test_inspect_command_reports_archive_structure(capsys: pytest.CaptureFixture[str]) -> None:
@@ -204,6 +361,69 @@ def test_convert_command_overwrite_replaces_existing_output(
     assert (output / "manifest.json").exists()
     assert (output / "index.html").exists()
     assert (output / "data" / "occurrences.parquet").exists()
+
+
+def test_convert_command_writes_large_geoparquet_with_chunk_size(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    pa = pytest.importorskip("pyarrow")
+    pq = pytest.importorskip("pyarrow.parquet")
+    output = tmp_path / "bundle"
+
+    exit_code = main(
+        [
+            "convert",
+            str(NORMALIZATION_FIXTURE_DIR),
+            str(output),
+            "--format",
+            "geoparquet",
+            "--geoparquet-large-output",
+            "--chunk-size",
+            "2",
+            "--overwrite",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    processing = json.loads(
+        (output / "metadata" / "processing.json").read_text(encoding="utf-8")
+    )
+    parquet_file = pq.ParquetFile(output / "data" / "occurrences.parquet")
+    table = parquet_file.read()
+    geo_metadata = json.loads(
+        parquet_file.metadata.metadata[b"geo"].decode("utf-8")
+    )
+
+    assert exit_code == 0
+    assert "Formats: geoparquet" in captured.out
+    assert processing["configuration"]["geoparquet"]["large_output_mode"] is True
+    assert processing["configuration"]["geoparquet"]["covering_bbox_column"] == {
+        "enabled": True,
+        "strategy": "point_bbox_struct",
+        "threshold": None,
+    }
+    assert processing["configuration"]["geoparquet"]["spatial_sorting"] == {
+        "enabled": True,
+        "strategy": "grid",
+        "threshold": None,
+    }
+    assert processing["configuration"]["user"]["chunk_size"] == 2
+    assert processing["counts"]["accepted_records"] == 2
+    assert table.schema.field("bbox").type == pa.struct(
+        [
+            pa.field("xmin", pa.float64(), nullable=False),
+            pa.field("ymin", pa.float64(), nullable=False),
+            pa.field("xmax", pa.float64(), nullable=False),
+            pa.field("ymax", pa.float64(), nullable=False),
+        ]
+    )
+    assert geo_metadata["columns"]["geometry"]["covering"]["bbox"] == {
+        "xmin": ["bbox", "xmin"],
+        "ymin": ["bbox", "ymin"],
+        "xmax": ["bbox", "xmax"],
+        "ymax": ["bbox", "ymax"],
+    }
 
 
 def test_validate_command_reports_structured_results(

@@ -2,7 +2,7 @@
 
 Status: Public prototype overview
 
-Last updated: 2026-06-21
+Last updated: 2026-06-24
 
 ## What It Is
 
@@ -329,7 +329,10 @@ GBIF.org (4 June 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.3xbk
 The demo conversion passes the GBIF download key
 `0038004-260519110011954`, DOI `10.15468/dl.3xbk5b`, citation text and
 license `CC_BY_NC_4_0` explicitly so they are preserved in generated bundle
-metadata. If you use the "--gbif-enrich" flag, these parameters will be automatically downloaded from the GBIF portal.
+metadata. If you use the `--gbif-enrich` flag, the converter performs a
+read-only GBIF occurrence download metadata lookup when a download key is
+supplied or inferred; it does not create downloads or perform occurrence
+search.
 
 Viewer screenshot:
 

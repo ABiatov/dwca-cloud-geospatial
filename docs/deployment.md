@@ -2,7 +2,7 @@
 
 Status: Accepted MVP static hosting workflow
 
-Last updated: 2026-06-20
+Last updated: 2026-06-24
 
 ## Purpose
 
@@ -102,10 +102,12 @@ inventory pages with the accepted no-map-layer message:
 No FlatGeobuf map layer is available for this bundle. To display occurrence points on the map, generate the bundle with the FlatGeobuf output format selected.
 ```
 
-GeoParquet large-output mode is also GeoParquet-only MVP behavior. It uses
-chunked parser/normalizer/writer handoff, writes a `bbox` covering column and
-records spatial sorting configuration in processing metadata. Browser
-GeoParquet loading and partitioned GeoParquet datasets are deferred.
+GeoParquet large-output mode is GeoParquet-specific MVP behavior. It can be
+enabled for GeoParquet-only bundles or for the GeoParquet output in a
+multi-format bundle. It uses chunked parser/normalizer/writer handoff, writes
+a `bbox` covering column and records spatial sorting configuration in
+processing metadata. Browser GeoParquet loading and partitioned GeoParquet
+datasets are deferred.
 
 ## Static Hosting Requirements
 
