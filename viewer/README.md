@@ -16,8 +16,7 @@ Create a bundle with the documented converter workflow, then serve a directory
 that contains both `viewer/` and the bundle:
 
 ```bash
-gh repo clone ABiatov/dwca-cloud-geospatial
-# or: git clone git@github.com:ABiatov/dwca-cloud-geospatial.git
+git clone https://github.com/ABiatov/dwca-cloud-geospatial.git
 cd dwca-cloud-geospatial
 export REPO="$(pwd)"
 python -m venv "${REPO}/.venv"
