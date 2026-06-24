@@ -28,7 +28,9 @@ docs/knowledge_base/
 test_dwca/
 TODO/
 # data/
-examples/
+examples/*
+!examples/
+!examples/DWCA-Cloud-Geospatial_Demo_Notebook.ipynb
 session_logs/
 scratch/
 *.log
