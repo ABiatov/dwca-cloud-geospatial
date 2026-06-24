@@ -53,9 +53,9 @@ Default conversion writes indexed FlatGeobuf at `data/occurrences.fgb`.
 FlatGeobuf generation now uses a bounded parser/normalizer handoff into a
 persistent GeoPackage staging artifact at `data/occurrences.gpkg`, then asks
 Pyogrio/GDAL to create the indexed FlatGeobuf with `SPATIAL_INDEX=YES`.
-Explicit GeoParquet conversion can also run in a core-API large-output mode
-that streams occurrence batches, writes a GeoParquet `bbox` covering column
-and applies bounded grid spatial ordering.
+Explicit GeoParquet conversion can also run in large-output mode through the
+CLI, GUI or core API. That mode streams occurrence batches, writes a
+GeoParquet `bbox` covering column and applies bounded grid spatial ordering.
 
 The accepted MVP development plan is documented in [docs/development_plan.md](docs/development_plan.md).
 The public project overview is documented in

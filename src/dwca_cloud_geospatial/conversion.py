@@ -704,6 +704,7 @@ def _bundle_options(
 ) -> BundleWriterOptions:
     configuration: dict[str, Any] = {
         "formats": list(output_formats),
+        "chunk_size": conversion_options.chunk_size,
         "gbif": {
             "download_key": conversion_options.gbif.download_key,
             "doi": conversion_options.gbif.doi,

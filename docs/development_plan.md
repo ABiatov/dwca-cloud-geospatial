@@ -2,7 +2,7 @@
 
 Status: Accepted MVP plan
 
-Last updated: 2026-06-20
+Last updated: 2026-06-24
 
 ## Purpose
 
@@ -70,13 +70,18 @@ The MVP excludes:
   `dwca_cloud_geospatial.conversion.convert_dwca_archive`, configured with
   `ConversionOptions` and returning `ConversionResult`. Conversion failures
   use `ConversionError` with actionable messages and parser diagnostics when
-  available. CLI and future GUI code should call this API rather than
+  available. CLI and GUI code should call this API rather than
   duplicating parser, normalization, writer, manifest or rejected-report
   logic.
 - MVP conversion CLI: default FlatGeobuf conversion is
   `dwca-cloud-geospatial convert <archive> <output>`. Explicit GeoParquet is
   selected with `--format geoparquet`, both formats are selected by repeating
-  `--format`, and existing output paths require `--overwrite`.
+  `--format`, and existing output paths require `--overwrite`. GeoParquet
+  large-output mode is selected explicitly with
+  `--geoparquet-large-output`, requires `--format geoparquet`, and does not
+  silently add GeoParquet output. The streaming conversion chunk size can be
+  configured with `--chunk-size <positive-int>`; omitting it preserves the
+  core API default `ConversionOptions.chunk_size` of `10_000`.
 - MVP CLI framework: use the Python standard library `argparse` for the MVP CLI. Command handlers should remain thin wrappers around core functions and structured configuration/result objects. Do not add Click or Typer unless the CLI grows enough that `argparse` becomes burdensome to maintain.
 - MVP inspect command: include `inspect <archive>` in the MVP CLI as a lightweight archive/schema inspection command. It should parse DwC-A structure through `meta.xml`, report core/extension files, row types, declared fields, coordinate field presence and parser warnings. It must not perform full occurrence normalization, geospatial conversion or output bundle writing. Full data-quality validation remains part of conversion and `validate <output-dir>`. Human-readable text output is sufficient for MVP; `--json` is useful but optional.
 - Checklist/Taxon DwC-A handling: valid checklist archives with a `Taxon` core

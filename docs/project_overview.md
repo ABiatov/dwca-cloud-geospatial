@@ -2,7 +2,7 @@
 
 Status: Public prototype overview
 
-Last updated: 2026-06-21
+Last updated: 2026-06-24
 
 ## What It Is
 
@@ -307,10 +307,32 @@ GUI screenshot:
 ## Demo And Supporting Materials
 
 - YouTube video: TODO: add YouTube URL here.
-- Medium post: TODO: add Medium.com URL here.
+- Medium post:
+  [How to Convert and Stream Biodiversity Data with FlatGeobuf, GeoParquet, and Zero Infrastructure](https://medium.com/@anton.biatov/how-to-convert-and-stream-biodiversity-data-with-flatgeobuf-geoparquet-and-zero-infrastructure-de303715c160).
+- Google Colab demo notebook:
+  [examples/DWCA-Cloud-Geospatial_Demo_Notebook.ipynb](../examples/DWCA-Cloud-Geospatial_Demo_Notebook.ipynb).
+  Open in Colab:
+  [DWCA-Cloud-Geospatial Demo Notebook](https://colab.research.google.com/drive/1qc0yYgmtGMnOcQNpvY4HevhBzHibf6eb?usp=sharing).
+  The notebook installs the converter in Colab, downloads the GBIF demo
+  DwC-A archive, runs `inspect`, `convert` and `validate`, and downloads the
+  generated FlatGeobuf, GeoPackage, GeoParquet and complete static bundle.
 - Source repository: [ABiatov/dwca-cloud-geospatial](https://github.com/ABiatov/dwca-cloud-geospatial)
 - Demo screenshots: see the GUI and static viewer screenshots below.
 - Demo bundle: generated locally from the dataset described in [demo/README.md](../demo/README.md).
+
+Dataset citation for the Colab and demo bundle:
+
+```text
+GBIF.org (4 June 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.3xbk5b
+```
+
+The demo conversion passes the GBIF download key
+`0038004-260519110011954`, DOI `10.15468/dl.3xbk5b`, citation text and
+license `CC_BY_NC_4_0` explicitly so they are preserved in generated bundle
+metadata. If you use the `--gbif-enrich` flag, the converter performs a
+read-only GBIF occurrence download metadata lookup when a download key is
+supplied or inferred; it does not create downloads or perform occurrence
+search.
 
 Viewer screenshot:
 

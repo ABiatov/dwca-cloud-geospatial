@@ -2,7 +2,7 @@
 
 Status: Accepted MVP behavior
 
-Last updated: 2026-06-19
+Last updated: 2026-06-24
 
 ## Purpose
 
@@ -94,9 +94,10 @@ Opening `index.html` from a static HTTP server reads the neighboring
 confused with the source `viewer/README.md`.
 
 Large GeoParquet output is enabled through `GeoParquetWriterOptions` on the
-core API. It keeps the CLI default unchanged and writes single-file
-GeoParquet with a `bbox` covering column, grid-based spatial ordering,
-streamed rejected reports and bounded count/warning aggregation:
+core API and through explicit CLI flags. It keeps the default conversion
+behavior unchanged and writes single-file GeoParquet with a `bbox` covering
+column, grid-based spatial ordering, streamed rejected reports and bounded
+count/warning aggregation:
 
 ```python
 from dwca_cloud_geospatial.geoparquet import GeoParquetWriterOptions
@@ -174,11 +175,53 @@ Convert with explicit GeoParquet output:
 dwca-cloud-geospatial convert /path/to/archive.zip /path/to/output-bundle --format geoparquet
 ```
 
+This writes the normal non-large GeoParquet output. Large-output mode is a
+separate GeoParquet-specific option:
+
+```bash
+dwca-cloud-geospatial convert /path/to/archive.zip /path/to/output-bundle \
+  --format geoparquet \
+  --geoparquet-large-output \
+  --chunk-size 10000
+```
+
+`--geoparquet-large-output` maps to:
+
+```python
+ConversionOptions(
+    output_formats=("geoparquet",),
+    geoparquet=GeoParquetWriterOptions(large_output_mode=True),
+    chunk_size=10_000,
+)
+```
+
+`--chunk-size` controls the number of source occurrence rows handed through
+each streaming parser/normalizer chunk. It must be a positive integer. When
+omitted, conversion uses the core API default `ConversionOptions.chunk_size`
+of `10_000`. Passing `--geoparquet-large-output` without selecting
+GeoParquet output fails before conversion starts; add `--format geoparquet`
+instead of expecting the CLI to silently add a new output.
+
 Convert with both FlatGeobuf and GeoParquet:
 
 ```bash
 dwca-cloud-geospatial convert /path/to/archive.zip /path/to/output-bundle --format flatgeobuf --format geoparquet
 ```
+
+Large-output GeoParquet can also be enabled when both outputs are selected:
+
+```bash
+dwca-cloud-geospatial convert /path/to/archive.zip /path/to/output-bundle \
+  --format flatgeobuf \
+  --format geoparquet \
+  --geoparquet-large-output \
+  --chunk-size 10000
+```
+
+This remains GeoParquet-oriented behavior. FlatGeobuf output keeps its
+GeoPackage-staged indexed writer path, while GeoParquet receives the bbox
+covering column and grid spatial sorting declarations. Partitioned
+GeoParquet output remains deferred and is not exposed as a CLI option.
 
 Convert with manually supplied GBIF occurrence download citation metadata and
 no network access:

@@ -8,12 +8,14 @@ import sys
 
 from dwca_cloud_geospatial import __version__
 from dwca_cloud_geospatial.conversion import (
+    GEOPARQUET_FORMAT,
     SUPPORTED_OUTPUT_FORMATS,
     ConversionError,
     ConversionOptions,
     convert_dwca_archive,
 )
 from dwca_cloud_geospatial.gbif import GbifDownloadOptions
+from dwca_cloud_geospatial.geoparquet import GeoParquetWriterOptions
 from dwca_cloud_geospatial.inspection import (
     DECIMAL_LATITUDE_TERM,
     DECIMAL_LONGITUDE_TERM,
@@ -97,6 +99,23 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     convert_parser.add_argument(
+        "--geoparquet-large-output",
+        action="store_true",
+        help=(
+            "Enable GeoParquet large-output mode for selected GeoParquet output "
+            "(bbox covering column and grid spatial sorting). Requires "
+            "--format geoparquet."
+        ),
+    )
+    convert_parser.add_argument(
+        "--chunk-size",
+        type=_positive_int,
+        help=(
+            "Positive number of source occurrence rows to process per streaming "
+            "conversion chunk. Defaults to the core API default of 10000."
+        ),
+    )
+    convert_parser.add_argument(
         "--gbif-download-key",
         help=(
             "Explicit GBIF occurrence download key for source provenance. "
@@ -123,7 +142,7 @@ def build_parser() -> argparse.ArgumentParser:
             "Ordinary conversion performs no GBIF network access."
         ),
     )
-    convert_parser.set_defaults(handler=_convert_archive)
+    convert_parser.set_defaults(handler=_convert_archive, parser=convert_parser)
 
     validate_parser = subparsers.add_parser(
         "validate",
@@ -164,21 +183,12 @@ def _inspect_archive(args: argparse.Namespace) -> int:
 
 
 def _convert_archive(args: argparse.Namespace) -> int:
+    _validate_convert_args(args)
     try:
         result = convert_dwca_archive(
             args.archive,
             args.output,
-            options=ConversionOptions(
-                output_formats=tuple(args.formats or ()),
-                overwrite=args.overwrite,
-                gbif=GbifDownloadOptions(
-                    download_key=args.gbif_download_key,
-                    doi=args.gbif_doi,
-                    citation=args.gbif_citation,
-                    license=args.gbif_license,
-                    enrich=args.gbif_enrich,
-                ),
-            ),
+            options=_conversion_options_from_args(args),
         )
     except ConversionError as exc:
         print(f"Conversion failed: {exc.message}", file=sys.stderr)
@@ -197,6 +207,48 @@ def _convert_archive(args: argparse.Namespace) -> int:
     print(f"Manifest: {result.metadata_result.manifest_path}")
     print(f"Viewer: {result.output_directory / 'index.html'}")
     return 0
+
+
+def _positive_int(value: str) -> int:
+    try:
+        parsed = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(
+            "chunk size must be a positive integer."
+        ) from exc
+    if parsed <= 0:
+        raise argparse.ArgumentTypeError("chunk size must be a positive integer.")
+    return parsed
+
+
+def _validate_convert_args(args: argparse.Namespace) -> None:
+    if args.geoparquet_large_output and GEOPARQUET_FORMAT not in tuple(
+        args.formats or ()
+    ):
+        args.parser.error(
+            "GeoParquet large-output mode requires GeoParquet output; "
+            "pass --format geoparquet."
+        )
+
+
+def _conversion_options_from_args(args: argparse.Namespace) -> ConversionOptions:
+    options: dict[str, object] = {
+        "output_formats": tuple(args.formats or ()),
+        "overwrite": args.overwrite,
+        "geoparquet": GeoParquetWriterOptions(
+            large_output_mode=args.geoparquet_large_output,
+        ),
+        "gbif": GbifDownloadOptions(
+            download_key=args.gbif_download_key,
+            doi=args.gbif_doi,
+            citation=args.gbif_citation,
+            license=args.gbif_license,
+            enrich=args.gbif_enrich,
+        ),
+    }
+    if args.chunk_size is not None:
+        options["chunk_size"] = args.chunk_size
+    return ConversionOptions(**options)
 
 
 def _validate_bundle(args: argparse.Namespace) -> int:
