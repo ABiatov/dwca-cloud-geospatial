@@ -116,15 +116,13 @@ core. These archives are valid inputs for `inspect`, but they are not valid
 inputs for the MVP occurrence geospatial conversion workflow unless a future
 feature adds checklist/taxon-specific processing.
 
-Current local checklist examples:
+Current local checklist test fixture:
 
-- `examples/dwca/dwca-reddatabookofukraine_plants-fungi-algae_checklist-v1.1.zip`
-- `examples/dwca/dwca-appendixiibernconventionua-v1.2.zip`
-- `examples/dwca/dwca-kharkivredliastua-v1.0.zip`
+- `tests/fixtures/dwca/dwca-appendixiibernconventionua-v1.2.zip`
 
-All three inspect successfully with `dwca-cloud-geospatial inspect --json`.
-They declare `http://rs.tdwg.org/dwc/terms/Taxon` cores, have no occurrence
-core and do not declare `decimalLatitude` or `decimalLongitude` terms.
+It inspects successfully with `dwca-cloud-geospatial inspect --json`. It
+declares a `http://rs.tdwg.org/dwc/terms/Taxon` core, has no occurrence core
+and does not declare `decimalLatitude` or `decimalLongitude` terms.
 
 The occurrence row reader fails fast for these archives with the
 `missing_occurrence_core` parser diagnostic. The Prompt 10 core conversion

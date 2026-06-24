@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from conftest import MINIMAL_OCCURRENCE_FIXTURE_DIR, REPOSITORY_ROOT
+from conftest import DWCA_FIXTURES_DIR, MINIMAL_OCCURRENCE_FIXTURE_DIR
 from dwca_cloud_geospatial.bundle import MANIFEST_RELATIVE_PATH
 from dwca_cloud_geospatial.conversion import (
     ConversionError,
@@ -28,12 +28,7 @@ from dwca_cloud_geospatial.validation import validate_output_bundle
 VALID_OCCURRENCE_FIXTURE_DIR = MINIMAL_OCCURRENCE_FIXTURE_DIR / "valid"
 NORMALIZATION_FIXTURE_DIR = MINIMAL_OCCURRENCE_FIXTURE_DIR / "normalization"
 CHECKLIST_FIXTURES = (
-    REPOSITORY_ROOT
-    / "examples"
-    / "dwca"
-    / "dwca-reddatabookofukraine_plants-fungi-algae_checklist-v1.1.zip",
-    REPOSITORY_ROOT / "examples" / "dwca" / "dwca-appendixiibernconventionua-v1.2.zip",
-    REPOSITORY_ROOT / "examples" / "dwca" / "dwca-kharkivredliastua-v1.0.zip",
+    DWCA_FIXTURES_DIR / "dwca-appendixiibernconventionua-v1.2.zip",
 )
 
 

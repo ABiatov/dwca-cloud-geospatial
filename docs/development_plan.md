@@ -419,7 +419,7 @@ Deliverables:
 
 Acceptance criteria:
 
-- The parser reads the local sample DwC-A archives in `examples/dwca/`.
+- The parser reads local DwC-A fixtures from `tests/fixtures/dwca/`.
 - Checklist/Taxon-core archives are inspectable but rejected by occurrence row
   reading with actionable non-occurrence diagnostics.
 - Field access is based on declared DwC-A terms instead of hard-coded column positions.

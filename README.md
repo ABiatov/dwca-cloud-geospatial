@@ -85,16 +85,38 @@ export REPO="$(pwd)"
 python -m venv "${REPO}/.venv"
 source "${REPO}/.venv/bin/activate"
 python -m pip install --upgrade pip
-python -m pip install -e "${REPO}[dev]"
-python -m pytest "${REPO}/tests"
-dwca-cloud-geospatial --help
+python -m pip install -e "${REPO}[dev,flatgeobuf,validation]"
 ```
 
-Default FlatGeobuf conversion requires the optional writer dependencies,
-including Pyogrio/GDAL support for both `GPKG` and `FlatGeobuf`:
+### Run The GUI
+
+After installation, start the desktop GUI with:
 
 ```bash
-python -m pip install -e "${REPO}[dev,flatgeobuf]"
+dwca-cloud-geospatial-gui
+```
+
+If the console script is not on `PATH`, run it through the local virtual
+environment:
+
+```bash
+"${REPO}/.venv/bin/dwca-cloud-geospatial-gui"
+```
+
+The GUI calls the same conversion and validation APIs as the CLI. For
+repeatable command-line usage, see the CLI examples in
+[docs/project_overview.md#use-the-cli](docs/project_overview.md#use-the-cli)
+and [docs/converter.md](docs/converter.md). For Python usage, see the Python
+API example in
+[docs/project_overview.md#use-the-python-api](docs/project_overview.md#use-the-python-api).
+
+### Verify The Install
+
+Run the test suite and print the CLI help:
+
+```bash
+python -m pytest "${REPO}/tests"
+dwca-cloud-geospatial --help
 ```
 
 The Python import package is `dwca_cloud_geospatial`; the console command is
@@ -104,15 +126,20 @@ generated bundle structure and geospatial outputs.
 
 `convert` copies the minimal static viewer into each output bundle as
 `index.html`, `styles.css`, `app.js` and `README.md`. After generating a
-bundle, serve the repository or output parent as static files:
+bundle, serve the repository or output parent as static files.
+
+To view a demo of the conversion result, you can run a local server:
 
 ```bash
 python -m http.server 8000 --directory "${REPO}"
 ```
+And then open this address in a web browser:
 
 ```text
-http://localhost:8000/scratch/sample-bundle/index.html
+http://localhost:8000/demo/output/index.html
 ```
+
+👉 Watch the live demo of the viewer on GitHub Pages: <https://abiatov.github.io/dwca-cloud-geospatial/demo/output/index.html>
 
 More setup details are documented in [docs/developer_setup.md](docs/developer_setup.md).
 Converter usage is documented in [docs/converter.md](docs/converter.md).
@@ -120,9 +147,6 @@ Demo dataset download instructions are documented in
 [demo/README.md](demo/README.md).
 Static hosting and demo review steps are documented in
 [docs/deployment.md](docs/deployment.md).
-For non-CLI users, a primitive Tkinter entry point is available as
-`dwca-cloud-geospatial-gui`; it calls the same core conversion and validation
-APIs as the CLI.
 
 GBIF occurrence download DOI/citation/license provenance can be supplied manually or
 resolved through explicit conversion-time enrichment. CLI and core conversion
@@ -154,6 +178,36 @@ backend.
 Biodiversity datasets are often published in Darwin Core Archive format, which is excellent for data exchange but not always convenient for direct web mapping, static hosting or browser-based exploration.
 
 This project explores a lightweight path from biodiversity data archives to portable geospatial files that can be hosted cheaply, reused by other tools and inspected without running a geospatial server.
+
+## Demo And Supporting Materials
+
+- YouTube video: TODO: add YouTube URL here.
+- Medium post:
+  [How to Convert and Stream Biodiversity Data with FlatGeobuf, GeoParquet, and Zero Infrastructure](https://medium.com/@anton.biatov/how-to-convert-and-stream-biodiversity-data-with-flatgeobuf-geoparquet-and-zero-infrastructure-de303715c160).
+- Google Colab demo notebook:
+  [examples/DWCA-Cloud-Geospatial_Demo_Notebook.ipynb](examples/DWCA-Cloud-Geospatial_Demo_Notebook.ipynb).
+  Open in Colab:
+  [DWCA-Cloud-Geospatial Demo Notebook](https://colab.research.google.com/drive/1qc0yYgmtGMnOcQNpvY4HevhBzHibf6eb?usp=sharing).
+  The notebook installs the converter in Colab, downloads the GBIF demo
+  DwC-A archive, runs `inspect`, `convert` and `validate`, and downloads the
+  generated FlatGeobuf, GeoPackage, GeoParquet and complete static bundle.
+- Source repository: [ABiatov/dwca-cloud-geospatial](https://github.com/ABiatov/dwca-cloud-geospatial)
+- Demo screenshots: see the GUI and static viewer screenshots above.
+- Demo bundle: generated locally from the dataset described in [demo/README.md](demo/README.md).
+
+Dataset citation for the Colab and demo bundle:
+
+```text
+GBIF.org (4 June 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.3xbk5b
+```
+
+The demo conversion passes the GBIF download key
+`0038004-260519110011954`, DOI `10.15468/dl.3xbk5b`, citation text and
+license `CC_BY_NC_4_0` explicitly so they are preserved in generated bundle
+metadata. If you use the `--gbif-enrich` flag, the converter performs a
+read-only GBIF occurrence download metadata lookup when a download key is
+supplied or inferred; it does not create downloads or perform occurrence
+search.
 
 ## Related Roadmap
 

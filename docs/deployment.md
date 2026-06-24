@@ -135,7 +135,7 @@ not MVP geospatial conversion inputs. Use:
 
 ```bash
 "${REPO}/.venv/bin/dwca-cloud-geospatial" inspect --json \
-  "${REPO}/examples/dwca/dwca-reddatabookofukraine_plants-fungi-algae_checklist-v1.1.zip"
+  "${REPO}/tests/fixtures/dwca/dwca-appendixiibernconventionua-v1.2.zip"
 ```
 
 Conversion fails with an actionable non-occurrence error when no Occurrence
