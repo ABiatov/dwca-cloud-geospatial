@@ -180,7 +180,8 @@ This project explores a lightweight path from biodiversity data archives to port
 
 ## Demo And Supporting Materials
 
-- YouTube video: TODO: add YouTube URL here.
+- YouTube video:
+  [How to Convert GBIF Darwin Core Archives into Cloud-Native Geospatial Data (FlatGeobuf & GeoParquet)](https://youtu.be/ixLtxP824Og).
 - Medium post:
   [How to Convert and Stream Biodiversity Data with FlatGeobuf, GeoParquet, and Zero Infrastructure](https://medium.com/@anton.biatov/how-to-convert-and-stream-biodiversity-data-with-flatgeobuf-geoparquet-and-zero-infrastructure-de303715c160).
 - Google Colab demo notebook:
