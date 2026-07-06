@@ -6,7 +6,7 @@
     "rejected_records": 0,
     "source_records": 1168
   },
-  "created_at": "2026-06-21T19:28:34Z",
+  "created_at": "2026-07-06T14:42:42Z",
   "files": [
     {
       "bytes": 120578,
@@ -17,20 +17,20 @@
       "sha256": "34f4991f920dc01dad9dc9a1323113f01118288a8649893125ee68a387478a59"
     },
     {
-      "bytes": 7378,
+      "bytes": 7419,
       "media_type": "application/json",
       "path": "metadata/processing.json",
       "record_count": null,
       "role": "metadata",
-      "sha256": "f898d862247d936ac3c12efafbab51c5e420663e0bd17e48de3e4043cb8bc0fd"
+      "sha256": "3848102f84f1462b6038a2cc4ecb48d9c78fd5a58fd43f3b6f9b36da2e451ecf"
     },
     {
-      "bytes": 80709,
+      "bytes": 84717,
       "media_type": "application/vnd.apache.parquet",
       "path": "data/occurrences.parquet",
       "record_count": 1168,
       "role": "geoparquet",
-      "sha256": "8d6f29f61fd3772f950f0fb35385df5100f6c4cfc3ab90b729ec267b6f65dfe1"
+      "sha256": "cc6a2d49eaa33e22a938212af947df9fd7aa819c4535590e0f9668c0989956f2"
     },
     {
       "bytes": 618496,
@@ -38,7 +38,7 @@
       "path": "data/occurrences.gpkg",
       "record_count": 1168,
       "role": "geopackage",
-      "sha256": "6a83a1c0f8789072de8146aa0235a9779e9c94622849699045092d658ef04c06"
+      "sha256": "fbc5c0a850117a10c7368c1949ef716b4140d0df2541a14fcb423337cb74fcf3"
     },
     {
       "bytes": 651192,
@@ -54,7 +54,7 @@
     "name": "dwca-cloud-geospatial",
     "version": "0.1.0"
   },
-  "id": "dwca-geo-570eb19ae1a5",
+  "id": "dwca-geo-1e38215a2a93",
   "layers": [
     {
       "bounds": [

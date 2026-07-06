@@ -85,7 +85,7 @@ def test_static_viewer_formats_artifact_link_labels() -> None:
     assert 'return "source.json (metadata)";' in script
     assert 'return "processing.json (metadata)";' in script
     assert 'path.startsWith("data/") ? path.slice("data/".length) : path' in script
-    assert "link.href = urlForBundlePath(entry.path).href" in script
+    assert "link.href = artifactUrl" in script
     assert "link.textContent = artifactLinkLabel(entry.path)" in script
     assert "link.textContent = entry.path" not in script
 

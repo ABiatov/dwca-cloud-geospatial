@@ -442,9 +442,41 @@
     for (const entry of files) {
       const item = document.createElement("article");
       item.className = "artifact";
+      const artifactUrl = urlForBundlePath(entry.path).href;
+      const row = document.createElement("div");
+      row.className = "artifact-row";
       const link = document.createElement("a");
-      link.href = urlForBundlePath(entry.path).href;
+      link.href = artifactUrl;
       link.textContent = artifactLinkLabel(entry.path);
+      const copyBtn = document.createElement("button");
+      copyBtn.type = "button";
+      copyBtn.className = "copy-url-btn";
+      copyBtn.title = "Copy URL";
+      copyBtn.setAttribute("aria-label", `Copy URL for ${artifactLinkLabel(entry.path)}`);
+      const copyImg = document.createElement("img");
+      copyImg.src = "assets/pic/pic-copy-32.png";
+      copyImg.alt = "";
+      copyImg.width = 16;
+      copyImg.height = 16;
+      copyBtn.append(copyImg);
+      copyBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        navigator.clipboard.writeText(artifactUrl).then(
+          () => {
+            copyBtn.classList.add("copied");
+            copyBtn.title = "Copied!";
+            setTimeout(() => {
+              copyBtn.classList.remove("copied");
+              copyBtn.title = "Copy URL";
+            }, 1500);
+          },
+          () => {
+            copyBtn.title = "Copy failed";
+            setTimeout(() => { copyBtn.title = "Copy URL"; }, 1500);
+          }
+        );
+      });
+      row.append(link, copyBtn);
       const description = document.createElement("p");
       description.textContent = [
         entry.role,
@@ -453,7 +485,7 @@
       ]
         .filter(Boolean)
         .join(" | ");
-      item.append(link, description);
+      item.append(row, description);
       container.append(item);
     }
   }
@@ -912,7 +944,7 @@
   }
 
   function renderRecordList() {
-    const list = byId("record-list");
+    const list = byId("sidebar-record-list");
     list.replaceChildren();
     const visible = state.filteredFeatures.slice(0, 250);
     for (const feature of visible) {
@@ -965,8 +997,81 @@
     }
   }
 
+  /* ---- Sidebar panel toggling ---- */
+
+  let activePanel = null;
+
+  function openPanel(panelName) {
+    if (activePanel === panelName) {
+      closePanel();
+      return;
+    }
+    closePanel();
+    activePanel = panelName;
+    const panel = document.getElementById(`panel-${panelName}`);
+    if (panel) {
+      panel.hidden = false;
+    }
+    document.querySelector(".viewer-shell").classList.add("panel-open");
+    updateActiveButton(panelName);
+    if (state.map) {
+      state.map.resize();
+    }
+  }
+
+  function closePanel() {
+    if (activePanel) {
+      const panel = document.getElementById(`panel-${activePanel}`);
+      if (panel) {
+        panel.hidden = true;
+      }
+      activePanel = null;
+    }
+    document.querySelector(".viewer-shell").classList.remove("panel-open");
+    updateActiveButton(null);
+    if (state.map) {
+      state.map.resize();
+    }
+  }
+
+  function updateActiveButton(panelName) {
+    for (const btn of document.querySelectorAll(".ctrl-btn")) {
+      btn.classList.toggle("active", btn.dataset.panel === panelName);
+    }
+  }
+
+  function initPanelToggles() {
+    for (const btn of document.querySelectorAll(".ctrl-btn")) {
+      btn.addEventListener("click", () => {
+        openPanel(btn.dataset.panel);
+      });
+    }
+  }
+
+  /* ---- Bottom panel toggling ---- */
+
+  function initBottomToggle() {
+    const bottomPanels = document.getElementById("bottom-panels");
+    const toggleBtn = document.getElementById("bottom-toggle");
+    if (!bottomPanels || !toggleBtn) {
+      return;
+    }
+    toggleBtn.addEventListener("click", () => {
+      bottomPanels.classList.toggle("collapsed");
+      const icon = toggleBtn.querySelector(".toggle-icon");
+      if (icon) {
+        icon.textContent = bottomPanels.classList.contains("collapsed") ? "▶" : "▼";
+      }
+      if (state.map) {
+        setTimeout(() => state.map.resize(), 260);
+      }
+    });
+  }
+
   async function boot() {
     try {
+      initPanelToggles();
+      initBottomToggle();
       const manifestUrl = manifestUrlFromLocation();
       state.bundleRoot = new URL(".", manifestUrl);
       state.manifest = await fetchJson(manifestUrl);

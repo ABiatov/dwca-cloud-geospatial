@@ -68,6 +68,7 @@ FLATGEOBUF_FORMAT = "flatgeobuf"
 GEOPARQUET_FORMAT = "geoparquet"
 SUPPORTED_OUTPUT_FORMATS = (FLATGEOBUF_FORMAT, GEOPARQUET_FORMAT)
 VIEWER_ASSET_FILENAMES = ("index.html", "styles.css", "app.js")
+VIEWER_ASSET_SUBDIRS = ("assets",)
 
 
 class ConversionError(RuntimeError):
@@ -589,6 +590,15 @@ def _copy_static_viewer(output_root: Path) -> None:
         if not source.is_file():
             raise ConversionError(f"Static viewer asset is missing: {source}")
         shutil.copy2(source, output_root / filename)
+
+    for subdir in VIEWER_ASSET_SUBDIRS:
+        source = viewer_source / subdir
+        if not source.is_dir():
+            raise ConversionError(f"Static viewer asset directory is missing: {source}")
+        dest = output_root / subdir
+        if dest.exists():
+            shutil.rmtree(dest)
+        shutil.copytree(source, dest)
 
 
 def _write_output_bundle_readme(output_root: Path) -> None:
