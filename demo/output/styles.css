@@ -484,6 +484,11 @@ button:focus-visible {
   padding: 16px;
 }
 
+#feature-details {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
 /* ---- Processing ---- */
 
 .processing-summary {
@@ -510,6 +515,83 @@ button:focus-visible {
   color: var(--danger);
 }
 
+/* ---- Point Info Popup ---- */
+
+.map-point-popup .maplibregl-popup-content {
+  padding: 10px 12px;
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  line-height: 1.4;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.map-point-popup .maplibregl-popup-close-button {
+  font-size: 18px;
+  color: var(--muted);
+  top: 4px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  border-radius: 50%;
+}
+
+.map-point-popup .maplibregl-popup-close-button:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.map-point-popup .maplibregl-popup-tip {
+  border-top-color: var(--surface);
+}
+
+.popup-title {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.popup-scroll {
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.popup-dl {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.popup-dl dt {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.popup-dl dd {
+  margin: 0 0 6px;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.popup-dl dd:last-child {
+  margin-bottom: 0;
+}
+
+.popup-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-style: italic;
+}
+
 /* ---- Responsive ---- */
 
 @media (max-width: 900px) {
@@ -523,5 +605,23 @@ button:focus-visible {
 
   .workspace {
     min-height: auto;
+  }
+
+  .map-point-popup {
+    max-width: 260px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .map-point-popup {
+    max-width: 220px !important;
+  }
+
+  .popup-dl dt {
+    font-size: 10px;
+  }
+
+  .popup-dl dd {
+    font-size: 12px;
   }
 }

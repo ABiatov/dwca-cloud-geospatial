@@ -38,11 +38,13 @@ def test_static_viewer_files_exist_and_reference_declared_browser_assets() -> No
     assert "\"Plantae\"" in script
     assert "occurrence-selected" in script
     assert "setFilter(\"occurrence-selected\"" in script
+    assert "showPointPopup" in script
     assert "https://www.gbif.org/occurrence/" in script
     assert "target = \"_blank\"" in script
     assert "live GBIF" not in index
     assert "live OBIS" not in index
     assert ".empty-state[hidden]" in styles
+    assert ".popup-scroll" in styles
     assert "display: none" in styles
     assert "http://localhost:8000/viewer/?bundle=../scratch/sample-bundle/" in readme
 
@@ -99,6 +101,7 @@ def test_static_viewer_renders_provenance_doi_links_safely() -> None:
     assert "addProvenanceDefinition(list, label, value)" in script
     assert "https://doi.org/${doi}" in script
     assert "doi\\.org\\/(10\\.\\d{4,9}\\/\\S+)" in script
+    assert "function escapeHTML" in script
     assert "innerHTML" not in script
 
 

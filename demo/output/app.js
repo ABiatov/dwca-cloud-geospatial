@@ -53,6 +53,7 @@
     processingMetadata: null,
     bundleRoot: null,
     map: null,
+    popup: null,
     allFeatures: [],
     filteredFeatures: [],
     selectedFeatureId: null,
@@ -668,6 +669,13 @@
         const feature = event.features && event.features[0];
         if (feature && feature.properties) {
           selectFeature(Number(feature.properties._viewerId));
+          showPointPopup(feature, event.lngLat);
+        }
+      });
+      map.on("click", (event) => {
+        const features = map.queryRenderedFeatures(event.point, { layers: ["occurrence-points"] });
+        if (!features.length) {
+          closePointPopup();
         }
       });
       if (bounds && bounds.length === 4) {
@@ -965,6 +973,73 @@
     updateSelectedFeatureLayer();
     renderRecordList();
     renderFeatureDetails();
+    closePointPopup();
+  }
+
+  const POPUP_FIELDS = null;  // now computed dynamically from manifest.viewer.display_fields + knownDetailFields
+
+  function popupFieldsForFeature(feature) {
+    const displayFields = (state.manifest && state.manifest.viewer && state.manifest.viewer.display_fields) || [];
+    const ordered = Array.from(new Set([...displayFields, ...knownDetailFields]));
+    return ordered.filter((field) =>
+      Object.prototype.hasOwnProperty.call(feature.properties || {}, field) &&
+      feature.properties[field] != null &&
+      feature.properties[field] !== ""
+    );
+  }
+
+  function buildPopupHTML(feature) {
+    const fields = popupFieldsForFeature(feature);
+    if (fields.length === 0) {
+      return '<h2 class="popup-title">Feature Details</h2><p class="popup-empty">No details available</p>';
+    }
+    const rows = fields.map((field) => {
+      let row = `<dt>${escapeHTML(fieldLabel(field))}</dt><dd>${escapeHTML(displayValue(feature.properties[field]))}</dd>`;
+      if (field === "source_record_id" && feature.properties[field]) {
+        const occurrenceUrl = `https://www.gbif.org/occurrence/${encodeURIComponent(feature.properties[field])}`;
+        row += `<dt>Source Record URL</dt><dd><a href="${escapeHTML(occurrenceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHTML(occurrenceUrl)}</a></dd>`;
+      }
+      return row;
+    });
+    return `<h2 class="popup-title">Feature Details</h2><div class="popup-scroll"><dl class="popup-dl">${rows.join("")}</dl></div>`;
+  }
+
+  function escapeHTML(text) {
+    return String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function showPointPopup(feature, lngLat) {
+    closePointPopup();
+    if (!state.map) {
+      return;
+    }
+    const popup = new window.maplibregl.Popup({
+      closeButton: true,
+      closeOnClick: false,
+      maxWidth: "320px",
+      className: "map-point-popup",
+      offset: 10,
+    })
+      .setLngLat(lngLat)
+      .setHTML(buildPopupHTML(feature))
+      .addTo(state.map);
+    state.popup = popup;
+    const scrollEl = popup.getElement().querySelector(".popup-scroll");
+    if (scrollEl) {
+      scrollEl.scrollTop = 0;
+    }
+  }
+
+  function closePointPopup() {
+    if (state.popup) {
+      state.popup.remove();
+      state.popup = null;
+    }
   }
 
   function renderFeatureDetails() {

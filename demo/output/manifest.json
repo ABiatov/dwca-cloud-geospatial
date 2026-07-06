@@ -6,7 +6,7 @@
     "rejected_records": 0,
     "source_records": 1168
   },
-  "created_at": "2026-07-06T14:42:42Z",
+  "created_at": "2026-07-06T16:49:18Z",
   "files": [
     {
       "bytes": 120578,
@@ -22,7 +22,7 @@
       "path": "metadata/processing.json",
       "record_count": null,
       "role": "metadata",
-      "sha256": "3848102f84f1462b6038a2cc4ecb48d9c78fd5a58fd43f3b6f9b36da2e451ecf"
+      "sha256": "8e0fa88499b5c589672bf4cd3d493483cd0ba453e7e69269c7b0c1017aea37ec"
     },
     {
       "bytes": 84717,
@@ -38,7 +38,7 @@
       "path": "data/occurrences.gpkg",
       "record_count": 1168,
       "role": "geopackage",
-      "sha256": "fbc5c0a850117a10c7368c1949ef716b4140d0df2541a14fcb423337cb74fcf3"
+      "sha256": "7925c5c80a8e32292077788289cbc2187015e0459393f3a75858ede61942c3ca"
     },
     {
       "bytes": 651192,
@@ -54,7 +54,7 @@
     "name": "dwca-cloud-geospatial",
     "version": "0.1.0"
   },
-  "id": "dwca-geo-1e38215a2a93",
+  "id": "dwca-geo-b6d5e8103b7d",
   "layers": [
     {
       "bounds": [
