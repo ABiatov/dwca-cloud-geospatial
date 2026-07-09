@@ -6,7 +6,7 @@
     "rejected_records": 0,
     "source_records": 1168
   },
-  "created_at": "2026-07-09T10:55:14Z",
+  "created_at": "2026-07-09T11:47:27Z",
   "files": [
     {
       "bytes": 120578,
@@ -22,7 +22,7 @@
       "path": "metadata/processing.json",
       "record_count": null,
       "role": "metadata",
-      "sha256": "6e0aab37754784670e7ee3d36a6b4a64a435ca5d872a6e5acf4bf15b8a360aba"
+      "sha256": "476303181d226afc08452fe237438f1d40a52d17f5ef6efc77c8e7bb87a0d390"
     },
     {
       "bytes": 84717,
@@ -38,7 +38,7 @@
       "path": "data/occurrences.gpkg",
       "record_count": 1168,
       "role": "geopackage",
-      "sha256": "beae7d1cb375c4f421a8d8d5c0d30e35057c1c54d904c24a8c6f31d0351c4b2d"
+      "sha256": "09083c33683ae451f1f5a4ab37c9060bcad4f03ecca0bc5f968cfa61c2c6b5cd"
     },
     {
       "bytes": 651192,
@@ -54,7 +54,7 @@
     "name": "dwca-cloud-geospatial",
     "version": "0.1.0"
   },
-  "id": "dwca-geo-257c484d1bc4",
+  "id": "dwca-geo-489a5f5ef75a",
   "layers": [
     {
       "bounds": [
@@ -153,7 +153,8 @@
       19.9975,
       -72.622907,
       20.083333
-    ]
+    ],
+    "map_title": "Custom map title, edit it in manifest.json"
   },
   "viewer_contract_version": "0.1.0"
 }

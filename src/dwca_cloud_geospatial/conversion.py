@@ -738,5 +738,6 @@ def _bundle_options(
         generator_name=conversion_options.bundle.generator_name,
         generator_version=conversion_options.bundle.generator_version,
         generator_commit=conversion_options.bundle.generator_commit,
+        viewer_map_title=conversion_options.bundle.viewer_map_title,
         configuration=configuration,
     )

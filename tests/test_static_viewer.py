@@ -40,6 +40,8 @@ def test_static_viewer_files_exist_and_reference_declared_browser_assets() -> No
     assert "maplibre-gl@4.7.1" in index
     assert "flatgeobuf@4.3.3" in index
     assert "app.js" in index
+    assert 'id="map-title-header"' in index
+    assert 'id="map-title"' in index
     assert "manifest.json" in script
     assert "metadata/source.json" in script
     assert "metadata/processing.json" in script
@@ -58,6 +60,10 @@ def test_static_viewer_files_exist_and_reference_declared_browser_assets() -> No
     assert "live GBIF" not in index
     assert "live OBIS" not in index
     assert ".empty-state[hidden]" in styles
+    assert ".map-title-header[hidden]" in styles
+    assert "grid-row: 1" in styles
+    assert "grid-row: 2" in styles
+    assert "grid-row: 3" in styles
     assert ".popup-scroll" in styles
     assert "display: none" in styles
     assert "http://localhost:8000/viewer/?bundle=../scratch/sample-bundle/" in readme
@@ -77,6 +83,28 @@ def test_static_viewer_implements_no_flatgeobuf_and_artifact_only_states() -> No
     assert "new Uint8Array(await response.arrayBuffer())" in script
     assert "flatgeobuf.deserialize(bytes)" in script
     assert "flatgeobuf.deserialize(url.href)" not in script
+
+
+def test_static_viewer_uses_manifest_viewer_map_title_for_conditional_header() -> None:
+    script = (VIEWER_DIR / "app.js").read_text(encoding="utf-8")
+
+    assert "function viewerMapTitle(manifest)" in script
+    assert "viewer.map_title" in script
+    assert "String(title).trim()" in script
+    assert "function renderMapTitleHeader" in script
+    assert 'byId("map-title-header")' in script
+    assert 'byId("map-title")' in script
+    assert "titleNode.textContent = title" in script
+    assert "header.hidden = !title" in script
+
+    helper_body = script[
+        script.index("function viewerMapTitle(manifest)") :
+        script.index("function renderMapTitleHeader")
+    ]
+    assert "manifest.title" not in helper_body
+    assert "source" not in helper_body
+    assert "dataset" not in helper_body
+    assert "layer" not in helper_body
 
 
 def test_static_viewer_orders_generated_file_links_for_review() -> None:

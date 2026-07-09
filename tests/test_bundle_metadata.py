@@ -10,6 +10,7 @@ from conftest import MINIMAL_OCCURRENCE_FIXTURE_DIR, OUTPUT_BUNDLE_FIXTURES_DIR
 import pytest
 
 from dwca_cloud_geospatial.bundle import (
+    DEFAULT_VIEWER_MAP_TITLE,
     PROCESSING_METADATA_RELATIVE_PATH,
     REJECTED_RECORDS_RELATIVE_PATH,
     SOURCE_METADATA_RELATIVE_PATH,
@@ -149,6 +150,7 @@ def test_flatgeobuf_only_default_bundle_omits_rejected_report_and_geoparquet(
     assert set(manifest["viewer"]["filter_fields"]).issubset(
         set(FLATGEOBUF_PROJECTION_COLUMNS)
     )
+    assert manifest["viewer"]["map_title"] == DEFAULT_VIEWER_MAP_TITLE
     assert "taxon_id" not in manifest["viewer"]["display_fields"]
 
     file_entries = {entry["path"]: entry for entry in manifest["files"]}
@@ -314,6 +316,49 @@ def test_explicit_geoparquet_bundle_inventory_and_rejected_report(
     assert len(rows) == 5
     assert rows[0]["reason_code"] == "missing_coordinates"
     assert rows[0]["source_data_row_number"] == "3"
+
+
+def test_bundle_metadata_writes_configured_viewer_map_title(
+    tmp_path: Path,
+) -> None:
+    read_result, normalization_result = _read_and_normalize(QUALITY_RULES_FIXTURE_DIR)
+
+    result = write_bundle_metadata(
+        output_directory=tmp_path,
+        occurrence_result=read_result,
+        normalization_result=normalization_result,
+        options=BundleWriterOptions(
+            bundle_id="test-viewer-title",
+            created_at="2026-07-09T12:00:00Z",
+            viewer_map_title="  Publisher map review title  ",
+        ),
+    )
+
+    manifest = _load_json(result.manifest_path)
+
+    assert manifest["viewer"]["map_title"] == "Publisher map review title"
+    assert manifest["title"] == "Quality rules fixture"
+
+
+def test_bundle_metadata_omits_blank_viewer_map_title(
+    tmp_path: Path,
+) -> None:
+    read_result, normalization_result = _read_and_normalize(QUALITY_RULES_FIXTURE_DIR)
+
+    result = write_bundle_metadata(
+        output_directory=tmp_path,
+        occurrence_result=read_result,
+        normalization_result=normalization_result,
+        options=BundleWriterOptions(
+            bundle_id="test-blank-viewer-title",
+            created_at="2026-07-09T12:00:00Z",
+            viewer_map_title="   ",
+        ),
+    )
+
+    manifest = _load_json(result.manifest_path)
+
+    assert "map_title" not in manifest["viewer"]
 
 
 def test_bundle_metadata_preserves_manual_gbif_download_citation(

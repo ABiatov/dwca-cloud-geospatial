@@ -83,6 +83,7 @@
       5.0,
       60.0
     ],
+    "map_title": "Custom publisher-facing map title",
     "display_fields": [
       "scientific_name",
       "class",
@@ -106,4 +107,3 @@
     "occurrence_records": 2
   }
 }
-

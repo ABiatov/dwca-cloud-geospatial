@@ -14,6 +14,7 @@ from dwca_cloud_geospatial.conversion import (
     ConversionOptions,
     convert_dwca_archive,
 )
+from dwca_cloud_geospatial.bundle import DEFAULT_VIEWER_MAP_TITLE, BundleWriterOptions
 from dwca_cloud_geospatial.gbif import GbifDownloadOptions
 from dwca_cloud_geospatial.geoparquet import GeoParquetWriterOptions
 from dwca_cloud_geospatial.inspection import (
@@ -113,6 +114,14 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "Positive number of source occurrence rows to process per streaming "
             "conversion chunk. Defaults to the core API default of 10000."
+        ),
+    )
+    convert_parser.add_argument(
+        "--viewer-map-title",
+        default=DEFAULT_VIEWER_MAP_TITLE,
+        help=(
+            "Viewer-facing map header title written to manifest.viewer.map_title. "
+            "Blank or whitespace-only values are treated as absent by the viewer."
         ),
     )
     convert_parser.add_argument(
@@ -238,6 +247,7 @@ def _conversion_options_from_args(args: argparse.Namespace) -> ConversionOptions
         "geoparquet": GeoParquetWriterOptions(
             large_output_mode=args.geoparquet_large_output,
         ),
+        "bundle": BundleWriterOptions(viewer_map_title=args.viewer_map_title),
         "gbif": GbifDownloadOptions(
             download_key=args.gbif_download_key,
             doi=args.gbif_doi,

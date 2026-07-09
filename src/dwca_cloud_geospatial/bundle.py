@@ -37,6 +37,7 @@ from dwca_cloud_geospatial.occurrence import OccurrenceReadResult, OccurrenceSou
 BUNDLE_SCHEMA_VERSION = "0.1.0"
 VIEWER_CONTRACT_VERSION = "0.1.0"
 OCCURRENCE_SCHEMA_VERSION = "0.1.0"
+DEFAULT_VIEWER_MAP_TITLE = "Custom map title, edit it in manifest.json"
 
 MANIFEST_RELATIVE_PATH = Path("manifest.json")
 SOURCE_METADATA_RELATIVE_PATH = Path("metadata/source.json")
@@ -136,6 +137,7 @@ class BundleWriterOptions:
     generator_name: str = "dwca-cloud-geospatial"
     generator_version: str = "0.0.0+unknown"
     generator_commit: str | None = None
+    viewer_map_title: str | None = DEFAULT_VIEWER_MAP_TITLE
     configuration: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
@@ -220,7 +222,11 @@ def write_bundle_metadata(
             or (geoparquet_result.bounds if geoparquet_result else None)
         ),
     )
-    viewer = _viewer_defaults(layers=layers, flatgeobuf_result=flatgeobuf_result)
+    viewer = _viewer_defaults(
+        layers=layers,
+        flatgeobuf_result=flatgeobuf_result,
+        map_title=writer_options.viewer_map_title,
+    )
     manifest = {
         "bundle_schema_version": BUNDLE_SCHEMA_VERSION,
         "viewer_contract_version": VIEWER_CONTRACT_VERSION,
@@ -668,6 +674,7 @@ def _viewer_defaults(
     *,
     layers: list[dict[str, Any]],
     flatgeobuf_result: FlatGeobufWriteResult | None,
+    map_title: str | None,
 ) -> dict[str, Any]:
     columns = (
         flatgeobuf_result.columns
@@ -677,7 +684,7 @@ def _viewer_defaults(
     column_set = set(columns)
     default_layer = layers[0]["id"] if layers else None
     initial_bounds = layers[0]["bounds"] if layers else None
-    return {
+    viewer = {
         "default_layer": default_layer,
         "initial_bounds": initial_bounds,
         "display_fields": [
@@ -687,6 +694,17 @@ def _viewer_defaults(
             field for field in FILTER_FIELD_CANDIDATES if field in column_set
         ],
     }
+    normalized_title = _normalize_viewer_map_title(map_title)
+    if normalized_title is not None:
+        viewer["map_title"] = normalized_title
+    return viewer
+
+
+def _normalize_viewer_map_title(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = str(value).strip()
+    return normalized or None
 
 
 def _source_summary(source_metadata: Mapping[str, Any]) -> dict[str, Any]:

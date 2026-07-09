@@ -2,7 +2,7 @@
 
 Status: Accepted MVP contract
 
-Last updated: 2026-06-19
+Last updated: 2026-07-09
 
 ## Purpose
 
@@ -38,7 +38,7 @@ The viewer uses these manifest fields:
 | `source` | Startup source summary before `metadata/source.json` is loaded. |
 | `files` | Authoritative inventory for metadata, reports and downloadable artifacts. |
 | `layers` | Authoritative geospatial layer declarations. |
-| `viewer` | Default layer, initial bounds, display fields and filter fields. |
+| `viewer` | Default layer, initial bounds, optional map title, display fields and filter fields. |
 | `counts` | High-level source, accepted and rejected counts. |
 
 `manifest.files` lists only generated files. A file absent from the inventory
@@ -72,6 +72,25 @@ are declared in `manifest.files`:
 Missing optional fields inside metadata objects must be displayed as absent or
 unknown. Missing DOI, citation, GBIF keys, OBIS identifiers, publisher,
 license, validation warnings or rejected-report files are not load errors.
+
+## Map Header
+
+The viewer may render a Header above the map from the optional
+`manifest.viewer.map_title` field. The value is publisher-facing viewer text,
+not dataset provenance. The Header behavior is:
+
+- Read only `manifest.viewer.map_title`.
+- Trim whitespace before display.
+- Show the Header when the trimmed value is non-empty.
+- Hide the Header when the field is missing, null, empty or whitespace only.
+- Do not fall back to `metadata/source.json.dataset.title`, `manifest.title`,
+  `manifest.source.title`, layer titles or file names.
+
+When hidden, the Header must leave no reserved layout space so older manifests
+without `viewer.map_title` keep the current full map layout. Newly generated
+converter manifests default the field to `Custom map title, edit it in
+manifest.json`, which publishers can edit or override during conversion.
+Blank conversion-time values are omitted from generated manifests.
 
 ## Geospatial Layers
 

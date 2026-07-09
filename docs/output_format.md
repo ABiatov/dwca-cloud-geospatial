@@ -2,7 +2,7 @@
 
 Status: Accepted baseline for MVP
 
-Last updated: 2026-06-24
+Last updated: 2026-07-09
 
 ## Purpose
 
@@ -134,7 +134,7 @@ Required fields:
 | `source` | object | Short source summary for viewer startup. |
 | `files` | array | Inventory of generated files. |
 | `layers` | array | Viewer-readable geospatial layers. |
-| `viewer` | object | Viewer defaults and fields. |
+| `viewer` | object | Viewer defaults, optional map title and fields. |
 | `counts` | object | High-level accepted, rejected and output record counts. |
 
 Recommended `source` fields:
@@ -173,6 +173,16 @@ Required `layers[]` fields:
 | `geometry` | object | Geometry column, CRS and coordinate order. |
 | `record_count` | integer | Number of records in the layer. |
 | `bounds` | array or null | `[west, south, east, north]` in lon/lat order. |
+
+Recommended `viewer` fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `default_layer` | string or null | Layer id selected by default when a usable viewer layer is present. |
+| `initial_bounds` | array or null | Initial map bounds as `[west, south, east, north]` in lon/lat order. |
+| `map_title` | string when present | Optional viewer-facing map Header title. When present, viewers trim whitespace and render a Header above the map only if the trimmed value is non-empty. Existing manifests may omit the field. This does not replace `manifest.title` or source dataset title provenance. The converter fills new generated manifests with `Custom map title, edit it in manifest.json` unless a caller configures a different value or a blank value. Blank configured values are omitted from generated manifests. |
+| `display_fields` | array | Ordered normalized occurrence fields for details and popups. |
+| `filter_fields` | array | Ordered normalized occurrence fields used to build filters when available on the loaded layer. |
 
 Example with FlatGeobuf and GeoParquet selected, and rejected records present:
 
@@ -268,6 +278,7 @@ Example with FlatGeobuf and GeoParquet selected, and rejected records present:
   "viewer": {
     "default_layer": "occurrences",
     "initial_bounds": [-10.0, 35.0, 5.0, 60.0],
+    "map_title": "Custom publisher-facing map title",
     "display_fields": [
       "scientific_name",
       "event_date",
@@ -730,7 +741,7 @@ The viewer must display these dataset/provenance fields when available:
 
 | Field | Source |
 | --- | --- |
-| Dataset title | `manifest.title` or `metadata/source.json.dataset.title`. |
+| Dataset title | `metadata/source.json.dataset.title`, then `manifest.title`, then `manifest.source.title`. |
 | Publisher | `metadata/source.json.dataset.publisher`. |
 | DOI | `metadata/source.json.dataset.doi`, GBIF DOI or OBIS DOI. |
 | Citation | `metadata/source.json.dataset.citation`, GBIF citation or OBIS citation. |
@@ -741,6 +752,12 @@ The viewer must display these dataset/provenance fields when available:
 | Generated timestamp | `manifest.created_at`. |
 | Converter version | `manifest.generator.version`. |
 | Accepted/rejected counts | `manifest.counts` and `metadata/processing.json.counts`. |
+
+The optional map Header is separate from dataset/provenance display. It reads
+only `manifest.viewer.map_title`; missing, null, empty or whitespace-only
+values hide the Header and leave no extra map layout space. The Header must
+not fall back to `manifest.title`, source metadata titles, layer titles or file
+names.
 
 The viewer must be able to show these feature fields in popups or a details panel:
 

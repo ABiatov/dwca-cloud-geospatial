@@ -31,6 +31,8 @@ def test_viewer_contract_document_exists_and_records_mvp_boundaries() -> None:
     assert "GeoPackage browser rendering is outside this contract." in contract
     assert "Do not attempt browser GeoParquet loading in the MVP." in contract
     assert "split on `|` and match exact tokens" in contract
+    assert "`manifest.viewer.map_title`" in contract
+    assert "Do not fall back to `metadata/source.json.dataset.title`" in contract
     assert "live GBIF API" in contract
     assert "live OBIS API" in contract
 
@@ -59,6 +61,7 @@ def test_flatgeobuf_fixture_declares_geopackage_as_inventory_only() -> None:
     layer_formats = {layer["source_format"] for layer in manifest["layers"]}
     assert layer_formats == {"flatgeobuf"}
     assert manifest["viewer"]["default_layer"] == "occurrences"
+    assert manifest["viewer"]["map_title"] == "Custom publisher-facing map title"
     assert set(manifest["viewer"]["filter_fields"]) == VIEWER_FILTER_FIELDS
     assert "class" in manifest["viewer"]["display_fields"]
     assert "class_" not in manifest["viewer"]["display_fields"]
@@ -76,4 +79,5 @@ def test_geoparquet_only_fixture_represents_valid_no_flatgeobuf_state() -> None:
     assert not any(
         layer["source_format"] == "flatgeobuf" for layer in manifest["layers"]
     )
+    assert "map_title" not in manifest["viewer"]
     assert set(manifest["viewer"]["filter_fields"]) == VIEWER_FILTER_FIELDS

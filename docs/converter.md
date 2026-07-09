@@ -2,7 +2,7 @@
 
 Status: Accepted MVP behavior
 
-Last updated: 2026-06-24
+Last updated: 2026-07-09
 
 ## Purpose
 
@@ -93,6 +93,28 @@ Opening `index.html` from a static HTTP server reads the neighboring
 `manifest.json`. `README.md` describes the generated bundle and should not be
 confused with the source `viewer/README.md`.
 
+The viewer-facing map Header title is configured independently from dataset
+metadata and bundle provenance. New generated manifests default
+`manifest.viewer.map_title` to `Custom map title, edit it in manifest.json`.
+Python callers can override or omit it through `BundleWriterOptions`:
+
+```python
+from dwca_cloud_geospatial.bundle import BundleWriterOptions
+from dwca_cloud_geospatial.conversion import ConversionOptions
+
+ConversionOptions(
+    bundle=BundleWriterOptions(
+        viewer_map_title="Publisher-facing map title",
+    )
+)
+```
+
+Blank or whitespace-only `viewer_map_title` values are omitted from generated
+manifests, and the static viewer hides the map Header without reserving layout
+space. This does not change `manifest.title`,
+`metadata/source.json.dataset.title` or the Dataset Info provenance title
+fallback.
+
 Large GeoParquet output is enabled through `GeoParquetWriterOptions` on the
 core API and through explicit CLI flags. It keeps the default conversion
 behavior unchanged and writes single-file GeoParquet with a `bbox` covering
@@ -168,6 +190,17 @@ Convert with the default FlatGeobuf output:
 ```bash
 dwca-cloud-geospatial convert /path/to/archive.zip /path/to/output-bundle
 ```
+
+Set a viewer-facing map Header title during conversion:
+
+```bash
+dwca-cloud-geospatial convert /path/to/archive.zip /path/to/output-bundle \
+  --viewer-map-title "Publisher-facing map title"
+```
+
+If `--viewer-map-title` is omitted, the generated manifest uses the editable
+default `Custom map title, edit it in manifest.json`. Passing a blank or
+whitespace-only value omits `manifest.viewer.map_title`.
 
 Convert with explicit GeoParquet output:
 

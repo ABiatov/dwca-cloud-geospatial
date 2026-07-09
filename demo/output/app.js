@@ -281,6 +281,20 @@
     }
   }
 
+  function viewerMapTitle(manifest) {
+    const viewer = (manifest && manifest.viewer) || {};
+    const title = viewer.map_title;
+    return title === null || title === undefined ? "" : String(title).trim();
+  }
+
+  function renderMapTitleHeader() {
+    const header = byId("map-title-header");
+    const titleNode = byId("map-title");
+    const title = viewerMapTitle(state.manifest);
+    titleNode.textContent = title;
+    header.hidden = !title;
+  }
+
   function fileEntry(path) {
     return (state.manifest.files || []).find((entry) => entry.path === path);
   }
@@ -1195,6 +1209,7 @@
       state.bundleRoot = new URL(".", manifestUrl);
       state.manifest = await fetchJson(manifestUrl);
       requireSupportedVersions(state.manifest);
+      renderMapTitleHeader();
       requireMetadataFile(SOURCE_METADATA_PATH);
       requireMetadataFile(PROCESSING_METADATA_PATH);
       state.sourceMetadata = await fetchJson(urlForBundlePath(SOURCE_METADATA_PATH));
@@ -1235,6 +1250,7 @@
     qualityFlagTokens,
     hasQualityFlags,
     matchesFilters,
+    viewerMapTitle,
     NO_MAP_LAYER_MESSAGE,
   };
 

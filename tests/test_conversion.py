@@ -7,7 +7,7 @@ from typing import Any
 import pytest
 
 from conftest import DWCA_FIXTURES_DIR, MINIMAL_OCCURRENCE_FIXTURE_DIR
-from dwca_cloud_geospatial.bundle import MANIFEST_RELATIVE_PATH
+from dwca_cloud_geospatial.bundle import DEFAULT_VIEWER_MAP_TITLE, MANIFEST_RELATIVE_PATH
 from dwca_cloud_geospatial.conversion import (
     ConversionError,
     ConversionOptions,
@@ -84,6 +84,7 @@ def test_core_conversion_writes_default_flatgeobuf_bundle(tmp_path: Path) -> Non
         "metadata/processing.json",
         "data/occurrences.fgb",
     ]
+    assert manifest["viewer"]["map_title"] == DEFAULT_VIEWER_MAP_TITLE
     assert "index.html" not in {entry["path"] for entry in manifest["files"]}
 
 
