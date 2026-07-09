@@ -12,10 +12,22 @@ from dwca_cloud_geospatial.validation import validate_output_bundle
 
 VIEWER_DIR = REPOSITORY_ROOT / "viewer"
 NORMALIZATION_FIXTURE_DIR = MINIMAL_OCCURRENCE_FIXTURE_DIR / "normalization"
+VIEWER_ICON_ASSET_PATHS = (
+    "assets/pic/pic-info-64.png",
+    "assets/pic/pic-filter-64.png",
+    "assets/pic/pic-list-64.png",
+    "assets/pic/pic-download-64.png",
+    "assets/pic/pic-copy-32.png",
+)
 
 
 def _load_manifest(bundle: Path) -> dict:
     return json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
+
+
+def _assert_viewer_icon_assets_copied(bundle: Path) -> None:
+    for asset_path in VIEWER_ICON_ASSET_PATHS:
+        assert (bundle / asset_path).exists()
 
 
 def test_static_viewer_files_exist_and_reference_declared_browser_assets() -> None:
@@ -39,6 +51,8 @@ def test_static_viewer_files_exist_and_reference_declared_browser_assets() -> No
     assert "occurrence-selected" in script
     assert "setFilter(\"occurrence-selected\"" in script
     assert "showPointPopup" in script
+    assert "function copyTextToClipboard" in script
+    assert "function legacyCopyText" in script
     assert "https://www.gbif.org/occurrence/" in script
     assert "target = \"_blank\"" in script
     assert "live GBIF" not in index
@@ -175,6 +189,7 @@ def test_static_viewer_smoke_inputs_cover_generated_flatgeobuf_bundle(
     assert (bundle / "index.html").exists()
     assert (bundle / "styles.css").exists()
     assert (bundle / "app.js").exists()
+    _assert_viewer_icon_assets_copied(bundle)
     assert (bundle / "metadata" / "source.json").exists()
     assert (bundle / "metadata" / "processing.json").exists()
 
@@ -202,5 +217,8 @@ def test_static_viewer_smoke_inputs_cover_generated_geoparquet_only_bundle(
     assert "geopackage" not in file_roles
     assert "flatgeobuf" not in layer_formats
     assert (bundle / "index.html").exists()
+    assert (bundle / "styles.css").exists()
+    assert (bundle / "app.js").exists()
+    _assert_viewer_icon_assets_copied(bundle)
     assert (bundle / "metadata" / "source.json").exists()
     assert (bundle / "metadata" / "processing.json").exists()

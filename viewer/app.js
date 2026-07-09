@@ -429,6 +429,50 @@
     return path.startsWith("data/") ? path.slice("data/".length) : path;
   }
 
+  function legacyCopyText(text) {
+    if (typeof document.execCommand !== "function") {
+      return Promise.reject(new Error("Clipboard copy is not available."));
+    }
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.left = "-1000px";
+    textarea.style.top = "-1000px";
+    document.body.append(textarea);
+
+    const selection = document.getSelection();
+    const previousRange =
+      selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+
+    let copied = false;
+    try {
+      copied = document.execCommand("copy");
+    } finally {
+      textarea.remove();
+      if (selection && previousRange) {
+        selection.removeAllRanges();
+        selection.addRange(previousRange);
+      }
+    }
+    return copied
+      ? Promise.resolve()
+      : Promise.reject(new Error("Clipboard copy failed."));
+  }
+
+  function copyTextToClipboard(text) {
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.clipboard &&
+      typeof navigator.clipboard.writeText === "function"
+    ) {
+      return navigator.clipboard.writeText(text).catch(() => legacyCopyText(text));
+    }
+    return legacyCopyText(text);
+  }
+
   function renderArtifacts() {
     const container = byId("artifact-list");
     container.replaceChildren();
@@ -462,7 +506,7 @@
       copyBtn.append(copyImg);
       copyBtn.addEventListener("click", (event) => {
         event.preventDefault();
-        navigator.clipboard.writeText(artifactUrl).then(
+        copyTextToClipboard(artifactUrl).then(
           () => {
             copyBtn.classList.add("copied");
             copyBtn.title = "Copied!";

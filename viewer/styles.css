@@ -455,11 +455,6 @@ button:focus-visible {
   display: inline-block;
   font-size: 10px;
   line-height: 1;
-  transition: transform 0.2s;
-}
-
-.bottom-panels.collapsed .toggle-icon {
-  transform: rotate(-90deg);
 }
 
 .bottom-panels-content {
