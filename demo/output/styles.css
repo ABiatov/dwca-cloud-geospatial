@@ -388,6 +388,7 @@ button:focus-visible {
   grid-row: 1;
   display: flex;
   align-items: center;
+  gap: 14px;
   min-height: 56px;
   padding: 12px 18px;
   border-bottom: 1px solid var(--line);
@@ -400,11 +401,32 @@ button:focus-visible {
 
 .map-title-header h1 {
   margin: 0;
+  flex: 1;
+  min-width: 0;
   font-size: 20px;
   line-height: 1.25;
   font-weight: 650;
   letter-spacing: 0;
   overflow-wrap: anywhere;
+}
+
+.map-title-header h1[hidden] {
+  display: none;
+}
+
+.app-description-button {
+  margin-right: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.app-description-button:hover,
+.app-description-button:focus-visible {
+  background: #e6f4ef;
 }
 
 .map-wrap {
@@ -612,6 +634,131 @@ button:focus-visible {
   font-style: italic;
 }
 
+/* ---- App Description Modal ---- */
+
+.app-description-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(23, 33, 29, 0.48);
+}
+
+.app-description-modal[hidden] {
+  display: none;
+}
+
+.app-description-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(860px, 100%);
+  max-height: min(82vh, 760px);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.app-description-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.app-description-modal-header h2 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.app-description-close {
+  flex-shrink: 0;
+  padding: 6px 10px;
+}
+
+.app-description-content {
+  min-height: 0;
+  overflow: auto;
+  padding: 18px;
+}
+
+.app-description-content > :first-child {
+  margin-top: 0;
+}
+
+.app-description-content > :last-child {
+  margin-bottom: 0;
+}
+
+.app-description-content h2,
+.app-description-content h3,
+.app-description-content h4 {
+  margin: 18px 0 8px;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.app-description-content h2 {
+  font-size: 20px;
+}
+
+.app-description-content h3 {
+  font-size: 17px;
+}
+
+.app-description-content h4 {
+  font-size: 15px;
+}
+
+.app-description-content p,
+.app-description-content ol,
+.app-description-content ul,
+.app-description-content table,
+.app-description-content center {
+  margin: 0 0 12px;
+}
+
+.app-description-content a {
+  color: var(--accent);
+}
+
+.app-description-content img,
+.app-description-content iframe,
+.app-description-content table {
+  max-width: 100%;
+}
+
+.app-description-content img {
+  height: auto;
+}
+
+.app-description-content iframe {
+  display: block;
+  width: 100%;
+  min-height: 240px;
+  border: 1px solid var(--line);
+}
+
+.app-description-content table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.app-description-content td {
+  border: 1px solid var(--line);
+  padding: 6px 8px;
+  vertical-align: top;
+}
+
 /* ---- Responsive ---- */
 
 @media (max-width: 900px) {
@@ -630,10 +777,15 @@ button:focus-visible {
   .map-title-header {
     min-height: 48px;
     padding: 10px 14px;
+    gap: 10px;
   }
 
   .map-title-header h1 {
     font-size: 17px;
+  }
+
+  .app-description-button {
+    padding: 5px 8px;
   }
 
   .map-point-popup {
@@ -644,6 +796,23 @@ button:focus-visible {
 @media (max-width: 480px) {
   .map-point-popup {
     max-width: 220px !important;
+  }
+
+  .map-title-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .app-description-button {
+    align-self: flex-end;
+  }
+
+  .app-description-modal {
+    padding: 12px;
+  }
+
+  .app-description-panel {
+    max-height: 88vh;
   }
 
   .popup-dl dt {

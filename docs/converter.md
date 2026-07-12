@@ -93,10 +93,13 @@ Opening `index.html` from a static HTTP server reads the neighboring
 `manifest.json`. `README.md` describes the generated bundle and should not be
 confused with the source `viewer/README.md`.
 
-The viewer-facing map Header title is configured independently from dataset
-metadata and bundle provenance. New generated manifests default
-`manifest.viewer.map_title` to `Custom map title, edit it in manifest.json`.
-Python callers can override or omit it through `BundleWriterOptions`:
+The viewer-facing map Header title and App Description popup are configured
+independently from dataset metadata and bundle provenance. New generated
+manifests default `manifest.viewer.map_title` to
+`Custom map title, edit it in manifest.json` and
+`manifest.viewer.appDescription` to editable publisher-facing HTML that shows
+the popup feature immediately. Python callers can override or omit either
+value through `BundleWriterOptions`:
 
 ```python
 from dwca_cloud_geospatial.bundle import BundleWriterOptions
@@ -105,6 +108,12 @@ from dwca_cloud_geospatial.conversion import ConversionOptions
 ConversionOptions(
     bundle=BundleWriterOptions(
         viewer_map_title="Publisher-facing map title",
+        viewer_app_description=(
+            "<center><h2>About this map</h2></center>"
+            "<p>Publisher-authored HTML.</p>"
+            "<p>Supported HTML Tags: p, b, i, h2, h3, h4, a, img, br, "
+            "ol, ul, li, table, tr, td, iframe, center, small</p>"
+        ),
     )
 )
 ```
@@ -114,6 +123,13 @@ manifests, and the static viewer hides the map Header without reserving layout
 space. This does not change `manifest.title`,
 `metadata/source.json.dataset.title` or the Dataset Info provenance title
 fallback.
+
+Blank or whitespace-only `viewer_app_description` values are also omitted from
+generated manifests. The CLI does not expose a long-HTML flag; publishers can
+set `BundleWriterOptions.viewer_app_description` through Python or manually
+edit the generated default at `manifest.viewer.appDescription` after
+conversion. The static viewer sanitizes this HTML before rendering it in the
+Header App Description popup.
 
 Large GeoParquet output is enabled through `GeoParquetWriterOptions` on the
 core API and through explicit CLI flags. It keeps the default conversion
@@ -201,6 +217,12 @@ dwca-cloud-geospatial convert /path/to/archive.zip /path/to/output-bundle \
 If `--viewer-map-title` is omitted, the generated manifest uses the editable
 default `Custom map title, edit it in manifest.json`. Passing a blank or
 whitespace-only value omits `manifest.viewer.map_title`.
+
+Generated manifests include an editable `manifest.viewer.appDescription`
+placeholder by default. For publisher-authored app description popup content,
+edit that field after conversion or configure
+`BundleWriterOptions.viewer_app_description` from Python. The viewer shows the
+Header button only when the value is non-blank after trimming.
 
 Convert with explicit GeoParquet output:
 

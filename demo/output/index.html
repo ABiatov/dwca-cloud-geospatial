@@ -75,6 +75,9 @@
       <section class="workspace" aria-label="Occurrence map and records">
         <header id="map-title-header" class="map-title-header" hidden>
           <h1 id="map-title"></h1>
+          <button id="app-description-button" class="app-description-button" type="button" hidden>
+            App Description
+          </button>
         </header>
         <div class="map-wrap">
           <div id="map" class="map" role="region" aria-label="Occurrence map"></div>
@@ -102,6 +105,30 @@
         </div>
       </section>
     </main>
+
+    <div
+      id="app-description-dialog"
+      class="app-description-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="app-description-title"
+      hidden
+    >
+      <div class="app-description-panel" role="document">
+        <header class="app-description-modal-header">
+          <h2 id="app-description-title">App Description</h2>
+          <button
+            id="app-description-close"
+            class="app-description-close"
+            type="button"
+            aria-label="Close app description"
+          >
+            Close
+          </button>
+        </header>
+        <div id="app-description-content" class="app-description-content"></div>
+      </div>
+    </div>
 
     <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
     <script src="https://unpkg.com/flatgeobuf@4.3.3/dist/flatgeobuf-geojson.min.js"></script>

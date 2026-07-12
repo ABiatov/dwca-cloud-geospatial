@@ -25,6 +25,28 @@
   };
   const NO_MAP_LAYER_MESSAGE =
     "No FlatGeobuf map layer is available for this bundle. To display occurrence points on the map, generate the bundle with the FlatGeobuf output format selected.";
+  const APP_DESCRIPTION_ALLOWED_TAGS = Object.freeze([
+    "p",
+    "b",
+    "i",
+    "h2",
+    "h3",
+    "h4",
+    "a",
+    "img",
+    "br",
+    "ol",
+    "ul",
+    "li",
+    "table",
+    "tr",
+    "td",
+    "iframe",
+    "center",
+    "small",
+  ]);
+  const APP_DESCRIPTION_ALLOWED_TAG_SET = new Set(APP_DESCRIPTION_ALLOWED_TAGS);
+  const APP_DESCRIPTION_DROP_CONTENT_TAGS = new Set(["script", "style"]);
   const KINGDOM_COLOR_EXPRESSION = [
     "match",
     ["coalesce", ["get", "kingdom"], ""],
@@ -57,6 +79,7 @@
     allFeatures: [],
     filteredFeatures: [],
     selectedFeatureId: null,
+    appDescriptionPreviousFocus: null,
     filters: {
       scientific_name: "",
       categories: {},
@@ -287,12 +310,203 @@
     return title === null || title === undefined ? "" : String(title).trim();
   }
 
-  function renderMapTitleHeader() {
+  function viewerAppDescription(manifest) {
+    const viewer = (manifest && manifest.viewer) || {};
+    const description = viewer.appDescription;
+    return description === null || description === undefined ? "" : String(description).trim();
+  }
+
+  function isSafeAppDescriptionUrl(value) {
+    if (typeof value !== "string") {
+      return false;
+    }
+    const url = value.trim();
+    if (!url || /[\u0000-\u001f\u007f]/.test(url) || url.includes("\\")) {
+      return false;
+    }
+    if (url.startsWith("//") || url.startsWith("/")) {
+      return false;
+    }
+    const schemeMatch = url.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
+    if (schemeMatch) {
+      return ["http:", "https:"].includes(`${schemeMatch[1].toLowerCase()}:`);
+    }
+    return true;
+  }
+
+  function copySafeAttribute(source, target, name) {
+    if (!source.hasAttribute(name)) {
+      return;
+    }
+    const value = source.getAttribute(name);
+    if (value !== null) {
+      target.setAttribute(name, value);
+    }
+  }
+
+  function copyDimensionAttribute(source, target, name) {
+    if (!source.hasAttribute(name)) {
+      return;
+    }
+    const value = source.getAttribute(name).trim();
+    if (/^\d{1,5}$/.test(value) || /^\d{1,3}%$/.test(value)) {
+      target.setAttribute(name, value);
+    }
+  }
+
+  function copyLoadingAttribute(source, target) {
+    if (!source.hasAttribute("loading")) {
+      return;
+    }
+    const value = source.getAttribute("loading").trim().toLowerCase();
+    if (value === "lazy" || value === "eager") {
+      target.setAttribute("loading", value);
+    }
+  }
+
+  function sanitizeElementAttributes(source, target, tagName) {
+    if (tagName === "a") {
+      const href = source.getAttribute("href");
+      if (href && isSafeAppDescriptionUrl(href)) {
+        target.setAttribute("href", href.trim());
+        if (/^https?:/i.test(href.trim())) {
+          target.target = "_blank";
+          target.rel = "noopener";
+        }
+      }
+      copySafeAttribute(source, target, "title");
+    } else if (tagName === "img") {
+      const src = source.getAttribute("src");
+      if (src && isSafeAppDescriptionUrl(src)) {
+        target.setAttribute("src", src.trim());
+      }
+      copySafeAttribute(source, target, "alt");
+      copySafeAttribute(source, target, "title");
+      copyDimensionAttribute(source, target, "width");
+      copyDimensionAttribute(source, target, "height");
+      copyLoadingAttribute(source, target);
+    } else if (tagName === "iframe") {
+      const src = source.getAttribute("src");
+      if (src && isSafeAppDescriptionUrl(src)) {
+        target.setAttribute("src", src.trim());
+      }
+      copySafeAttribute(source, target, "title");
+      copySafeAttribute(source, target, "allow");
+      copyDimensionAttribute(source, target, "width");
+      copyDimensionAttribute(source, target, "height");
+      copyLoadingAttribute(source, target);
+      if (source.hasAttribute("allowfullscreen")) {
+        target.setAttribute("allowfullscreen", "");
+      }
+    }
+  }
+
+  function sanitizeAppDescriptionNode(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return document.createTextNode(node.textContent || "");
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return document.createDocumentFragment();
+    }
+    const tagName = node.tagName.toLowerCase();
+    if (APP_DESCRIPTION_DROP_CONTENT_TAGS.has(tagName)) {
+      return document.createDocumentFragment();
+    }
+    const fragment = document.createDocumentFragment();
+    const appendSanitizedChildren = (parent) => {
+      for (const child of Array.from(node.childNodes)) {
+        parent.append(sanitizeAppDescriptionNode(child));
+      }
+    };
+    if (!APP_DESCRIPTION_ALLOWED_TAG_SET.has(tagName)) {
+      appendSanitizedChildren(fragment);
+      return fragment;
+    }
+    if (
+      (tagName === "img" || tagName === "iframe") &&
+      !isSafeAppDescriptionUrl(node.getAttribute("src") || "")
+    ) {
+      return fragment;
+    }
+    const sanitized = document.createElement(tagName);
+    sanitizeElementAttributes(node, sanitized, tagName);
+    if (tagName !== "br" && tagName !== "img") {
+      appendSanitizedChildren(sanitized);
+    }
+    return sanitized;
+  }
+
+  function sanitizeAppDescription(html) {
+    const parsed = new DOMParser().parseFromString(String(html), "text/html");
+    const fragment = document.createDocumentFragment();
+    for (const child of Array.from(parsed.body.childNodes)) {
+      fragment.append(sanitizeAppDescriptionNode(child));
+    }
+    return fragment;
+  }
+
+  function renderAppDescriptionContent() {
+    const content = byId("app-description-content");
+    content.replaceChildren();
+    const description = viewerAppDescription(state.manifest);
+    if (description) {
+      content.append(sanitizeAppDescription(description));
+    }
+  }
+
+  function openAppDescriptionDialog() {
+    const dialog = byId("app-description-dialog");
+    if (dialog.hidden) {
+      state.appDescriptionPreviousFocus = document.activeElement;
+    }
+    renderAppDescriptionContent();
+    dialog.hidden = false;
+    byId("app-description-close").focus();
+  }
+
+  function closeAppDescriptionDialog() {
+    const dialog = byId("app-description-dialog");
+    if (dialog.hidden) {
+      return;
+    }
+    dialog.hidden = true;
+    byId("app-description-content").replaceChildren();
+    if (
+      state.appDescriptionPreviousFocus &&
+      typeof state.appDescriptionPreviousFocus.focus === "function"
+    ) {
+      state.appDescriptionPreviousFocus.focus();
+    }
+    state.appDescriptionPreviousFocus = null;
+  }
+
+  function initAppDescriptionDialog() {
+    const button = byId("app-description-button");
+    const dialog = byId("app-description-dialog");
+    byId("app-description-close").addEventListener("click", closeAppDescriptionDialog);
+    button.addEventListener("click", openAppDescriptionDialog);
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) {
+        closeAppDescriptionDialog();
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !dialog.hidden) {
+        closeAppDescriptionDialog();
+      }
+    });
+  }
+
+  function renderAppHeader() {
     const header = byId("map-title-header");
     const titleNode = byId("map-title");
+    const descriptionButton = byId("app-description-button");
     const title = viewerMapTitle(state.manifest);
+    const description = viewerAppDescription(state.manifest);
     titleNode.textContent = title;
-    header.hidden = !title;
+    titleNode.hidden = !title;
+    descriptionButton.hidden = !description;
+    header.hidden = !title && !description;
   }
 
   function fileEntry(path) {
@@ -1205,11 +1419,12 @@
     try {
       initPanelToggles();
       initBottomToggle();
+      initAppDescriptionDialog();
       const manifestUrl = manifestUrlFromLocation();
       state.bundleRoot = new URL(".", manifestUrl);
       state.manifest = await fetchJson(manifestUrl);
       requireSupportedVersions(state.manifest);
-      renderMapTitleHeader();
+      renderAppHeader();
       requireMetadataFile(SOURCE_METADATA_PATH);
       requireMetadataFile(PROCESSING_METADATA_PATH);
       state.sourceMetadata = await fetchJson(urlForBundlePath(SOURCE_METADATA_PATH));
@@ -1251,6 +1466,9 @@
     hasQualityFlags,
     matchesFilters,
     viewerMapTitle,
+    viewerAppDescription,
+    sanitizeAppDescription,
+    APP_DESCRIPTION_ALLOWED_TAGS,
     NO_MAP_LAYER_MESSAGE,
   };
 

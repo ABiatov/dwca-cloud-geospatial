@@ -2,7 +2,7 @@
 
 Status: Accepted MVP contract
 
-Last updated: 2026-07-09
+Last updated: 2026-07-12
 
 ## Purpose
 
@@ -73,24 +73,74 @@ Missing optional fields inside metadata objects must be displayed as absent or
 unknown. Missing DOI, citation, GBIF keys, OBIS identifiers, publisher,
 license, validation warnings or rejected-report files are not load errors.
 
-## Map Header
+## Map Header And App Description
 
-The viewer may render a Header above the map from the optional
-`manifest.viewer.map_title` field. The value is publisher-facing viewer text,
-not dataset provenance. The Header behavior is:
+The viewer may render a Header above the map from optional `manifest.viewer`
+fields. `manifest.viewer.map_title` is publisher-facing viewer title text, and
+`manifest.viewer.appDescription` is publisher-authored app-level description
+HTML. Neither field is dataset provenance.
 
-- Read only `manifest.viewer.map_title`.
-- Trim whitespace before display.
-- Show the Header when the trimmed value is non-empty.
-- Hide the Header when the field is missing, null, empty or whitespace only.
+Header behavior:
+
+- Read title text only from `manifest.viewer.map_title`.
+- Read App Description popup content only from
+  `manifest.viewer.appDescription`.
+- Trim whitespace before deciding whether either value is visible.
+- Show the Header title text only when the trimmed map title is non-empty.
+- Show the App Description button only when the trimmed app description is
+  non-empty.
+- Show the Header container when either the title or App Description button is
+  visible, including when `appDescription` exists and `map_title` is absent.
+- Hide the Header container, with no reserved layout space, only when both
+  fields are missing, null, empty or whitespace only.
 - Do not fall back to `metadata/source.json.dataset.title`, `manifest.title`,
   `manifest.source.title`, layer titles or file names.
 
 When hidden, the Header must leave no reserved layout space so older manifests
-without `viewer.map_title` keep the current full map layout. Newly generated
-converter manifests default the field to `Custom map title, edit it in
-manifest.json`, which publishers can edit or override during conversion.
-Blank conversion-time values are omitted from generated manifests.
+without `viewer.map_title` or `viewer.appDescription` keep the current full
+map layout. Newly generated converter manifests default `viewer.map_title` to
+`Custom map title, edit it in manifest.json`, which publishers can edit or
+override during conversion. Blank conversion-time map-title values are omitted
+from generated manifests. Newly generated converter manifests also default
+`viewer.appDescription` to this editable HTML so publishers can immediately see
+the popup feature:
+
+```html
+<center><h2>About this map</h2></center><p>Publisher-authored HTML.</p><p>Supported HTML Tags: p, b, i, h2, h3, h4, a, img, br, ol, ul, li, table, tr, td, iframe, center, small</p>
+```
+
+Publishers can edit that value, override it during Python conversion or pass a
+blank conversion-time value to omit `viewer.appDescription`.
+
+Clicking the Header App Description button opens a modal dialog above the
+viewer. The modal must be independent from map feature popups: opening or
+closing it must not select, clear or otherwise change occurrence feature
+selection. The modal should include a clear close button, close on backdrop
+click and `Escape` where practical, expose accessible dialog labeling, move
+focus into the dialog on open and return focus to the opener on close.
+
+The app description renderer must sanitize HTML before rendering and must not
+append unsanitized publisher HTML directly to the live document. Rendering is
+restricted to this exact allowlist:
+
+```text
+p, b, i, h2, h3, h4, a, img, br, ol, ul, li, table, tr, td, iframe, center, small
+```
+
+Unsupported wrapper tags should be dropped while preserving safe child text and
+allowed child elements where practical. `script`, `style`, inline event-handler
+attributes and unsafe URL schemes must not render. Allowed attributes are:
+
+| Tag | Allowed attributes |
+| --- | --- |
+| `a` | Safe `href`, optional `title`; external links open with `target="_blank"` and `rel="noopener"`. |
+| `img` | Safe `src`, `alt`, optional `title`, `width`, `height`, `loading`. |
+| `iframe` | Safe `src`, optional `title`, `width`, `height`, `allow`, `allowfullscreen`, `loading`. |
+
+Bundle-relative URLs and `http:`/`https:` URLs are allowed for `href`, `src`
+and iframe sources. Executable or ambiguous schemes such as `javascript:`,
+`data:` and protocol-relative URLs are rejected. Long text, tables, images and
+iframes must scroll within the modal instead of pushing controls off screen.
 
 ## Geospatial Layers
 

@@ -38,6 +38,11 @@ BUNDLE_SCHEMA_VERSION = "0.1.0"
 VIEWER_CONTRACT_VERSION = "0.1.0"
 OCCURRENCE_SCHEMA_VERSION = "0.1.0"
 DEFAULT_VIEWER_MAP_TITLE = "Custom map title, edit it in manifest.json"
+DEFAULT_VIEWER_APP_DESCRIPTION = (
+    "<center><h2>About this map</h2></center><p>Publisher-authored HTML.</p>"
+    "<p>Supported HTML Tags: p, b, i, h2, h3, h4, a, img, br, ol, ul, li, "
+    "table, tr, td, iframe, center, small</p>"
+)
 
 MANIFEST_RELATIVE_PATH = Path("manifest.json")
 SOURCE_METADATA_RELATIVE_PATH = Path("metadata/source.json")
@@ -138,6 +143,7 @@ class BundleWriterOptions:
     generator_version: str = "0.0.0+unknown"
     generator_commit: str | None = None
     viewer_map_title: str | None = DEFAULT_VIEWER_MAP_TITLE
+    viewer_app_description: str | None = DEFAULT_VIEWER_APP_DESCRIPTION
     configuration: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
@@ -226,6 +232,7 @@ def write_bundle_metadata(
         layers=layers,
         flatgeobuf_result=flatgeobuf_result,
         map_title=writer_options.viewer_map_title,
+        app_description=writer_options.viewer_app_description,
     )
     manifest = {
         "bundle_schema_version": BUNDLE_SCHEMA_VERSION,
@@ -675,6 +682,7 @@ def _viewer_defaults(
     layers: list[dict[str, Any]],
     flatgeobuf_result: FlatGeobufWriteResult | None,
     map_title: str | None,
+    app_description: str | None,
 ) -> dict[str, Any]:
     columns = (
         flatgeobuf_result.columns
@@ -697,10 +705,20 @@ def _viewer_defaults(
     normalized_title = _normalize_viewer_map_title(map_title)
     if normalized_title is not None:
         viewer["map_title"] = normalized_title
+    normalized_description = _normalize_viewer_app_description(app_description)
+    if normalized_description is not None:
+        viewer["appDescription"] = normalized_description
     return viewer
 
 
 def _normalize_viewer_map_title(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = str(value).strip()
+    return normalized or None
+
+
+def _normalize_viewer_app_description(value: str | None) -> str | None:
     if value is None:
         return None
     normalized = str(value).strip()

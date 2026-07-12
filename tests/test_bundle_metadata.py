@@ -10,6 +10,7 @@ from conftest import MINIMAL_OCCURRENCE_FIXTURE_DIR, OUTPUT_BUNDLE_FIXTURES_DIR
 import pytest
 
 from dwca_cloud_geospatial.bundle import (
+    DEFAULT_VIEWER_APP_DESCRIPTION,
     DEFAULT_VIEWER_MAP_TITLE,
     PROCESSING_METADATA_RELATIVE_PATH,
     REJECTED_RECORDS_RELATIVE_PATH,
@@ -151,6 +152,7 @@ def test_flatgeobuf_only_default_bundle_omits_rejected_report_and_geoparquet(
         set(FLATGEOBUF_PROJECTION_COLUMNS)
     )
     assert manifest["viewer"]["map_title"] == DEFAULT_VIEWER_MAP_TITLE
+    assert manifest["viewer"]["appDescription"] == DEFAULT_VIEWER_APP_DESCRIPTION
     assert "taxon_id" not in manifest["viewer"]["display_fields"]
 
     file_entries = {entry["path"]: entry for entry in manifest["files"]}
@@ -338,6 +340,72 @@ def test_bundle_metadata_writes_configured_viewer_map_title(
 
     assert manifest["viewer"]["map_title"] == "Publisher map review title"
     assert manifest["title"] == "Quality rules fixture"
+
+
+def test_bundle_metadata_writes_configured_viewer_app_description(
+    tmp_path: Path,
+) -> None:
+    read_result, normalization_result = _read_and_normalize(QUALITY_RULES_FIXTURE_DIR)
+
+    result = write_bundle_metadata(
+        output_directory=tmp_path,
+        occurrence_result=read_result,
+        normalization_result=normalization_result,
+        options=BundleWriterOptions(
+            bundle_id="test-viewer-description",
+            created_at="2026-07-12T12:00:00Z",
+            viewer_app_description=(
+                "  <h2>About this map</h2><p>Publisher-authored HTML.</p>  "
+            ),
+        ),
+    )
+
+    manifest = _load_json(result.manifest_path)
+
+    assert manifest["viewer"]["appDescription"] == (
+        "<h2>About this map</h2><p>Publisher-authored HTML.</p>"
+    )
+
+
+def test_bundle_metadata_writes_default_viewer_app_description(
+    tmp_path: Path,
+) -> None:
+    read_result, normalization_result = _read_and_normalize(QUALITY_RULES_FIXTURE_DIR)
+
+    result = write_bundle_metadata(
+        output_directory=tmp_path,
+        occurrence_result=read_result,
+        normalization_result=normalization_result,
+        options=BundleWriterOptions(
+            bundle_id="test-no-viewer-description",
+            created_at="2026-07-12T12:00:00Z",
+        ),
+    )
+
+    manifest = _load_json(result.manifest_path)
+
+    assert manifest["viewer"]["appDescription"] == DEFAULT_VIEWER_APP_DESCRIPTION
+
+
+def test_bundle_metadata_omits_blank_viewer_app_description(
+    tmp_path: Path,
+) -> None:
+    read_result, normalization_result = _read_and_normalize(QUALITY_RULES_FIXTURE_DIR)
+
+    result = write_bundle_metadata(
+        output_directory=tmp_path,
+        occurrence_result=read_result,
+        normalization_result=normalization_result,
+        options=BundleWriterOptions(
+            bundle_id="test-blank-viewer-description",
+            created_at="2026-07-12T12:00:00Z",
+            viewer_app_description="   ",
+        ),
+    )
+
+    manifest = _load_json(result.manifest_path)
+
+    assert "appDescription" not in manifest["viewer"]
 
 
 def test_bundle_metadata_omits_blank_viewer_map_title(

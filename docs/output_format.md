@@ -2,7 +2,7 @@
 
 Status: Accepted baseline for MVP
 
-Last updated: 2026-07-09
+Last updated: 2026-07-12
 
 ## Purpose
 
@@ -181,6 +181,7 @@ Recommended `viewer` fields:
 | `default_layer` | string or null | Layer id selected by default when a usable viewer layer is present. |
 | `initial_bounds` | array or null | Initial map bounds as `[west, south, east, north]` in lon/lat order. |
 | `map_title` | string when present | Optional viewer-facing map Header title. When present, viewers trim whitespace and render a Header above the map only if the trimmed value is non-empty. Existing manifests may omit the field. This does not replace `manifest.title` or source dataset title provenance. The converter fills new generated manifests with `Custom map title, edit it in manifest.json` unless a caller configures a different value or a blank value. Blank configured values are omitted from generated manifests. |
+| `appDescription` | string when present | Optional publisher-authored application description HTML. Viewers trim whitespace and show a Header App Description button only when the trimmed value is non-empty. The converter fills new generated manifests with an editable default description so publishers can immediately see the feature, unless a caller configures a different value or a blank value. Blank configured values are omitted from generated manifests. This does not replace `manifest.title`, `manifest.source`, `metadata/source.json.dataset.description` or `viewer.map_title`. Viewers must sanitize this HTML before rendering. |
 | `display_fields` | array | Ordered normalized occurrence fields for details and popups. |
 | `filter_fields` | array | Ordered normalized occurrence fields used to build filters when available on the loaded layer. |
 
@@ -279,6 +280,7 @@ Example with FlatGeobuf and GeoParquet selected, and rejected records present:
     "default_layer": "occurrences",
     "initial_bounds": [-10.0, 35.0, 5.0, 60.0],
     "map_title": "Custom publisher-facing map title",
+    "appDescription": "<center><h2>About this map</h2></center><p>Publisher-authored HTML.</p><p>Supported HTML Tags: p, b, i, h2, h3, h4, a, img, br, ol, ul, li, table, tr, td, iframe, center, small</p>",
     "display_fields": [
       "scientific_name",
       "event_date",
@@ -754,10 +756,33 @@ The viewer must display these dataset/provenance fields when available:
 | Accepted/rejected counts | `manifest.counts` and `metadata/processing.json.counts`. |
 
 The optional map Header is separate from dataset/provenance display. It reads
-only `manifest.viewer.map_title`; missing, null, empty or whitespace-only
-values hide the Header and leave no extra map layout space. The Header must
-not fall back to `manifest.title`, source metadata titles, layer titles or file
-names.
+only `manifest.viewer.map_title` for title text and
+`manifest.viewer.appDescription` for the App Description button. Missing,
+null, empty or whitespace-only values are hidden after trimming. The Header
+container is visible when either the title or App Description button is
+visible, including the compact app-description-only case, and hidden with no
+reserved layout space only when both values are absent or blank. The Header
+must not fall back to `manifest.title`, source metadata titles, layer titles
+or file names.
+
+`manifest.viewer.appDescription` is publisher-authored HTML for app-level
+context, not dataset provenance. Static viewers must not append the raw HTML
+string directly to the live document. They must parse and rebuild a sanitized
+fragment restricted to exactly these supported tags:
+
+```text
+p, b, i, h2, h3, h4, a, img, br, ol, ul, li, table, tr, td, iframe, center, small
+```
+
+Unsupported wrapper tags should be dropped while preserving safe child text
+and allowed child elements where practical. `script`, `style`, inline event
+handler attributes and unsafe URL schemes such as `javascript:` or `data:`
+must not render. Supported attributes are limited to safe `href` and optional
+`title` on `a`; safe `src`, `alt`, optional `title`, `width`, `height` and
+`loading` on `img`; and safe `src`, optional `title`, `width`, `height`,
+`allow`, `allowfullscreen` and `loading` on `iframe`. Bundle-relative,
+`http:` and `https:` URLs are allowed; executable or ambiguous schemes are
+rejected.
 
 The viewer must be able to show these feature fields in popups or a details panel:
 

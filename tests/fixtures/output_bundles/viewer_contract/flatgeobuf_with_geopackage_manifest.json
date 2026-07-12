@@ -84,6 +84,7 @@
       60.0
     ],
     "map_title": "Custom publisher-facing map title",
+    "appDescription": "<center><h2>About this map</h2></center><p>Publisher-authored HTML.</p><p>Supported HTML Tags: p, b, i, h2, h3, h4, a, img, br, ol, ul, li, table, tr, td, iframe, center, small</p>",
     "display_fields": [
       "scientific_name",
       "class",

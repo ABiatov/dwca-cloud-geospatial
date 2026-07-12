@@ -42,6 +42,12 @@ def test_static_viewer_files_exist_and_reference_declared_browser_assets() -> No
     assert "app.js" in index
     assert 'id="map-title-header"' in index
     assert 'id="map-title"' in index
+    assert 'id="app-description-button"' in index
+    assert 'id="app-description-dialog"' in index
+    assert 'id="app-description-content"' in index
+    assert 'id="app-description-close"' in index
+    assert 'role="dialog"' in index
+    assert 'aria-modal="true"' in index
     assert "manifest.json" in script
     assert "metadata/source.json" in script
     assert "metadata/processing.json" in script
@@ -69,6 +75,92 @@ def test_static_viewer_files_exist_and_reference_declared_browser_assets() -> No
     assert "http://localhost:8000/viewer/?bundle=../scratch/sample-bundle/" in readme
 
 
+def test_static_viewer_uses_manifest_app_description_for_header_button_and_modal() -> None:
+    script = (VIEWER_DIR / "app.js").read_text(encoding="utf-8")
+    styles = (VIEWER_DIR / "styles.css").read_text(encoding="utf-8")
+
+    assert "function viewerAppDescription(manifest)" in script
+    assert "viewer.appDescription" in script
+    assert "String(description).trim()" in script
+    assert "function renderAppHeader" in script
+    assert 'byId("app-description-button")' in script
+    assert 'byId("app-description-dialog")' in script
+    assert 'byId("app-description-content")' in script
+    assert "descriptionButton.hidden = !description" in script
+    assert "header.hidden = !title && !description" in script
+    assert "titleNode.hidden = !title" in script
+    assert "function openAppDescriptionDialog" in script
+    assert "function closeAppDescriptionDialog" in script
+    assert 'event.key === "Escape"' in script
+    assert "event.target === dialog" in script
+    assert ".app-description-modal[hidden]" in styles
+    assert ".app-description-content" in styles
+    assert "overflow: auto" in styles
+
+    helper_body = script[
+        script.index("function viewerAppDescription(manifest)") :
+        script.index("function isSafeAppDescriptionUrl")
+    ]
+    assert "manifest.title" not in helper_body
+    assert "source" not in helper_body
+    assert "dataset" not in helper_body
+    assert "layer" not in helper_body
+
+
+def test_static_viewer_sanitizes_manifest_app_description_html() -> None:
+    script = (VIEWER_DIR / "app.js").read_text(encoding="utf-8")
+    expected_tags = [
+        "p",
+        "b",
+        "i",
+        "h2",
+        "h3",
+        "h4",
+        "a",
+        "img",
+        "br",
+        "ol",
+        "ul",
+        "li",
+        "table",
+        "tr",
+        "td",
+        "iframe",
+        "center",
+        "small",
+    ]
+
+    assert "const APP_DESCRIPTION_ALLOWED_TAGS = Object.freeze([" in script
+    allowlist_body = script[
+        script.index("const APP_DESCRIPTION_ALLOWED_TAGS = Object.freeze([") :
+        script.index("]);", script.index("const APP_DESCRIPTION_ALLOWED_TAGS"))
+    ]
+    for tag in expected_tags:
+        assert f'"{tag}"' in allowlist_body
+    assert allowlist_body.count('"') // 2 == len(expected_tags)
+    assert "const APP_DESCRIPTION_DROP_CONTENT_TAGS = new Set([\"script\", \"style\"])" in script
+    assert "new DOMParser().parseFromString(String(html), \"text/html\")" in script
+    assert "document.createElement(tagName)" in script
+    assert "APP_DESCRIPTION_ALLOWED_TAG_SET.has(tagName)" in script
+    assert "appendSanitizedChildren(fragment)" in script
+    assert "onload" not in script
+    assert "onclick" not in script
+    assert "copySafeAttribute(source, target, \"title\")" in script
+    assert "copySafeAttribute(source, target, \"alt\")" in script
+    assert "copySafeAttribute(source, target, \"allow\")" in script
+    assert "copyDimensionAttribute(source, target, \"width\")" in script
+    assert "copyDimensionAttribute(source, target, \"height\")" in script
+    assert "copyLoadingAttribute(source, target)" in script
+    assert "allowfullscreen" in script
+    assert "target = \"_blank\"" in script
+    assert "rel = \"noopener\"" in script
+    assert "function isSafeAppDescriptionUrl" in script
+    assert "[\"http:\", \"https:\"].includes" in script
+    assert "url.startsWith(\"//\")" in script
+    assert "url.startsWith(\"/\")" in script
+    assert 'tagName === "img" || tagName === "iframe"' in script
+
+
 def test_static_viewer_implements_no_flatgeobuf_and_artifact_only_states() -> None:
     script = (VIEWER_DIR / "app.js").read_text(encoding="utf-8")
 
@@ -91,15 +183,15 @@ def test_static_viewer_uses_manifest_viewer_map_title_for_conditional_header() -
     assert "function viewerMapTitle(manifest)" in script
     assert "viewer.map_title" in script
     assert "String(title).trim()" in script
-    assert "function renderMapTitleHeader" in script
+    assert "function renderAppHeader" in script
     assert 'byId("map-title-header")' in script
     assert 'byId("map-title")' in script
     assert "titleNode.textContent = title" in script
-    assert "header.hidden = !title" in script
+    assert "titleNode.hidden = !title" in script
 
     helper_body = script[
         script.index("function viewerMapTitle(manifest)") :
-        script.index("function renderMapTitleHeader")
+        script.index("function viewerAppDescription")
     ]
     assert "manifest.title" not in helper_body
     assert "source" not in helper_body
