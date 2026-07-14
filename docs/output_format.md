@@ -77,14 +77,14 @@ Initial MVP versions:
 
 ```json
 {
-  "bundle_schema_version": "0.1.0",
-  "viewer_contract_version": "0.1.0",
-  "occurrence_schema_version": "0.1.0"
+  "bundle_schema_version": "0.1.2",
+  "viewer_contract_version": "0.1.2",
+  "occurrence_schema_version": "0.1.2"
 }
 ```
 
-In `v0.1.0`, these versions identify the initial prototype schemas and
-viewer contract. Breaking changes after `v0.1.0` require a new schema or
+In `v0.1.2`, these versions identify the initial prototype schemas and
+viewer contract. Breaking changes after `v0.1.2` require a new schema or
 contract version and migration notes.
 
 ## Canonical Occurrence Schema And Projections
@@ -234,15 +234,15 @@ Example with FlatGeobuf and GeoParquet selected, and rejected records present:
 
 ```json
 {
-  "bundle_schema_version": "0.1.0",
-  "viewer_contract_version": "0.1.0",
-  "occurrence_schema_version": "0.1.0",
+  "bundle_schema_version": "0.1.2",
+  "viewer_contract_version": "0.1.2",
+  "occurrence_schema_version": "0.1.2",
   "id": "dwca-geo-20260604-001",
   "title": "Example occurrence dataset",
   "created_at": "2026-06-04T12:00:00Z",
   "generator": {
     "name": "dwca-cloud-geospatial",
-    "version": "0.1.0",
+    "version": "0.1.2",
     "commit": null
   },
   "source": {

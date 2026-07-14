@@ -32,6 +32,7 @@ metadata, outputs and FlatGeobuf occurrence points from static files.
 
 ![DwC-A Cloud Geospatial static viewer](docs/assets/viewer-screenshot.png)
 
+
 ## Project Status
 
 This repository is at the initial prototype stage. The first goal is to prove a simple, reproducible workflow:
@@ -41,10 +42,6 @@ This repository is at the initial prototype stage. The first goal is to prove a 
 3. Convert the data into cloud-friendly geospatial formats.
 4. Publish the generated files as static assets.
 5. Explore the result in a browser-based MapLibre viewer.
-
-`v0.1.0` is an initial prototype release. APIs, file layouts and
-command-line interfaces are usable for evaluation and demo workflows, but may
-change as the converter, bundle contract and viewer mature.
 
 Checklist DwC-A archives with `Taxon` cores can be inspected, but the MVP
 conversion workflow targets occurrence archives that declare coordinate terms.

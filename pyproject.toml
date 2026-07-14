@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dwca-cloud-geospatial"
-version = "0.1.1"
+version = "0.1.2"
 description = "Convert Darwin Core Archive datasets into cloud-friendly geospatial outputs."
 readme = "README.md"
 requires-python = ">=3.10"

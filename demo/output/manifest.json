@@ -1,12 +1,12 @@
 {
-  "bundle_schema_version": "0.1.0",
+  "bundle_schema_version": "0.1.2",
   "counts": {
     "accepted_records": 1168,
     "occurrence_records": 1168,
     "rejected_records": 0,
     "source_records": 1168
   },
-  "created_at": "2026-07-14T18:36:12Z",
+  "created_at": "2026-07-14T20:56:15Z",
   "files": [
     {
       "bytes": 120578,
@@ -22,7 +22,7 @@
       "path": "metadata/processing.json",
       "record_count": null,
       "role": "metadata",
-      "sha256": "5e7068d6e35a3bf129dbdf2271d5c159bb000d479fe74d88f560862150cb130c"
+      "sha256": "ab1d0659a4c468da7c5f85b653326239c783af5d8aaddb93ef6cb91f873f2f52"
     },
     {
       "bytes": 84717,
@@ -38,7 +38,7 @@
       "path": "data/occurrences.gpkg",
       "record_count": 1168,
       "role": "geopackage",
-      "sha256": "3706af56b91ab7000594b1bc78774ffea8b4721374a3ab0bcfbf850fc2405ac4"
+      "sha256": "c24dff0351d4079bdf5e7e6ca279ea45b2b3cc9699a0fc584aab862e426f1ab3"
     },
     {
       "bytes": 651192,
@@ -52,9 +52,9 @@
   "generator": {
     "commit": null,
     "name": "dwca-cloud-geospatial",
-    "version": "0.1.0"
+    "version": "0.1.2"
   },
-  "id": "dwca-geo-96f0fb157296",
+  "id": "dwca-geo-cfb371d9f713",
   "layers": [
     {
       "bounds": [
@@ -95,7 +95,7 @@
       "type": "point"
     }
   ],
-  "occurrence_schema_version": "0.1.0",
+  "occurrence_schema_version": "0.1.2",
   "source": {
     "citation": "GBIF.org (4 June 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.3xbk5b",
     "doi": "10.15468/dl.3xbk5b",
@@ -108,7 +108,7 @@
   },
   "title": "GBIF Occurrence Download 0038004-260519110011954",
   "viewer": {
-    "appDescription": "<center><h3>Demo application</h3></center><p>Biodiversity data downloaded from <a href='https://www.gbif.org/occurrence/download/0038004-260519110011954' target='_blank'>GBIF</a>.</p><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/ixLtxP824Og?si=fe90FtrDhUN4fvbM\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe><br><p>Supported HTML Tags: p, b, i, h2, h3, h4, a, img, br, ol, ul, li, table, tr, td, iframe, center, small</p>",
+    "appDescription": "<center><h2>About this map</h2></center><p>Publisher-authored HTML.</p><p>Supported HTML Tags: p, b, i, h2, h3, h4, a, img, br, ol, ul, li, table, tr, td, iframe, center, small</p><iframe src=\"https://www.youtube.com/embed/ixLtxP824Og?si=fe90FtrDhUN4fvbM\" title=\"YouTube video player\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" width=\"560\" height=\"315\" allowfullscreen=></iframe>",
     "default_layer": "occurrences",
     "display_fields": [
       "scientific_name",
@@ -155,7 +155,7 @@
       -72.622907,
       20.083333
     ],
-    "map_title": "Biodiversity of Tortuga Island, Dominican Republic",
+    "map_title": "Custom map title, edit it in manifest.json",
     "visibility": {
       "bottom-panels": {
         "bottom-panels-content": {
@@ -164,7 +164,7 @@
           },
           "is_visible": true,
           "processing": {
-            "is_visible": false
+            "is_visible": true
           }
         },
         "is_visible": true
@@ -181,7 +181,7 @@
             "is_visible": true
           },
           "processing.json": {
-            "is_visible": false
+            "is_visible": true
           },
           "source.json": {
             "is_visible": true
@@ -217,18 +217,18 @@
           "is_visible": true
         },
         "header": {
-          "is_visible": false
+          "is_visible": true
         },
         "is_visible": true,
         "provenance": {
           "archive_sha256": {
-            "is_visible": false
+            "is_visible": true
           },
           "citation": {
             "is_visible": true
           },
           "converter": {
-            "is_visible": false
+            "is_visible": true
           },
           "dataset_title": {
             "is_visible": true
@@ -237,7 +237,7 @@
             "is_visible": true
           },
           "doi": {
-            "is_visible": false
+            "is_visible": true
           },
           "gbif_dataset_key": {
             "is_visible": true
@@ -253,16 +253,16 @@
             "is_visible": true
           },
           "publisher": {
-            "is_visible": false
+            "is_visible": true
           },
           "rights_holder": {
-            "is_visible": false
+            "is_visible": true
           },
           "source_archive": {
-            "is_visible": false
+            "is_visible": true
           },
           "validation": {
-            "is_visible": false
+            "is_visible": true
           }
         }
       },
@@ -274,5 +274,5 @@
       }
     }
   },
-  "viewer_contract_version": "0.1.0"
+  "viewer_contract_version": "0.1.2"
 }

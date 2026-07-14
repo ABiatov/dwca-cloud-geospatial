@@ -18,7 +18,7 @@ keywords:
   - FlatGeobuf
   - MapLibre
 license: AGPL-3.0-only
-version: 0.1.0
-date-released: 2026-06-21
+version: 0.1.2
+date-released: 2026-07-14
 repository-code: "https://github.com/ABiatov/dwca-cloud-geospatial"
 url: "https://github.com/ABiatov/dwca-cloud-geospatial"

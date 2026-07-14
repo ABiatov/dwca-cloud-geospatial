@@ -1,7 +1,7 @@
 {
-  "bundle_schema_version": "0.1.0",
-  "viewer_contract_version": "0.1.0",
-  "occurrence_schema_version": "0.1.0",
+  "bundle_schema_version": "0.1.2",
+  "viewer_contract_version": "0.1.2",
+  "occurrence_schema_version": "0.1.2",
   "id": "viewer-contract-selective-visibility",
   "title": "Selective visibility fixture",
   "files": [],

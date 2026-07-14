@@ -35,14 +35,15 @@ from dwca_cloud_geospatial.normalization import (
 from dwca_cloud_geospatial.occurrence import OccurrenceReadResult, OccurrenceSourceRecord
 
 
-BUNDLE_SCHEMA_VERSION = "0.1.0"
-VIEWER_CONTRACT_VERSION = "0.1.0"
-OCCURRENCE_SCHEMA_VERSION = "0.1.0"
+BUNDLE_SCHEMA_VERSION = "0.1.2"
+VIEWER_CONTRACT_VERSION = "0.1.2"
+OCCURRENCE_SCHEMA_VERSION = "0.1.2"
 DEFAULT_VIEWER_MAP_TITLE = "Custom map title, edit it in manifest.json"
 DEFAULT_VIEWER_APP_DESCRIPTION = (
     "<center><h2>About this map</h2></center><p>Publisher-authored HTML.</p>"
     "<p>Supported HTML Tags: p, b, i, h2, h3, h4, a, img, br, ol, ul, li, "
     "table, tr, td, iframe, center, small</p>"
+    "<iframe src=\"https://www.youtube.com/embed/ixLtxP824Og?si=fe90FtrDhUN4fvbM\" title=\"YouTube video player\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" width=\"560\" height=\"315\" allowfullscreen=""></iframe>"
 )
 DEFAULT_VIEWER_VISIBILITY: dict[str, Any] = {
     "panel-info": {

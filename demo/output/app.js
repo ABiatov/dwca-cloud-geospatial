@@ -1,8 +1,8 @@
 (function () {
   "use strict";
 
-  const SUPPORTED_BUNDLE_SCHEMA_VERSION = "0.1.0";
-  const SUPPORTED_VIEWER_CONTRACT_VERSION = "0.1.0";
+  const SUPPORTED_BUNDLE_SCHEMA_VERSION = "0.1.2";
+  const SUPPORTED_VIEWER_CONTRACT_VERSION = "0.1.2";
   const SOURCE_METADATA_PATH = "metadata/source.json";
   const PROCESSING_METADATA_PATH = "metadata/processing.json";
   const ARTIFACT_DISPLAY_ORDER = [

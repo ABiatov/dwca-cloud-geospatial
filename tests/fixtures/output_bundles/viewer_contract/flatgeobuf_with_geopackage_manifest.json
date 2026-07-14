@@ -1,13 +1,13 @@
 {
-  "bundle_schema_version": "0.1.0",
-  "viewer_contract_version": "0.1.0",
-  "occurrence_schema_version": "0.1.0",
+  "bundle_schema_version": "0.1.2",
+  "viewer_contract_version": "0.1.2",
+  "occurrence_schema_version": "0.1.2",
   "id": "viewer-contract-flatgeobuf",
   "title": "Viewer contract FlatGeobuf fixture",
   "created_at": "2026-06-19T12:00:00Z",
   "generator": {
     "name": "dwca-cloud-geospatial",
-    "version": "0.1.0",
+    "version": "0.1.2",
     "commit": null
   },
   "source": {
@@ -84,7 +84,7 @@
       60.0
     ],
     "map_title": "Custom publisher-facing map title",
-    "appDescription": "<center><h2>About this map</h2></center><p>Publisher-authored HTML.</p><p>Supported HTML Tags: p, b, i, h2, h3, h4, a, img, br, ol, ul, li, table, tr, td, iframe, center, small</p>",
+    "appDescription": "<center><h2>About this map</h2></center><p>Publisher-authored HTML.</p><p>Supported HTML Tags: p, b, i, h2, h3, h4, a, img, br, ol, ul, li, table, tr, td, iframe, center, small</p><iframe src=\"https://www.youtube.com/embed/ixLtxP824Og?si=fe90FtrDhUN4fvbM\" title=\"YouTube video player\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" width=\"560\" height=\"315\" allowfullscreen=></iframe>",
     "visibility": {
       "panel-info": {
         "is_visible": true,

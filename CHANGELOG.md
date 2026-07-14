@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## v0.1.0 - 2026-06-21
+## v0.1.2 - 2026-07-14
 
 Initial public prototype release of the DwC-A to cloud-optimized geospatial
 conversion workflow.
