@@ -69,6 +69,11 @@ button:focus-visible {
   grid-template-columns: var(--ctrl-width) var(--panel-width) minmax(0, 1fr);
 }
 
+.viewer-shell.control-strip-hidden,
+.viewer-shell.control-strip-hidden.panel-open {
+  grid-template-columns: 0px 0px minmax(0, 1fr);
+}
+
 /* ---- Control strip ---- */
 
 .control-strip {
@@ -96,6 +101,16 @@ button:focus-visible {
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
   position: relative;
+}
+
+.ctrl-btn[hidden],
+.control-strip[hidden],
+.sidebar-panels[hidden],
+.bottom-panels[hidden],
+.bottom-toggle-bar[hidden],
+.bottom-panels-content[hidden],
+.record-panel[hidden] {
+  display: none !important;
 }
 
 .ctrl-btn:hover,
@@ -768,6 +783,11 @@ button:focus-visible {
 
   .viewer-shell.panel-open {
     grid-template-columns: var(--ctrl-width) minmax(260px, 340px) minmax(0, 1fr);
+  }
+
+  .viewer-shell.control-strip-hidden,
+  .viewer-shell.control-strip-hidden.panel-open {
+    grid-template-columns: 0px 0px minmax(0, 1fr);
   }
 
   .workspace {

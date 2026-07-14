@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
+from copy import deepcopy
 import csv
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -43,6 +44,61 @@ DEFAULT_VIEWER_APP_DESCRIPTION = (
     "<p>Supported HTML Tags: p, b, i, h2, h3, h4, a, img, br, ol, ul, li, "
     "table, tr, td, iframe, center, small</p>"
 )
+DEFAULT_VIEWER_VISIBILITY: dict[str, Any] = {
+    "panel-info": {
+        "is_visible": True,
+        "header": {"is_visible": True},
+        "counts": {"is_visible": True},
+        "provenance": {
+            "is_visible": True,
+            "dataset_title": {"is_visible": True},
+            "description": {"is_visible": True},
+            "publisher": {"is_visible": True},
+            "doi": {"is_visible": True},
+            "citation": {"is_visible": True},
+            "license": {"is_visible": True},
+            "rights_holder": {"is_visible": True},
+            "source_archive": {"is_visible": True},
+            "archive_sha256": {"is_visible": True},
+            "gbif_dataset_key": {"is_visible": True},
+            "gbif_download_key": {"is_visible": True},
+            "generated": {"is_visible": True},
+            "converter": {"is_visible": True},
+            "validation": {"is_visible": True},
+        },
+    },
+    "panel-filters": {
+        "is_visible": True,
+        "filter_groups": {
+            "scientific_name": {"is_visible": True},
+            "kingdom": {"is_visible": True},
+            "iucn_red_list_category": {"is_visible": True},
+            "event_year": {"is_visible": True},
+            "basis_of_record": {"is_visible": True},
+            "quality_flags": {"is_visible": True},
+        },
+    },
+    "panel-records": {"is_visible": True},
+    "panel-download": {
+        "is_visible": True,
+        "artifacts": {
+            "occurrences.fgb": {"is_visible": True},
+            "occurrences.gpkg": {"is_visible": True},
+            "occurrences.parquet": {"is_visible": True},
+            "source.json": {"is_visible": True},
+            "processing.json": {"is_visible": True},
+        },
+    },
+    "bottom-panels": {
+        "is_visible": True,
+        "bottom-panels-content": {
+            "is_visible": True,
+            "feature_details": {"is_visible": True},
+            "processing": {"is_visible": True},
+        },
+    },
+    "popup": {"is_visible": True},
+}
 
 MANIFEST_RELATIVE_PATH = Path("manifest.json")
 SOURCE_METADATA_RELATIVE_PATH = Path("metadata/source.json")
@@ -144,6 +200,7 @@ class BundleWriterOptions:
     generator_commit: str | None = None
     viewer_map_title: str | None = DEFAULT_VIEWER_MAP_TITLE
     viewer_app_description: str | None = DEFAULT_VIEWER_APP_DESCRIPTION
+    viewer_visibility: Mapping[str, Any] | None = None
     configuration: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
@@ -233,6 +290,7 @@ def write_bundle_metadata(
         flatgeobuf_result=flatgeobuf_result,
         map_title=writer_options.viewer_map_title,
         app_description=writer_options.viewer_app_description,
+        visibility=writer_options.viewer_visibility,
     )
     manifest = {
         "bundle_schema_version": BUNDLE_SCHEMA_VERSION,
@@ -683,6 +741,7 @@ def _viewer_defaults(
     flatgeobuf_result: FlatGeobufWriteResult | None,
     map_title: str | None,
     app_description: str | None,
+    visibility: Mapping[str, Any] | None,
 ) -> dict[str, Any]:
     columns = (
         flatgeobuf_result.columns
@@ -701,6 +760,7 @@ def _viewer_defaults(
         "filter_fields": [
             field for field in FILTER_FIELD_CANDIDATES if field in column_set
         ],
+        "visibility": _viewer_visibility(visibility),
     }
     normalized_title = _normalize_viewer_map_title(map_title)
     if normalized_title is not None:
@@ -709,6 +769,24 @@ def _viewer_defaults(
     if normalized_description is not None:
         viewer["appDescription"] = normalized_description
     return viewer
+
+
+def _viewer_visibility(overrides: Mapping[str, Any] | None) -> dict[str, Any]:
+    """Return the complete viewer visibility schema with known overrides merged."""
+
+    visibility = deepcopy(DEFAULT_VIEWER_VISIBILITY)
+    if isinstance(overrides, Mapping):
+        _merge_known_mapping(visibility, overrides)
+    return visibility
+
+
+def _merge_known_mapping(target: dict[str, Any], overrides: Mapping[str, Any]) -> None:
+    for key, value in overrides.items():
+        current = target.get(key)
+        if isinstance(current, dict) and isinstance(value, Mapping):
+            _merge_known_mapping(current, value)
+        elif key == "is_visible" and key in target:
+            target[key] = False if value is False else True
 
 
 def _normalize_viewer_map_title(value: str | None) -> str | None:

@@ -199,6 +199,74 @@ def test_static_viewer_uses_manifest_viewer_map_title_for_conditional_header() -
     assert "layer" not in helper_body
 
 
+def test_static_viewer_resolves_manifest_visibility_safely_and_gates_controls() -> None:
+    index = (VIEWER_DIR / "index.html").read_text(encoding="utf-8")
+    script = (VIEWER_DIR / "app.js").read_text(encoding="utf-8")
+    styles = (VIEWER_DIR / "styles.css").read_text(encoding="utf-8")
+
+    assert "function viewerVisibility(manifest)" in script
+    assert "function viewerElementVisible(path, manifest = state.manifest)" in script
+    assert 'node.is_visible === false' in script
+    assert 'path.split(".")' in script
+    assert "function applyManifestVisibility()" in script
+    assert 'viewerElementVisible(`panel-${panelName}`)' in script
+    assert 'viewerElementVisible("popup")' in script
+    assert 'byId("control-strip").hidden = !hasSidebarLauncher' in script
+    assert "control-strip-hidden" in styles
+    for element_id in (
+        "control-strip",
+        "panel-info-header",
+        "panel-info-counts",
+        "panel-info-provenance",
+        "bottom-toggle-bar",
+        "bottom-feature-details",
+        "bottom-processing",
+    ):
+        assert f'id="{element_id}"' in index
+
+
+def test_static_viewer_visibility_gates_named_children_without_hiding_unlisted_rows() -> None:
+    script = (VIEWER_DIR / "app.js").read_text(encoding="utf-8")
+
+    for key in (
+        "dataset_title",
+        "description",
+        "publisher",
+        "doi",
+        "citation",
+        "license",
+        "rights_holder",
+        "source_archive",
+        "archive_sha256",
+        "gbif_dataset_key",
+        "gbif_download_key",
+        "generated",
+        "converter",
+        "validation",
+    ):
+        assert f'"{key}"' in script
+    assert '[null, "Homepage", dataset.homepage]' in script
+    assert '[null, "OBIS dataset id", obis.dataset_id' in script
+    for key in (
+        "scientific_name",
+        "kingdom",
+        "iucn_red_list_category",
+        "event_year",
+        "basis_of_record",
+        "quality_flags",
+    ):
+        assert f'panel-filters.filter_groups.${{field}}' in script
+    assert "function clearHiddenFilterState()" in script
+    assert "VISIBILITY_ARTIFACT_PATHS" in script
+    assert "function artifactVisibilityKey(path)" in script
+    assert '["panel-download", "artifacts", visibilityKey]' in script
+    assert 'const keys = Array.isArray(path) ? path : path.split(".");' in script
+    assert ".ctrl-btn[hidden]" in (VIEWER_DIR / "styles.css").read_text(encoding="utf-8")
+    assert "bottom-panels.bottom-toggle-bar" not in script
+    assert "bottom-panels.bottom-panels-content.feature_details" in script
+    assert "bottom-panels.bottom-panels-content.processing" in script
+
+
 def test_static_viewer_orders_generated_file_links_for_review() -> None:
     script = (VIEWER_DIR / "app.js").read_text(encoding="utf-8")
 

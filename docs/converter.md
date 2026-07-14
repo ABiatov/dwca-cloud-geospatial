@@ -91,7 +91,8 @@ These publishing convenience files are not listed in `manifest.files`; that
 inventory remains reserved for generated data, metadata and report artifacts.
 Opening `index.html` from a static HTTP server reads the neighboring
 `manifest.json`. `README.md` describes the generated bundle and should not be
-confused with the source `viewer/README.md`.
+confused with the source `viewer/README.md`; both include the publisher-facing
+visibility-control instructions relevant to their context.
 
 The viewer-facing map Header title and App Description popup are configured
 independently from dataset metadata and bundle provenance. New generated
@@ -130,6 +131,30 @@ set `BundleWriterOptions.viewer_app_description` through Python or manually
 edit the generated default at `manifest.viewer.appDescription` after
 conversion. The static viewer sanitizes this HTML before rendering it in the
 Header App Description popup.
+
+New generated manifests also include the complete all-visible
+`manifest.viewer.visibility` tree. To hide a supported viewer element during
+conversion, pass only the nested override that differs; the writer merges it
+with the documented defaults without changing map title, app description,
+file inventory, layers or provenance:
+
+```python
+ConversionOptions(
+    bundle=BundleWriterOptions(
+        viewer_visibility={
+            "panel-info": {"provenance": {"doi": {"is_visible": False}}},
+            "panel-download": {
+                "artifacts": {"occurrences.gpkg": {"is_visible": False}}
+            },
+            "popup": {"is_visible": False},
+        }
+    )
+)
+```
+
+Only the boolean value `False` hides an element in the browser. Publishers can
+also edit `manifest.viewer.visibility` after conversion; omitted and partial
+trees keep all unspecified elements visible.
 
 Large GeoParquet output is enabled through `GeoParquetWriterOptions` on the
 core API and through explicit CLI flags. It keeps the default conversion

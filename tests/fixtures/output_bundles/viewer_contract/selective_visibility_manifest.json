@@ -1,0 +1,66 @@
+{
+  "bundle_schema_version": "0.1.0",
+  "viewer_contract_version": "0.1.0",
+  "occurrence_schema_version": "0.1.0",
+  "id": "viewer-contract-selective-visibility",
+  "title": "Selective visibility fixture",
+  "files": [],
+  "layers": [],
+  "viewer": {
+    "visibility": {
+      "panel-info": {
+        "is_visible": true,
+        "header": { "is_visible": true },
+        "counts": { "is_visible": true },
+        "provenance": {
+          "is_visible": true,
+          "dataset_title": { "is_visible": true },
+          "description": { "is_visible": true },
+          "publisher": { "is_visible": true },
+          "doi": { "is_visible": false },
+          "citation": { "is_visible": true },
+          "license": { "is_visible": true },
+          "rights_holder": { "is_visible": true },
+          "source_archive": { "is_visible": true },
+          "archive_sha256": { "is_visible": true },
+          "gbif_dataset_key": { "is_visible": true },
+          "gbif_download_key": { "is_visible": true },
+          "generated": { "is_visible": true },
+          "converter": { "is_visible": true },
+          "validation": { "is_visible": true }
+        }
+      },
+      "panel-filters": {
+        "is_visible": true,
+        "filter_groups": {
+          "scientific_name": { "is_visible": true },
+          "kingdom": { "is_visible": true },
+          "iucn_red_list_category": { "is_visible": true },
+          "event_year": { "is_visible": true },
+          "basis_of_record": { "is_visible": true },
+          "quality_flags": { "is_visible": true }
+        }
+      },
+      "panel-records": { "is_visible": true },
+      "panel-download": {
+        "is_visible": true,
+        "artifacts": {
+          "occurrences.fgb": { "is_visible": true },
+          "occurrences.gpkg": { "is_visible": false },
+          "occurrences.parquet": { "is_visible": true },
+          "source.json": { "is_visible": true },
+          "processing.json": { "is_visible": true }
+        }
+      },
+      "bottom-panels": {
+        "is_visible": true,
+        "bottom-panels-content": {
+          "is_visible": true,
+          "feature_details": { "is_visible": true },
+          "processing": { "is_visible": true }
+        }
+      },
+      "popup": { "is_visible": false }
+    }
+  }
+}

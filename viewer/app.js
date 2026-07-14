@@ -12,6 +12,13 @@
     SOURCE_METADATA_PATH,
     PROCESSING_METADATA_PATH,
   ];
+  const VISIBILITY_ARTIFACT_PATHS = Object.freeze({
+    "data/occurrences.fgb": "occurrences.fgb",
+    "data/occurrences.gpkg": "occurrences.gpkg",
+    "data/occurrences.parquet": "occurrences.parquet",
+    [SOURCE_METADATA_PATH]: "source.json",
+    [PROCESSING_METADATA_PATH]: "processing.json",
+  });
   const FIELD_LABEL_OVERRIDES = {
     iucn_red_list_category: "IUCN Red List Categories",
   };
@@ -125,6 +132,29 @@
 
   function byId(id) {
     return document.getElementById(id);
+  }
+
+  function viewerVisibility(manifest) {
+    const viewer = manifest && typeof manifest.viewer === "object" ? manifest.viewer : null;
+    const visibility = viewer && viewer.visibility;
+    return visibility && typeof visibility === "object" && !Array.isArray(visibility)
+      ? visibility
+      : {};
+  }
+
+  function viewerElementVisible(path, manifest = state.manifest) {
+    let node = viewerVisibility(manifest);
+    const keys = Array.isArray(path) ? path : path.split(".");
+    for (const key of keys) {
+      if (node && node.is_visible === false) {
+        return false;
+      }
+      if (!node || typeof node !== "object" || Array.isArray(node)) {
+        return true;
+      }
+      node = node[key];
+    }
+    return !(node && typeof node === "object" && node.is_visible === false);
   }
 
   function setStatus(message, isError) {
@@ -607,21 +637,22 @@
     const obis = source.obis || {};
     const archive = source.source_archive || {};
     return [
-      ["Dataset title", dataset.title || state.manifest.title || manifestSource.title],
-      ["Description", dataset.description],
-      ["Publisher", dataset.publisher || manifestSource.publisher],
-      ["Homepage", dataset.homepage],
-      ["DOI", dataset.doi || gbif.doi || obis.doi || manifestSource.doi],
-      ["Citation", dataset.citation || gbif.citation || obis.citation || manifestSource.citation],
-      ["License", gbif.license || obis.license || rights.license || manifestSource.license],
-      ["Rights holder", rights.rights_holder],
-      ["Source archive", [archive.name, archive.kind, archive.bytes].filter(Boolean).join(" | ")],
-      ["Archive SHA-256", archive.sha256],
-      ["GBIF dataset key", gbif.dataset_key || manifestSource.gbif_dataset_key],
-      ["GBIF download key", gbif.download_key || manifestSource.gbif_download_key],
-      ["OBIS dataset id", obis.dataset_id || manifestSource.obis_dataset_id],
-      ["Generated", state.manifest.created_at || processing.created_at],
+      ["dataset_title", "Dataset title", dataset.title || state.manifest.title || manifestSource.title],
+      ["description", "Description", dataset.description],
+      ["publisher", "Publisher", dataset.publisher || manifestSource.publisher],
+      [null, "Homepage", dataset.homepage],
+      ["doi", "DOI", dataset.doi || gbif.doi || obis.doi || manifestSource.doi],
+      ["citation", "Citation", dataset.citation || gbif.citation || obis.citation || manifestSource.citation],
+      ["license", "License", gbif.license || obis.license || rights.license || manifestSource.license],
+      ["rights_holder", "Rights holder", rights.rights_holder],
+      ["source_archive", "Source archive", [archive.name, archive.kind, archive.bytes].filter(Boolean).join(" | ")],
+      ["archive_sha256", "Archive SHA-256", archive.sha256],
+      ["gbif_dataset_key", "GBIF dataset key", gbif.dataset_key || manifestSource.gbif_dataset_key],
+      ["gbif_download_key", "GBIF download key", gbif.download_key || manifestSource.gbif_download_key],
+      [null, "OBIS dataset id", obis.dataset_id || manifestSource.obis_dataset_id],
+      ["generated", "Generated", state.manifest.created_at || processing.created_at],
       [
+        "converter",
         "Converter",
         [
           state.manifest.generator && state.manifest.generator.name,
@@ -630,14 +661,17 @@
           .filter(Boolean)
           .join(" "),
       ],
-      ["Validation", processing.validation && processing.validation.status],
+      ["validation", "Validation", processing.validation && processing.validation.status],
     ];
   }
 
   function renderProvenance() {
     const list = byId("provenance-list");
     list.replaceChildren();
-    for (const [label, value] of provenanceRows()) {
+    for (const [key, label, value] of provenanceRows()) {
+      if (key && !viewerElementVisible(`panel-info.provenance.${key}`)) {
+        continue;
+      }
       addProvenanceDefinition(list, label, value);
     }
   }
@@ -655,6 +689,10 @@
       return "processing.json (metadata)";
     }
     return path.startsWith("data/") ? path.slice("data/".length) : path;
+  }
+
+  function artifactVisibilityKey(path) {
+    return VISIBILITY_ARTIFACT_PATHS[path] || null;
   }
 
   function legacyCopyText(text) {
@@ -710,9 +748,16 @@
         (left, right) =>
           artifactDisplayRank(left.entry.path) -
             artifactDisplayRank(right.entry.path) || left.index - right.index
-      )
+    )
       .map((item) => item.entry);
     for (const entry of files) {
+      const visibilityKey = artifactVisibilityKey(entry.path);
+      if (
+        visibilityKey &&
+        !viewerElementVisible(["panel-download", "artifacts", visibilityKey])
+      ) {
+        continue;
+      }
       const item = document.createElement("article");
       item.className = "artifact";
       const artifactUrl = urlForBundlePath(entry.path).href;
@@ -986,7 +1031,8 @@
     container.replaceChildren();
     const declared = (state.manifest.viewer && state.manifest.viewer.filter_fields) || [];
     const available = declared.filter((field) =>
-      state.allFeatures.some((feature) => featureHasField(feature, field))
+      state.allFeatures.some((feature) => featureHasField(feature, field)) &&
+      viewerElementVisible(`panel-filters.filter_groups.${field}`)
     );
     if (!available.length) {
       const notice = document.createElement("p");
@@ -1248,6 +1294,93 @@
     closePointPopup();
   }
 
+  function clearHiddenFilterState() {
+    const groups = [
+      "scientific_name",
+      "kingdom",
+      "iucn_red_list_category",
+      "event_year",
+      "basis_of_record",
+      "quality_flags",
+    ];
+    for (const group of groups) {
+      if (viewerElementVisible(`panel-filters.filter_groups.${group}`)) {
+        continue;
+      }
+      if (group === "scientific_name") {
+        state.filters.scientific_name = "";
+      } else if (group === "event_year") {
+        state.filters.year_min = "";
+        state.filters.year_max = "";
+      } else if (group === "quality_flags") {
+        state.filters.quality_mode = "all";
+        state.filters.quality_tokens = new Set();
+      } else {
+        delete state.filters.categories[group];
+      }
+    }
+  }
+
+  function setBottomCollapsed(bottomPanels, toggleBtn, collapsed) {
+    bottomPanels.classList.toggle("collapsed", collapsed);
+    const icon = toggleBtn.querySelector(".toggle-icon");
+    if (icon) {
+      icon.textContent = collapsed ? "▶" : "▼";
+    }
+  }
+
+  function applyManifestVisibility() {
+    const shell = document.querySelector(".viewer-shell");
+    const panelIds = ["panel-info", "panel-filters", "panel-records", "panel-download"];
+    const activePanelId = activePanel ? `panel-${activePanel}` : null;
+    if (activePanelId && !viewerElementVisible(activePanelId)) {
+      closePanel();
+    }
+    for (const panelId of panelIds) {
+      const visible = viewerElementVisible(panelId);
+      const panel = byId(panelId);
+      const button = document.querySelector(`.ctrl-btn[data-panel="${panelId.slice(6)}"]`);
+      if (button) {
+        button.hidden = !visible;
+      }
+      if (!visible && panel) {
+        panel.hidden = true;
+      }
+    }
+    const hasSidebarLauncher = panelIds.some((panelId) => viewerElementVisible(panelId));
+    byId("control-strip").hidden = !hasSidebarLauncher;
+    byId("sidebar-panels").hidden = !hasSidebarLauncher;
+    shell.classList.toggle("control-strip-hidden", !hasSidebarLauncher);
+
+    byId("panel-info-header").hidden = !viewerElementVisible("panel-info.header");
+    byId("panel-info-counts").hidden = !viewerElementVisible("panel-info.counts");
+    byId("panel-info-provenance").hidden = !viewerElementVisible("panel-info.provenance");
+    clearHiddenFilterState();
+
+    const bottomPanels = byId("bottom-panels");
+    const toggleBar = byId("bottom-toggle-bar");
+    const toggleBtn = byId("bottom-toggle");
+    const content = byId("bottom-panels-content");
+    const bottomVisible = viewerElementVisible("bottom-panels");
+    const contentVisible = viewerElementVisible("bottom-panels.bottom-panels-content");
+    bottomPanels.hidden = !bottomVisible;
+    toggleBar.hidden = !bottomVisible;
+    content.hidden = !bottomVisible || !contentVisible;
+    byId("bottom-feature-details").hidden = !viewerElementVisible(
+      "bottom-panels.bottom-panels-content.feature_details"
+    );
+    byId("bottom-processing").hidden = !viewerElementVisible(
+      "bottom-panels.bottom-panels-content.processing"
+    );
+    toggleBtn.hidden = !bottomVisible || !contentVisible;
+    if (!viewerElementVisible("popup")) {
+      closePointPopup();
+    }
+    if (state.map) {
+      state.map.resize();
+    }
+  }
+
   const POPUP_FIELDS = null;  // now computed dynamically from manifest.viewer.display_fields + knownDetailFields
 
   function popupFieldsForFeature(feature) {
@@ -1287,7 +1420,7 @@
 
   function showPointPopup(feature, lngLat) {
     closePointPopup();
-    if (!state.map) {
+    if (!state.map || !viewerElementVisible("popup")) {
       return;
     }
     const popup = new window.maplibregl.Popup({
@@ -1349,6 +1482,9 @@
   let activePanel = null;
 
   function openPanel(panelName) {
+    if (!viewerElementVisible(`panel-${panelName}`)) {
+      return;
+    }
     if (activePanel === panelName) {
       closePanel();
       return;
@@ -1404,11 +1540,11 @@
       return;
     }
     toggleBtn.addEventListener("click", () => {
-      bottomPanels.classList.toggle("collapsed");
-      const icon = toggleBtn.querySelector(".toggle-icon");
-      if (icon) {
-        icon.textContent = bottomPanels.classList.contains("collapsed") ? "▶" : "▼";
-      }
+      setBottomCollapsed(
+        bottomPanels,
+        toggleBtn,
+        !bottomPanels.classList.contains("collapsed")
+      );
       if (state.map) {
         setTimeout(() => state.map.resize(), 260);
       }
@@ -1424,6 +1560,7 @@
       state.bundleRoot = new URL(".", manifestUrl);
       state.manifest = await fetchJson(manifestUrl);
       requireSupportedVersions(state.manifest);
+      applyManifestVisibility();
       renderAppHeader();
       requireMetadataFile(SOURCE_METADATA_PATH);
       requireMetadataFile(PROCESSING_METADATA_PATH);

@@ -641,6 +641,26 @@ The viewer does not require a project backend, database, scheduler or live
 GBIF/OBIS API. Optional external frontend assets and basemap tiles depend on
 the copied viewer configuration.
 
+## Viewer Visibility Controls
+
+`manifest.viewer.visibility` is optional presentation configuration. New
+generated manifests contain the complete all-visible tree; omitted or partial
+trees keep unspecified elements visible. Only the JSON boolean `false` at an
+`is_visible` node hides the target.
+
+The tree can control sidebar panels and their launcher buttons, Info blocks and
+named provenance rows, filter groups, the named download artifacts, bottom
+panel content/sections and point popups. Artifact keys are `occurrences.fgb`,
+`occurrences.gpkg`, `occurrences.parquet`, `source.json` and
+`processing.json`; they apply only to their standard bundle paths. Unlisted
+inventory artifacts retain normal display.
+
+`bottom-toggle-bar` is not a visibility key. Use `bottom-panels`,
+`bottom-panels-content`, `feature_details` and `processing` for footer
+presentation. Visibility changes only the viewer interface: it does not remove
+inventory files or change data, counts, source metadata or processing
+provenance.
+
 ## Citation And License
 
 Dataset DOI, citation, license, rights holder and GBIF/OBIS provenance are
@@ -740,5 +760,6 @@ def _bundle_options(
         generator_commit=conversion_options.bundle.generator_commit,
         viewer_map_title=conversion_options.bundle.viewer_map_title,
         viewer_app_description=conversion_options.bundle.viewer_app_description,
+        viewer_visibility=conversion_options.bundle.viewer_visibility,
         configuration=configuration,
     )

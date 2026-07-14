@@ -12,6 +12,7 @@ import pytest
 from dwca_cloud_geospatial.bundle import (
     DEFAULT_VIEWER_APP_DESCRIPTION,
     DEFAULT_VIEWER_MAP_TITLE,
+    DEFAULT_VIEWER_VISIBILITY,
     PROCESSING_METADATA_RELATIVE_PATH,
     REJECTED_RECORDS_RELATIVE_PATH,
     SOURCE_METADATA_RELATIVE_PATH,
@@ -385,6 +386,64 @@ def test_bundle_metadata_writes_default_viewer_app_description(
     manifest = _load_json(result.manifest_path)
 
     assert manifest["viewer"]["appDescription"] == DEFAULT_VIEWER_APP_DESCRIPTION
+
+
+def test_bundle_metadata_writes_complete_default_viewer_visibility_tree(
+    tmp_path: Path,
+) -> None:
+    read_result, normalization_result = _read_and_normalize(QUALITY_RULES_FIXTURE_DIR)
+
+    result = write_bundle_metadata(
+        output_directory=tmp_path,
+        occurrence_result=read_result,
+        normalization_result=normalization_result,
+    )
+
+    manifest = _load_json(result.manifest_path)
+
+    assert manifest["viewer"]["visibility"] == DEFAULT_VIEWER_VISIBILITY
+    assert "bottom-toggle-bar" not in manifest["viewer"]["visibility"][
+        "bottom-panels"
+    ]
+
+
+def test_bundle_metadata_merges_viewer_visibility_override_without_other_changes(
+    tmp_path: Path,
+) -> None:
+    read_result, normalization_result = _read_and_normalize(QUALITY_RULES_FIXTURE_DIR)
+
+    result = write_bundle_metadata(
+        output_directory=tmp_path,
+        occurrence_result=read_result,
+        normalization_result=normalization_result,
+        options=BundleWriterOptions(
+            viewer_map_title="Publisher title",
+            viewer_visibility={
+                "panel-info": {"provenance": {"doi": {"is_visible": False}}},
+                "panel-filters": {"is_visible": None},
+                "panel-download": {
+                    "artifacts": {"occurrences.gpkg": {"is_visible": False}}
+                },
+                "popup": {"is_visible": False},
+            },
+        ),
+    )
+
+    viewer = _load_json(result.manifest_path)["viewer"]
+
+    assert viewer["map_title"] == "Publisher title"
+    assert viewer["visibility"]["panel-info"]["provenance"]["doi"] == {
+        "is_visible": False
+    }
+    assert viewer["visibility"]["panel-download"]["artifacts"][
+        "occurrences.gpkg"
+    ] == {"is_visible": False}
+    assert viewer["visibility"]["popup"] == {"is_visible": False}
+    assert viewer["visibility"]["panel-info"]["counts"] == {"is_visible": True}
+    assert viewer["visibility"]["panel-filters"]["is_visible"] is True
+    assert viewer["visibility"]["panel-download"]["artifacts"]["source.json"] == {
+        "is_visible": True
+    }
 
 
 def test_bundle_metadata_omits_blank_viewer_app_description(

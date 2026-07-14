@@ -142,6 +142,51 @@ and iframe sources. Executable or ambiguous schemes such as `javascript:`,
 `data:` and protocol-relative URLs are rejected. Long text, tables, images and
 iframes must scroll within the modal instead of pushing controls off screen.
 
+## Manifest-driven visibility controls
+
+`manifest.viewer.visibility` is optional static presentation configuration.
+Only the boolean value `false` at an `is_visible` node is hidden; missing,
+`null`, non-boolean and `true` values are visible. This permits older bundles
+with no visibility object and partial hand-authored trees. A false parent
+always hides its descendants.
+
+New converter output writes the complete all-true tree below. It is compatible
+with the existing viewer-contract version because visibility is optional for
+readers:
+
+```json
+{
+  "panel-info": {"is_visible": true, "header": {"is_visible": true}, "counts": {"is_visible": true}, "provenance": {"is_visible": true, "dataset_title": {"is_visible": true}, "description": {"is_visible": true}, "publisher": {"is_visible": true}, "doi": {"is_visible": true}, "citation": {"is_visible": true}, "license": {"is_visible": true}, "rights_holder": {"is_visible": true}, "source_archive": {"is_visible": true}, "archive_sha256": {"is_visible": true}, "gbif_dataset_key": {"is_visible": true}, "gbif_download_key": {"is_visible": true}, "generated": {"is_visible": true}, "converter": {"is_visible": true}, "validation": {"is_visible": true}}},
+  "panel-filters": {"is_visible": true, "filter_groups": {"scientific_name": {"is_visible": true}, "kingdom": {"is_visible": true}, "iucn_red_list_category": {"is_visible": true}, "event_year": {"is_visible": true}, "basis_of_record": {"is_visible": true}, "quality_flags": {"is_visible": true}}},
+  "panel-records": {"is_visible": true}, "panel-download": {"is_visible": true, "artifacts": {"occurrences.fgb": {"is_visible": true}, "occurrences.gpkg": {"is_visible": true}, "occurrences.parquet": {"is_visible": true}, "source.json": {"is_visible": true}, "processing.json": {"is_visible": true}}},
+  "bottom-panels": {"is_visible": true, "bottom-panels-content": {"is_visible": true, "feature_details": {"is_visible": true}, "processing": {"is_visible": true}}}, "popup": {"is_visible": true}
+}
+```
+
+Hiding a sidebar panel hides only that panel and its launcher, closes it if it
+was open and leaves other launchers usable. Named Info provenance rows hide
+individually; unlisted Homepage and OBIS dataset id rows are unchanged. Each
+visible filter group still requires both a declared `filter_fields` value and
+a field present on the loaded FlatGeobuf layer; hidden groups never retain a
+stale filter. The Download artifact mapping is:
+
+| Visibility key | Path |
+| --- | --- |
+| `occurrences.fgb` | `data/occurrences.fgb` |
+| `occurrences.gpkg` | `data/occurrences.gpkg` |
+| `occurrences.parquet` | `data/occurrences.parquet` |
+| `source.json` | `metadata/source.json` |
+| `processing.json` | `metadata/processing.json` |
+
+A hidden mapped artifact removes both its link and Copy URL button, but does
+not change `manifest.files`; unknown artifact paths retain normal display.
+Hiding `bottom-panels` removes the complete container. Its toggle bar is not a
+visibility-schema key; `bottom-panels-content` and its two sections provide
+the supported footer controls. Hiding `popup` closes/prevents only MapLibre point popups,
+not point rendering, selection, sidebar records, bottom details or selected
+point highlighting. All behavior remains static and manifest-driven, with no
+backend, database, or live GBIF/OBIS service.
+
 ## Geospatial Layers
 
 The MVP map layer is the first declared layer whose:

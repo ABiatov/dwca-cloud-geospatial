@@ -13,7 +13,7 @@
   <body>
     <main class="viewer-shell">
       <!-- Left control strip – always visible -->
-      <nav class="control-strip" aria-label="Sidebar panel controls">
+      <nav id="control-strip" class="control-strip" aria-label="Sidebar panel controls">
         <button class="ctrl-btn" data-panel="info" title="Dataset Info" aria-label="Dataset Info">
           <img src="assets/pic/pic-info-64.png" alt="" width="28" height="28" />
         </button>
@@ -29,18 +29,18 @@
       </nav>
 
       <!-- Sidebar panels – only one visible at a time -->
-      <aside class="sidebar-panels" aria-label="Sidebar panels">
+      <aside id="sidebar-panels" class="sidebar-panels" aria-label="Sidebar panels">
         <div id="panel-info" class="sidebar-panel" hidden>
-          <header class="app-header">
+          <header id="panel-info-header" class="app-header">
             <p class="eyebrow">DwC-A output bundle</p>
             <h1 id="dataset-title">Loading bundle</h1>
             <p id="bundle-status" class="status-line">Reading manifest.json</p>
           </header>
-          <section class="panel">
+          <section id="panel-info-counts" class="panel">
             <h2>Counts</h2>
             <dl id="counts-list" class="metric-grid"></dl>
           </section>
-          <section class="panel">
+          <section id="panel-info-provenance" class="panel">
             <h2>Provenance</h2>
             <dl id="provenance-list" class="metadata-list"></dl>
           </section>
@@ -86,18 +86,18 @@
 
         <!-- Collapsible bottom panel -->
         <div id="bottom-panels" class="bottom-panels collapsed">
-          <div class="bottom-toggle-bar">
+          <div id="bottom-toggle-bar" class="bottom-toggle-bar">
             <button id="bottom-toggle" class="bottom-toggle-btn" title="Toggle bottom panel" aria-label="Toggle bottom panel">
               <span class="toggle-icon">▶</span>
             </button>
             <p id="feature-count" class="status-line">No records loaded</p>
           </div>
           <div id="bottom-panels-content" class="bottom-panels-content">
-            <section class="record-panel">
+            <section id="bottom-feature-details" class="record-panel">
               <h2>Feature Details</h2>
               <dl id="feature-details" class="metadata-list"></dl>
             </section>
-            <section class="record-panel">
+            <section id="bottom-processing" class="record-panel">
               <h2>Processing</h2>
               <div id="processing-summary" class="processing-summary"></div>
             </section>

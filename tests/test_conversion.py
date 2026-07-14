@@ -77,6 +77,17 @@ def test_core_conversion_writes_default_flatgeobuf_bundle(tmp_path: Path) -> Non
     bundle_readme = (tmp_path / "bundle" / "README.md").read_text(encoding="utf-8")
     assert "Generated DwC-A Geospatial Bundle" in bundle_readme
     assert "source copy of the minimal static MapLibre viewer" not in bundle_readme
+    assert "## Viewer Visibility Controls" in bundle_readme
+    assert "`manifest.viewer.visibility`" in bundle_readme
+    assert "`bottom-toggle-bar` is not a visibility key" in bundle_readme
+    for artifact_key in (
+        "`occurrences.fgb`",
+        "`occurrences.gpkg`",
+        "`occurrences.parquet`",
+        "`source.json`",
+        "`processing.json`",
+    ):
+        assert artifact_key in bundle_readme
     assert (tmp_path / "bundle" / DEFAULT_FLATGEOBUF_RELATIVE_PATH).exists()
     assert not (tmp_path / "bundle" / DEFAULT_GEOPARQUET_RELATIVE_PATH).exists()
 
