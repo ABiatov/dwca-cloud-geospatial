@@ -68,6 +68,7 @@ FLATGEOBUF_FORMAT = "flatgeobuf"
 GEOPARQUET_FORMAT = "geoparquet"
 SUPPORTED_OUTPUT_FORMATS = (FLATGEOBUF_FORMAT, GEOPARQUET_FORMAT)
 VIEWER_ASSET_FILENAMES = ("index.html", "styles.css", "app.js")
+VIEWER_ASSET_SUBDIRS = ("assets",)
 
 
 class ConversionError(RuntimeError):
@@ -590,6 +591,15 @@ def _copy_static_viewer(output_root: Path) -> None:
             raise ConversionError(f"Static viewer asset is missing: {source}")
         shutil.copy2(source, output_root / filename)
 
+    for subdir in VIEWER_ASSET_SUBDIRS:
+        source = viewer_source / subdir
+        if not source.is_dir():
+            raise ConversionError(f"Static viewer asset directory is missing: {source}")
+        dest = output_root / subdir
+        if dest.exists():
+            shutil.rmtree(dest)
+        shutil.copytree(source, dest)
+
 
 def _write_output_bundle_readme(output_root: Path) -> None:
     (output_root / "README.md").write_text(
@@ -630,6 +640,26 @@ http://localhost:8000/path/to/output-bundle/index.html
 The viewer does not require a project backend, database, scheduler or live
 GBIF/OBIS API. Optional external frontend assets and basemap tiles depend on
 the copied viewer configuration.
+
+## Viewer Visibility Controls
+
+`manifest.viewer.visibility` is optional presentation configuration. New
+generated manifests contain the complete all-visible tree; omitted or partial
+trees keep unspecified elements visible. Only the JSON boolean `false` at an
+`is_visible` node hides the target.
+
+The tree can control sidebar panels and their launcher buttons, Info blocks and
+named provenance rows, filter groups, the named download artifacts, bottom
+panel content/sections and point popups. Artifact keys are `occurrences.fgb`,
+`occurrences.gpkg`, `occurrences.parquet`, `source.json` and
+`processing.json`; they apply only to their standard bundle paths. Unlisted
+inventory artifacts retain normal display.
+
+`bottom-toggle-bar` is not a visibility key. Use `bottom-panels`,
+`bottom-panels-content`, `feature_details` and `processing` for footer
+presentation. Visibility changes only the viewer interface: it does not remove
+inventory files or change data, counts, source metadata or processing
+provenance.
 
 ## Citation And License
 
@@ -728,5 +758,8 @@ def _bundle_options(
         generator_name=conversion_options.bundle.generator_name,
         generator_version=conversion_options.bundle.generator_version,
         generator_commit=conversion_options.bundle.generator_commit,
+        viewer_map_title=conversion_options.bundle.viewer_map_title,
+        viewer_app_description=conversion_options.bundle.viewer_app_description,
+        viewer_visibility=conversion_options.bundle.viewer_visibility,
         configuration=configuration,
     )

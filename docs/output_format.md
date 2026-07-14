@@ -2,7 +2,7 @@
 
 Status: Accepted baseline for MVP
 
-Last updated: 2026-06-24
+Last updated: 2026-07-12
 
 ## Purpose
 
@@ -134,7 +134,7 @@ Required fields:
 | `source` | object | Short source summary for viewer startup. |
 | `files` | array | Inventory of generated files. |
 | `layers` | array | Viewer-readable geospatial layers. |
-| `viewer` | object | Viewer defaults and fields. |
+| `viewer` | object | Viewer defaults, optional map title and fields. |
 | `counts` | object | High-level accepted, rejected and output record counts. |
 
 Recommended `source` fields:
@@ -173,6 +173,62 @@ Required `layers[]` fields:
 | `geometry` | object | Geometry column, CRS and coordinate order. |
 | `record_count` | integer | Number of records in the layer. |
 | `bounds` | array or null | `[west, south, east, north]` in lon/lat order. |
+
+Recommended `viewer` fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `default_layer` | string or null | Layer id selected by default when a usable viewer layer is present. |
+| `initial_bounds` | array or null | Initial map bounds as `[west, south, east, north]` in lon/lat order. |
+| `map_title` | string when present | Optional viewer-facing map Header title. When present, viewers trim whitespace and render a Header above the map only if the trimmed value is non-empty. Existing manifests may omit the field. This does not replace `manifest.title` or source dataset title provenance. The converter fills new generated manifests with `Custom map title, edit it in manifest.json` unless a caller configures a different value or a blank value. Blank configured values are omitted from generated manifests. |
+| `appDescription` | string when present | Optional publisher-authored application description HTML. Viewers trim whitespace and show a Header App Description button only when the trimmed value is non-empty. The converter fills new generated manifests with an editable default description so publishers can immediately see the feature, unless a caller configures a different value or a blank value. Blank configured values are omitted from generated manifests. This does not replace `manifest.title`, `manifest.source`, `metadata/source.json.dataset.description` or `viewer.map_title`. Viewers must sanitize this HTML before rendering. |
+| `display_fields` | array | Ordered normalized occurrence fields for details and popups. |
+| `filter_fields` | array | Ordered normalized occurrence fields used to build filters when available on the loaded layer. |
+| `visibility` | object | Optional presentation-only visibility tree for the static viewer. New generated manifests always contain the complete all-true tree below; older and hand-authored manifests may omit all or part of it. |
+
+### Viewer visibility
+
+`manifest.viewer.visibility` is static-viewer presentation configuration. It
+does not change `files`, `layers`, converted data, validation counts, source
+metadata or processing provenance. Only the boolean value `false` at an
+`is_visible` node hides that node. Missing objects or keys, `null`, non-boolean
+values and `true` are visible, so older manifests remain compatible. A hidden
+parent hides all children regardless of child values.
+
+New manifests contain this exact all-true tree (callers may merge an override
+through `BundleWriterOptions.viewer_visibility` before conversion):
+
+```json
+{
+  "panel-info": {"is_visible": true, "header": {"is_visible": true}, "counts": {"is_visible": true}, "provenance": {"is_visible": true, "dataset_title": {"is_visible": true}, "description": {"is_visible": true}, "publisher": {"is_visible": true}, "doi": {"is_visible": true}, "citation": {"is_visible": true}, "license": {"is_visible": true}, "rights_holder": {"is_visible": true}, "source_archive": {"is_visible": true}, "archive_sha256": {"is_visible": true}, "gbif_dataset_key": {"is_visible": true}, "gbif_download_key": {"is_visible": true}, "generated": {"is_visible": true}, "converter": {"is_visible": true}, "validation": {"is_visible": true}}},
+  "panel-filters": {"is_visible": true, "filter_groups": {"scientific_name": {"is_visible": true}, "kingdom": {"is_visible": true}, "iucn_red_list_category": {"is_visible": true}, "event_year": {"is_visible": true}, "basis_of_record": {"is_visible": true}, "quality_flags": {"is_visible": true}}},
+  "panel-records": {"is_visible": true},
+  "panel-download": {"is_visible": true, "artifacts": {"occurrences.fgb": {"is_visible": true}, "occurrences.gpkg": {"is_visible": true}, "occurrences.parquet": {"is_visible": true}, "source.json": {"is_visible": true}, "processing.json": {"is_visible": true}}},
+  "bottom-panels": {"is_visible": true, "bottom-panels-content": {"is_visible": true, "feature_details": {"is_visible": true}, "processing": {"is_visible": true}}},
+  "popup": {"is_visible": true}
+}
+```
+
+Sidebar panel visibility also hides the matching launcher. The named
+provenance fields gate only their own rows; Homepage and OBIS dataset id retain
+their normal behavior unless the full Provenance block is hidden. Filter-group
+visibility removes only that control and clears any stale value from filtering.
+The listed artifact keys map only to the paths below; other inventory items
+remain governed by their existing display behavior.
+
+| Visibility key | Bundle-relative path |
+| --- | --- |
+| `occurrences.fgb` | `data/occurrences.fgb` |
+| `occurrences.gpkg` | `data/occurrences.gpkg` |
+| `occurrences.parquet` | `data/occurrences.parquet` |
+| `source.json` | `metadata/source.json` |
+| `processing.json` | `metadata/processing.json` |
+
+`bottom-panels` hides the complete container; `bottom-panels-content` controls
+the Feature Details and Processing area while its normal toggle bar remains
+available. A hidden `popup` prevents a new MapLibre popup without changing points,
+selection, details or highlighting. The viewer remains a static,
+manifest-driven bundle reader; visibility does not introduce a backend.
 
 Example with FlatGeobuf and GeoParquet selected, and rejected records present:
 
@@ -268,6 +324,8 @@ Example with FlatGeobuf and GeoParquet selected, and rejected records present:
   "viewer": {
     "default_layer": "occurrences",
     "initial_bounds": [-10.0, 35.0, 5.0, 60.0],
+    "map_title": "Custom publisher-facing map title",
+    "appDescription": "<center><h2>About this map</h2></center><p>Publisher-authored HTML.</p><p>Supported HTML Tags: p, b, i, h2, h3, h4, a, img, br, ol, ul, li, table, tr, td, iframe, center, small</p>",
     "display_fields": [
       "scientific_name",
       "event_date",
@@ -730,7 +788,7 @@ The viewer must display these dataset/provenance fields when available:
 
 | Field | Source |
 | --- | --- |
-| Dataset title | `manifest.title` or `metadata/source.json.dataset.title`. |
+| Dataset title | `metadata/source.json.dataset.title`, then `manifest.title`, then `manifest.source.title`. |
 | Publisher | `metadata/source.json.dataset.publisher`. |
 | DOI | `metadata/source.json.dataset.doi`, GBIF DOI or OBIS DOI. |
 | Citation | `metadata/source.json.dataset.citation`, GBIF citation or OBIS citation. |
@@ -741,6 +799,35 @@ The viewer must display these dataset/provenance fields when available:
 | Generated timestamp | `manifest.created_at`. |
 | Converter version | `manifest.generator.version`. |
 | Accepted/rejected counts | `manifest.counts` and `metadata/processing.json.counts`. |
+
+The optional map Header is separate from dataset/provenance display. It reads
+only `manifest.viewer.map_title` for title text and
+`manifest.viewer.appDescription` for the App Description button. Missing,
+null, empty or whitespace-only values are hidden after trimming. The Header
+container is visible when either the title or App Description button is
+visible, including the compact app-description-only case, and hidden with no
+reserved layout space only when both values are absent or blank. The Header
+must not fall back to `manifest.title`, source metadata titles, layer titles
+or file names.
+
+`manifest.viewer.appDescription` is publisher-authored HTML for app-level
+context, not dataset provenance. Static viewers must not append the raw HTML
+string directly to the live document. They must parse and rebuild a sanitized
+fragment restricted to exactly these supported tags:
+
+```text
+p, b, i, h2, h3, h4, a, img, br, ol, ul, li, table, tr, td, iframe, center, small
+```
+
+Unsupported wrapper tags should be dropped while preserving safe child text
+and allowed child elements where practical. `script`, `style`, inline event
+handler attributes and unsafe URL schemes such as `javascript:` or `data:`
+must not render. Supported attributes are limited to safe `href` and optional
+`title` on `a`; safe `src`, `alt`, optional `title`, `width`, `height` and
+`loading` on `img`; and safe `src`, optional `title`, `width`, `height`,
+`allow`, `allowfullscreen` and `loading` on `iframe`. Bundle-relative,
+`http:` and `https:` URLs are allowed; executable or ambiguous schemes are
+rejected.
 
 The viewer must be able to show these feature fields in popups or a details panel:
 

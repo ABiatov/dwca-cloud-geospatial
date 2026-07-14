@@ -7,7 +7,11 @@ from typing import Any
 import pytest
 
 from conftest import DWCA_FIXTURES_DIR, MINIMAL_OCCURRENCE_FIXTURE_DIR
-from dwca_cloud_geospatial.bundle import MANIFEST_RELATIVE_PATH
+from dwca_cloud_geospatial.bundle import (
+    DEFAULT_VIEWER_APP_DESCRIPTION,
+    DEFAULT_VIEWER_MAP_TITLE,
+    MANIFEST_RELATIVE_PATH,
+)
 from dwca_cloud_geospatial.conversion import (
     ConversionError,
     ConversionOptions,
@@ -73,6 +77,17 @@ def test_core_conversion_writes_default_flatgeobuf_bundle(tmp_path: Path) -> Non
     bundle_readme = (tmp_path / "bundle" / "README.md").read_text(encoding="utf-8")
     assert "Generated DwC-A Geospatial Bundle" in bundle_readme
     assert "source copy of the minimal static MapLibre viewer" not in bundle_readme
+    assert "## Viewer Visibility Controls" in bundle_readme
+    assert "`manifest.viewer.visibility`" in bundle_readme
+    assert "`bottom-toggle-bar` is not a visibility key" in bundle_readme
+    for artifact_key in (
+        "`occurrences.fgb`",
+        "`occurrences.gpkg`",
+        "`occurrences.parquet`",
+        "`source.json`",
+        "`processing.json`",
+    ):
+        assert artifact_key in bundle_readme
     assert (tmp_path / "bundle" / DEFAULT_FLATGEOBUF_RELATIVE_PATH).exists()
     assert not (tmp_path / "bundle" / DEFAULT_GEOPARQUET_RELATIVE_PATH).exists()
 
@@ -84,6 +99,8 @@ def test_core_conversion_writes_default_flatgeobuf_bundle(tmp_path: Path) -> Non
         "metadata/processing.json",
         "data/occurrences.fgb",
     ]
+    assert manifest["viewer"]["map_title"] == DEFAULT_VIEWER_MAP_TITLE
+    assert manifest["viewer"]["appDescription"] == DEFAULT_VIEWER_APP_DESCRIPTION
     assert "index.html" not in {entry["path"] for entry in manifest["files"]}
 
 

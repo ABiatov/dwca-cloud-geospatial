@@ -12,68 +12,123 @@
   </head>
   <body>
     <main class="viewer-shell">
-      <aside class="sidebar" aria-label="Bundle inspection controls">
-        <header class="app-header">
-          <p class="eyebrow">DwC-A output bundle</p>
-          <h1 id="dataset-title">Loading bundle</h1>
-          <p id="bundle-status" class="status-line">Reading manifest.json</p>
-        </header>
+      <!-- Left control strip – always visible -->
+      <nav id="control-strip" class="control-strip" aria-label="Sidebar panel controls">
+        <button class="ctrl-btn" data-panel="info" title="Dataset Info" aria-label="Dataset Info">
+          <img src="assets/pic/pic-info-64.png" alt="" width="28" height="28" />
+        </button>
+        <button class="ctrl-btn" data-panel="filters" title="Filters" aria-label="Filters">
+          <img src="assets/pic/pic-filter-64.png" alt="" width="28" height="28" />
+        </button>
+        <button class="ctrl-btn" data-panel="records" title="Occurrences List" aria-label="Occurrences List">
+          <img src="assets/pic/pic-list-64.png" alt="" width="28" height="28" />
+        </button>
+        <button class="ctrl-btn" data-panel="download" title="Download" aria-label="Download">
+          <img src="assets/pic/pic-download-64.png" alt="" width="28" height="28" />
+        </button>
+      </nav>
 
-        <section class="panel" aria-labelledby="counts-heading">
-          <h2 id="counts-heading">Counts</h2>
-          <dl id="counts-list" class="metric-grid"></dl>
-        </section>
+      <!-- Sidebar panels – only one visible at a time -->
+      <aside id="sidebar-panels" class="sidebar-panels" aria-label="Sidebar panels">
+        <div id="panel-info" class="sidebar-panel" hidden>
+          <header id="panel-info-header" class="app-header">
+            <p class="eyebrow">DwC-A output bundle</p>
+            <h1 id="dataset-title">Loading bundle</h1>
+            <p id="bundle-status" class="status-line">Reading manifest.json</p>
+          </header>
+          <section id="panel-info-counts" class="panel">
+            <h2>Counts</h2>
+            <dl id="counts-list" class="metric-grid"></dl>
+          </section>
+          <section id="panel-info-provenance" class="panel">
+            <h2>Provenance</h2>
+            <dl id="provenance-list" class="metadata-list"></dl>
+          </section>
+        </div>
 
-        <section class="panel" aria-labelledby="filters-heading">
-          <div class="panel-title-row">
-            <h2 id="filters-heading">Filters</h2>
-            <button id="reset-filters" type="button">Reset</button>
-          </div>
-          <div id="filters" class="filters"></div>
-        </section>
+        <div id="panel-filters" class="sidebar-panel" hidden>
+          <section class="panel">
+            <div class="panel-title-row">
+              <h2>Filters</h2>
+              <button id="reset-filters" type="button">Reset</button>
+            </div>
+            <div id="filters" class="filters"></div>
+          </section>
+        </div>
 
-        <section class="panel" aria-labelledby="provenance-heading">
-          <h2 id="provenance-heading">Provenance</h2>
-          <dl id="provenance-list" class="metadata-list"></dl>
-        </section>
+        <div id="panel-download" class="sidebar-panel" hidden>
+          <section class="panel">
+            <h2>Generated Files</h2>
+            <div id="artifact-list" class="artifact-list"></div>
+          </section>
+        </div>
 
-        <section class="panel" aria-labelledby="artifacts-heading">
-          <h2 id="artifacts-heading">Generated Files</h2>
-          <div id="artifact-list" class="artifact-list"></div>
-        </section>
+        <div id="panel-records" class="sidebar-panel" hidden>
+          <section class="panel">
+            <h2>Records</h2>
+            <ol id="sidebar-record-list" class="record-list"></ol>
+          </section>
+        </div>
       </aside>
 
+      <!-- Workspace: map + bottom panels -->
       <section class="workspace" aria-label="Occurrence map and records">
+        <header id="map-title-header" class="map-title-header" hidden>
+          <h1 id="map-title"></h1>
+          <button id="app-description-button" class="app-description-button" type="button" hidden>
+            App Description
+          </button>
+        </header>
         <div class="map-wrap">
           <div id="map" class="map" role="region" aria-label="Occurrence map"></div>
           <div id="map-empty-state" class="empty-state" hidden></div>
         </div>
 
-        <section class="record-panel" aria-labelledby="record-heading">
-          <div class="record-panel-header">
-            <div>
-              <p id="feature-count" class="status-line">No records loaded</p>
-              <h2 id="record-heading">Feature Details</h2>
-            </div>
+        <!-- Collapsible bottom panel -->
+        <div id="bottom-panels" class="bottom-panels collapsed">
+          <div id="bottom-toggle-bar" class="bottom-toggle-bar">
+            <button id="bottom-toggle" class="bottom-toggle-btn" title="Toggle bottom panel" aria-label="Toggle bottom panel">
+              <span class="toggle-icon">▶</span>
+            </button>
+            <p id="feature-count" class="status-line">No records loaded</p>
           </div>
-          <div class="record-grid">
-            <div>
-              <h3>Records</h3>
-              <ol id="record-list" class="record-list"></ol>
-            </div>
-            <div>
-              <h3>Selected Feature</h3>
+          <div id="bottom-panels-content" class="bottom-panels-content">
+            <section id="bottom-feature-details" class="record-panel">
+              <h2>Feature Details</h2>
               <dl id="feature-details" class="metadata-list"></dl>
-            </div>
+            </section>
+            <section id="bottom-processing" class="record-panel">
+              <h2>Processing</h2>
+              <div id="processing-summary" class="processing-summary"></div>
+            </section>
           </div>
-        </section>
-
-        <section class="record-panel" aria-labelledby="processing-heading">
-          <h2 id="processing-heading">Processing</h2>
-          <div id="processing-summary" class="processing-summary"></div>
-        </section>
+        </div>
       </section>
     </main>
+
+    <div
+      id="app-description-dialog"
+      class="app-description-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="app-description-title"
+      hidden
+    >
+      <div class="app-description-panel" role="document">
+        <header class="app-description-modal-header">
+          <h2 id="app-description-title">App Description</h2>
+          <button
+            id="app-description-close"
+            class="app-description-close"
+            type="button"
+            aria-label="Close app description"
+          >
+            Close
+          </button>
+        </header>
+        <div id="app-description-content" class="app-description-content"></div>
+      </div>
+    </div>
 
     <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
     <script src="https://unpkg.com/flatgeobuf@4.3.3/dist/flatgeobuf-geojson.min.js"></script>

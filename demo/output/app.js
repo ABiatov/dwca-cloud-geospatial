@@ -12,6 +12,13 @@
     SOURCE_METADATA_PATH,
     PROCESSING_METADATA_PATH,
   ];
+  const VISIBILITY_ARTIFACT_PATHS = Object.freeze({
+    "data/occurrences.fgb": "occurrences.fgb",
+    "data/occurrences.gpkg": "occurrences.gpkg",
+    "data/occurrences.parquet": "occurrences.parquet",
+    [SOURCE_METADATA_PATH]: "source.json",
+    [PROCESSING_METADATA_PATH]: "processing.json",
+  });
   const FIELD_LABEL_OVERRIDES = {
     iucn_red_list_category: "IUCN Red List Categories",
   };
@@ -25,6 +32,28 @@
   };
   const NO_MAP_LAYER_MESSAGE =
     "No FlatGeobuf map layer is available for this bundle. To display occurrence points on the map, generate the bundle with the FlatGeobuf output format selected.";
+  const APP_DESCRIPTION_ALLOWED_TAGS = Object.freeze([
+    "p",
+    "b",
+    "i",
+    "h2",
+    "h3",
+    "h4",
+    "a",
+    "img",
+    "br",
+    "ol",
+    "ul",
+    "li",
+    "table",
+    "tr",
+    "td",
+    "iframe",
+    "center",
+    "small",
+  ]);
+  const APP_DESCRIPTION_ALLOWED_TAG_SET = new Set(APP_DESCRIPTION_ALLOWED_TAGS);
+  const APP_DESCRIPTION_DROP_CONTENT_TAGS = new Set(["script", "style"]);
   const KINGDOM_COLOR_EXPRESSION = [
     "match",
     ["coalesce", ["get", "kingdom"], ""],
@@ -53,9 +82,11 @@
     processingMetadata: null,
     bundleRoot: null,
     map: null,
+    popup: null,
     allFeatures: [],
     filteredFeatures: [],
     selectedFeatureId: null,
+    appDescriptionPreviousFocus: null,
     filters: {
       scientific_name: "",
       categories: {},
@@ -101,6 +132,29 @@
 
   function byId(id) {
     return document.getElementById(id);
+  }
+
+  function viewerVisibility(manifest) {
+    const viewer = manifest && typeof manifest.viewer === "object" ? manifest.viewer : null;
+    const visibility = viewer && viewer.visibility;
+    return visibility && typeof visibility === "object" && !Array.isArray(visibility)
+      ? visibility
+      : {};
+  }
+
+  function viewerElementVisible(path, manifest = state.manifest) {
+    let node = viewerVisibility(manifest);
+    const keys = Array.isArray(path) ? path : path.split(".");
+    for (const key of keys) {
+      if (node && node.is_visible === false) {
+        return false;
+      }
+      if (!node || typeof node !== "object" || Array.isArray(node)) {
+        return true;
+      }
+      node = node[key];
+    }
+    return !(node && typeof node === "object" && node.is_visible === false);
   }
 
   function setStatus(message, isError) {
@@ -280,6 +334,211 @@
     }
   }
 
+  function viewerMapTitle(manifest) {
+    const viewer = (manifest && manifest.viewer) || {};
+    const title = viewer.map_title;
+    return title === null || title === undefined ? "" : String(title).trim();
+  }
+
+  function viewerAppDescription(manifest) {
+    const viewer = (manifest && manifest.viewer) || {};
+    const description = viewer.appDescription;
+    return description === null || description === undefined ? "" : String(description).trim();
+  }
+
+  function isSafeAppDescriptionUrl(value) {
+    if (typeof value !== "string") {
+      return false;
+    }
+    const url = value.trim();
+    if (!url || /[\u0000-\u001f\u007f]/.test(url) || url.includes("\\")) {
+      return false;
+    }
+    if (url.startsWith("//") || url.startsWith("/")) {
+      return false;
+    }
+    const schemeMatch = url.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
+    if (schemeMatch) {
+      return ["http:", "https:"].includes(`${schemeMatch[1].toLowerCase()}:`);
+    }
+    return true;
+  }
+
+  function copySafeAttribute(source, target, name) {
+    if (!source.hasAttribute(name)) {
+      return;
+    }
+    const value = source.getAttribute(name);
+    if (value !== null) {
+      target.setAttribute(name, value);
+    }
+  }
+
+  function copyDimensionAttribute(source, target, name) {
+    if (!source.hasAttribute(name)) {
+      return;
+    }
+    const value = source.getAttribute(name).trim();
+    if (/^\d{1,5}$/.test(value) || /^\d{1,3}%$/.test(value)) {
+      target.setAttribute(name, value);
+    }
+  }
+
+  function copyLoadingAttribute(source, target) {
+    if (!source.hasAttribute("loading")) {
+      return;
+    }
+    const value = source.getAttribute("loading").trim().toLowerCase();
+    if (value === "lazy" || value === "eager") {
+      target.setAttribute("loading", value);
+    }
+  }
+
+  function sanitizeElementAttributes(source, target, tagName) {
+    if (tagName === "a") {
+      const href = source.getAttribute("href");
+      if (href && isSafeAppDescriptionUrl(href)) {
+        target.setAttribute("href", href.trim());
+        if (/^https?:/i.test(href.trim())) {
+          target.target = "_blank";
+          target.rel = "noopener";
+        }
+      }
+      copySafeAttribute(source, target, "title");
+    } else if (tagName === "img") {
+      const src = source.getAttribute("src");
+      if (src && isSafeAppDescriptionUrl(src)) {
+        target.setAttribute("src", src.trim());
+      }
+      copySafeAttribute(source, target, "alt");
+      copySafeAttribute(source, target, "title");
+      copyDimensionAttribute(source, target, "width");
+      copyDimensionAttribute(source, target, "height");
+      copyLoadingAttribute(source, target);
+    } else if (tagName === "iframe") {
+      const src = source.getAttribute("src");
+      if (src && isSafeAppDescriptionUrl(src)) {
+        target.setAttribute("src", src.trim());
+      }
+      copySafeAttribute(source, target, "title");
+      copySafeAttribute(source, target, "allow");
+      copyDimensionAttribute(source, target, "width");
+      copyDimensionAttribute(source, target, "height");
+      copyLoadingAttribute(source, target);
+      if (source.hasAttribute("allowfullscreen")) {
+        target.setAttribute("allowfullscreen", "");
+      }
+    }
+  }
+
+  function sanitizeAppDescriptionNode(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return document.createTextNode(node.textContent || "");
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return document.createDocumentFragment();
+    }
+    const tagName = node.tagName.toLowerCase();
+    if (APP_DESCRIPTION_DROP_CONTENT_TAGS.has(tagName)) {
+      return document.createDocumentFragment();
+    }
+    const fragment = document.createDocumentFragment();
+    const appendSanitizedChildren = (parent) => {
+      for (const child of Array.from(node.childNodes)) {
+        parent.append(sanitizeAppDescriptionNode(child));
+      }
+    };
+    if (!APP_DESCRIPTION_ALLOWED_TAG_SET.has(tagName)) {
+      appendSanitizedChildren(fragment);
+      return fragment;
+    }
+    if (
+      (tagName === "img" || tagName === "iframe") &&
+      !isSafeAppDescriptionUrl(node.getAttribute("src") || "")
+    ) {
+      return fragment;
+    }
+    const sanitized = document.createElement(tagName);
+    sanitizeElementAttributes(node, sanitized, tagName);
+    if (tagName !== "br" && tagName !== "img") {
+      appendSanitizedChildren(sanitized);
+    }
+    return sanitized;
+  }
+
+  function sanitizeAppDescription(html) {
+    const parsed = new DOMParser().parseFromString(String(html), "text/html");
+    const fragment = document.createDocumentFragment();
+    for (const child of Array.from(parsed.body.childNodes)) {
+      fragment.append(sanitizeAppDescriptionNode(child));
+    }
+    return fragment;
+  }
+
+  function renderAppDescriptionContent() {
+    const content = byId("app-description-content");
+    content.replaceChildren();
+    const description = viewerAppDescription(state.manifest);
+    if (description) {
+      content.append(sanitizeAppDescription(description));
+    }
+  }
+
+  function openAppDescriptionDialog() {
+    const dialog = byId("app-description-dialog");
+    if (dialog.hidden) {
+      state.appDescriptionPreviousFocus = document.activeElement;
+    }
+    renderAppDescriptionContent();
+    dialog.hidden = false;
+    byId("app-description-close").focus();
+  }
+
+  function closeAppDescriptionDialog() {
+    const dialog = byId("app-description-dialog");
+    if (dialog.hidden) {
+      return;
+    }
+    dialog.hidden = true;
+    byId("app-description-content").replaceChildren();
+    if (
+      state.appDescriptionPreviousFocus &&
+      typeof state.appDescriptionPreviousFocus.focus === "function"
+    ) {
+      state.appDescriptionPreviousFocus.focus();
+    }
+    state.appDescriptionPreviousFocus = null;
+  }
+
+  function initAppDescriptionDialog() {
+    const button = byId("app-description-button");
+    const dialog = byId("app-description-dialog");
+    byId("app-description-close").addEventListener("click", closeAppDescriptionDialog);
+    button.addEventListener("click", openAppDescriptionDialog);
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) {
+        closeAppDescriptionDialog();
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !dialog.hidden) {
+        closeAppDescriptionDialog();
+      }
+    });
+  }
+
+  function renderAppHeader() {
+    const header = byId("map-title-header");
+    const titleNode = byId("map-title");
+    const descriptionButton = byId("app-description-button");
+    const title = viewerMapTitle(state.manifest);
+    const description = viewerAppDescription(state.manifest);
+    titleNode.textContent = title;
+    titleNode.hidden = !title;
+    descriptionButton.hidden = !description;
+    header.hidden = !title && !description;
+  }
+
   function fileEntry(path) {
     return (state.manifest.files || []).find((entry) => entry.path === path);
   }
@@ -378,21 +637,22 @@
     const obis = source.obis || {};
     const archive = source.source_archive || {};
     return [
-      ["Dataset title", dataset.title || state.manifest.title || manifestSource.title],
-      ["Description", dataset.description],
-      ["Publisher", dataset.publisher || manifestSource.publisher],
-      ["Homepage", dataset.homepage],
-      ["DOI", dataset.doi || gbif.doi || obis.doi || manifestSource.doi],
-      ["Citation", dataset.citation || gbif.citation || obis.citation || manifestSource.citation],
-      ["License", gbif.license || obis.license || rights.license || manifestSource.license],
-      ["Rights holder", rights.rights_holder],
-      ["Source archive", [archive.name, archive.kind, archive.bytes].filter(Boolean).join(" | ")],
-      ["Archive SHA-256", archive.sha256],
-      ["GBIF dataset key", gbif.dataset_key || manifestSource.gbif_dataset_key],
-      ["GBIF download key", gbif.download_key || manifestSource.gbif_download_key],
-      ["OBIS dataset id", obis.dataset_id || manifestSource.obis_dataset_id],
-      ["Generated", state.manifest.created_at || processing.created_at],
+      ["dataset_title", "Dataset title", dataset.title || state.manifest.title || manifestSource.title],
+      ["description", "Description", dataset.description],
+      ["publisher", "Publisher", dataset.publisher || manifestSource.publisher],
+      [null, "Homepage", dataset.homepage],
+      ["doi", "DOI", dataset.doi || gbif.doi || obis.doi || manifestSource.doi],
+      ["citation", "Citation", dataset.citation || gbif.citation || obis.citation || manifestSource.citation],
+      ["license", "License", gbif.license || obis.license || rights.license || manifestSource.license],
+      ["rights_holder", "Rights holder", rights.rights_holder],
+      ["source_archive", "Source archive", [archive.name, archive.kind, archive.bytes].filter(Boolean).join(" | ")],
+      ["archive_sha256", "Archive SHA-256", archive.sha256],
+      ["gbif_dataset_key", "GBIF dataset key", gbif.dataset_key || manifestSource.gbif_dataset_key],
+      ["gbif_download_key", "GBIF download key", gbif.download_key || manifestSource.gbif_download_key],
+      [null, "OBIS dataset id", obis.dataset_id || manifestSource.obis_dataset_id],
+      ["generated", "Generated", state.manifest.created_at || processing.created_at],
       [
+        "converter",
         "Converter",
         [
           state.manifest.generator && state.manifest.generator.name,
@@ -401,14 +661,17 @@
           .filter(Boolean)
           .join(" "),
       ],
-      ["Validation", processing.validation && processing.validation.status],
+      ["validation", "Validation", processing.validation && processing.validation.status],
     ];
   }
 
   function renderProvenance() {
     const list = byId("provenance-list");
     list.replaceChildren();
-    for (const [label, value] of provenanceRows()) {
+    for (const [key, label, value] of provenanceRows()) {
+      if (key && !viewerElementVisible(`panel-info.provenance.${key}`)) {
+        continue;
+      }
       addProvenanceDefinition(list, label, value);
     }
   }
@@ -428,6 +691,54 @@
     return path.startsWith("data/") ? path.slice("data/".length) : path;
   }
 
+  function artifactVisibilityKey(path) {
+    return VISIBILITY_ARTIFACT_PATHS[path] || null;
+  }
+
+  function legacyCopyText(text) {
+    if (typeof document.execCommand !== "function") {
+      return Promise.reject(new Error("Clipboard copy is not available."));
+    }
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.left = "-1000px";
+    textarea.style.top = "-1000px";
+    document.body.append(textarea);
+
+    const selection = document.getSelection();
+    const previousRange =
+      selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+
+    let copied = false;
+    try {
+      copied = document.execCommand("copy");
+    } finally {
+      textarea.remove();
+      if (selection && previousRange) {
+        selection.removeAllRanges();
+        selection.addRange(previousRange);
+      }
+    }
+    return copied
+      ? Promise.resolve()
+      : Promise.reject(new Error("Clipboard copy failed."));
+  }
+
+  function copyTextToClipboard(text) {
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.clipboard &&
+      typeof navigator.clipboard.writeText === "function"
+    ) {
+      return navigator.clipboard.writeText(text).catch(() => legacyCopyText(text));
+    }
+    return legacyCopyText(text);
+  }
+
   function renderArtifacts() {
     const container = byId("artifact-list");
     container.replaceChildren();
@@ -437,14 +748,53 @@
         (left, right) =>
           artifactDisplayRank(left.entry.path) -
             artifactDisplayRank(right.entry.path) || left.index - right.index
-      )
+    )
       .map((item) => item.entry);
     for (const entry of files) {
+      const visibilityKey = artifactVisibilityKey(entry.path);
+      if (
+        visibilityKey &&
+        !viewerElementVisible(["panel-download", "artifacts", visibilityKey])
+      ) {
+        continue;
+      }
       const item = document.createElement("article");
       item.className = "artifact";
+      const artifactUrl = urlForBundlePath(entry.path).href;
+      const row = document.createElement("div");
+      row.className = "artifact-row";
       const link = document.createElement("a");
-      link.href = urlForBundlePath(entry.path).href;
+      link.href = artifactUrl;
       link.textContent = artifactLinkLabel(entry.path);
+      const copyBtn = document.createElement("button");
+      copyBtn.type = "button";
+      copyBtn.className = "copy-url-btn";
+      copyBtn.title = "Copy URL";
+      copyBtn.setAttribute("aria-label", `Copy URL for ${artifactLinkLabel(entry.path)}`);
+      const copyImg = document.createElement("img");
+      copyImg.src = "assets/pic/pic-copy-32.png";
+      copyImg.alt = "";
+      copyImg.width = 16;
+      copyImg.height = 16;
+      copyBtn.append(copyImg);
+      copyBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        copyTextToClipboard(artifactUrl).then(
+          () => {
+            copyBtn.classList.add("copied");
+            copyBtn.title = "Copied!";
+            setTimeout(() => {
+              copyBtn.classList.remove("copied");
+              copyBtn.title = "Copy URL";
+            }, 1500);
+          },
+          () => {
+            copyBtn.title = "Copy failed";
+            setTimeout(() => { copyBtn.title = "Copy URL"; }, 1500);
+          }
+        );
+      });
+      row.append(link, copyBtn);
       const description = document.createElement("p");
       description.textContent = [
         entry.role,
@@ -453,7 +803,7 @@
       ]
         .filter(Boolean)
         .join(" | ");
-      item.append(link, description);
+      item.append(row, description);
       container.append(item);
     }
   }
@@ -636,6 +986,13 @@
         const feature = event.features && event.features[0];
         if (feature && feature.properties) {
           selectFeature(Number(feature.properties._viewerId));
+          showPointPopup(feature, event.lngLat);
+        }
+      });
+      map.on("click", (event) => {
+        const features = map.queryRenderedFeatures(event.point, { layers: ["occurrence-points"] });
+        if (!features.length) {
+          closePointPopup();
         }
       });
       if (bounds && bounds.length === 4) {
@@ -674,7 +1031,8 @@
     container.replaceChildren();
     const declared = (state.manifest.viewer && state.manifest.viewer.filter_fields) || [];
     const available = declared.filter((field) =>
-      state.allFeatures.some((feature) => featureHasField(feature, field))
+      state.allFeatures.some((feature) => featureHasField(feature, field)) &&
+      viewerElementVisible(`panel-filters.filter_groups.${field}`)
     );
     if (!available.length) {
       const notice = document.createElement("p");
@@ -912,7 +1270,7 @@
   }
 
   function renderRecordList() {
-    const list = byId("record-list");
+    const list = byId("sidebar-record-list");
     list.replaceChildren();
     const visible = state.filteredFeatures.slice(0, 250);
     for (const feature of visible) {
@@ -933,6 +1291,160 @@
     updateSelectedFeatureLayer();
     renderRecordList();
     renderFeatureDetails();
+    closePointPopup();
+  }
+
+  function clearHiddenFilterState() {
+    const groups = [
+      "scientific_name",
+      "kingdom",
+      "iucn_red_list_category",
+      "event_year",
+      "basis_of_record",
+      "quality_flags",
+    ];
+    for (const group of groups) {
+      if (viewerElementVisible(`panel-filters.filter_groups.${group}`)) {
+        continue;
+      }
+      if (group === "scientific_name") {
+        state.filters.scientific_name = "";
+      } else if (group === "event_year") {
+        state.filters.year_min = "";
+        state.filters.year_max = "";
+      } else if (group === "quality_flags") {
+        state.filters.quality_mode = "all";
+        state.filters.quality_tokens = new Set();
+      } else {
+        delete state.filters.categories[group];
+      }
+    }
+  }
+
+  function setBottomCollapsed(bottomPanels, toggleBtn, collapsed) {
+    bottomPanels.classList.toggle("collapsed", collapsed);
+    const icon = toggleBtn.querySelector(".toggle-icon");
+    if (icon) {
+      icon.textContent = collapsed ? "▶" : "▼";
+    }
+  }
+
+  function applyManifestVisibility() {
+    const shell = document.querySelector(".viewer-shell");
+    const panelIds = ["panel-info", "panel-filters", "panel-records", "panel-download"];
+    const activePanelId = activePanel ? `panel-${activePanel}` : null;
+    if (activePanelId && !viewerElementVisible(activePanelId)) {
+      closePanel();
+    }
+    for (const panelId of panelIds) {
+      const visible = viewerElementVisible(panelId);
+      const panel = byId(panelId);
+      const button = document.querySelector(`.ctrl-btn[data-panel="${panelId.slice(6)}"]`);
+      if (button) {
+        button.hidden = !visible;
+      }
+      if (!visible && panel) {
+        panel.hidden = true;
+      }
+    }
+    const hasSidebarLauncher = panelIds.some((panelId) => viewerElementVisible(panelId));
+    byId("control-strip").hidden = !hasSidebarLauncher;
+    byId("sidebar-panels").hidden = !hasSidebarLauncher;
+    shell.classList.toggle("control-strip-hidden", !hasSidebarLauncher);
+
+    byId("panel-info-header").hidden = !viewerElementVisible("panel-info.header");
+    byId("panel-info-counts").hidden = !viewerElementVisible("panel-info.counts");
+    byId("panel-info-provenance").hidden = !viewerElementVisible("panel-info.provenance");
+    clearHiddenFilterState();
+
+    const bottomPanels = byId("bottom-panels");
+    const toggleBar = byId("bottom-toggle-bar");
+    const toggleBtn = byId("bottom-toggle");
+    const content = byId("bottom-panels-content");
+    const bottomVisible = viewerElementVisible("bottom-panels");
+    const contentVisible = viewerElementVisible("bottom-panels.bottom-panels-content");
+    bottomPanels.hidden = !bottomVisible;
+    toggleBar.hidden = !bottomVisible;
+    content.hidden = !bottomVisible || !contentVisible;
+    byId("bottom-feature-details").hidden = !viewerElementVisible(
+      "bottom-panels.bottom-panels-content.feature_details"
+    );
+    byId("bottom-processing").hidden = !viewerElementVisible(
+      "bottom-panels.bottom-panels-content.processing"
+    );
+    toggleBtn.hidden = !bottomVisible || !contentVisible;
+    if (!viewerElementVisible("popup")) {
+      closePointPopup();
+    }
+    if (state.map) {
+      state.map.resize();
+    }
+  }
+
+  const POPUP_FIELDS = null;  // now computed dynamically from manifest.viewer.display_fields + knownDetailFields
+
+  function popupFieldsForFeature(feature) {
+    const displayFields = (state.manifest && state.manifest.viewer && state.manifest.viewer.display_fields) || [];
+    const ordered = Array.from(new Set([...displayFields, ...knownDetailFields]));
+    return ordered.filter((field) =>
+      Object.prototype.hasOwnProperty.call(feature.properties || {}, field) &&
+      feature.properties[field] != null &&
+      feature.properties[field] !== ""
+    );
+  }
+
+  function buildPopupHTML(feature) {
+    const fields = popupFieldsForFeature(feature);
+    if (fields.length === 0) {
+      return '<h2 class="popup-title">Feature Details</h2><p class="popup-empty">No details available</p>';
+    }
+    const rows = fields.map((field) => {
+      let row = `<dt>${escapeHTML(fieldLabel(field))}</dt><dd>${escapeHTML(displayValue(feature.properties[field]))}</dd>`;
+      if (field === "source_record_id" && feature.properties[field]) {
+        const occurrenceUrl = `https://www.gbif.org/occurrence/${encodeURIComponent(feature.properties[field])}`;
+        row += `<dt>Source Record URL</dt><dd><a href="${escapeHTML(occurrenceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHTML(occurrenceUrl)}</a></dd>`;
+      }
+      return row;
+    });
+    return `<h2 class="popup-title">Feature Details</h2><div class="popup-scroll"><dl class="popup-dl">${rows.join("")}</dl></div>`;
+  }
+
+  function escapeHTML(text) {
+    return String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function showPointPopup(feature, lngLat) {
+    closePointPopup();
+    if (!state.map || !viewerElementVisible("popup")) {
+      return;
+    }
+    const popup = new window.maplibregl.Popup({
+      closeButton: true,
+      closeOnClick: false,
+      maxWidth: "320px",
+      className: "map-point-popup",
+      offset: 10,
+    })
+      .setLngLat(lngLat)
+      .setHTML(buildPopupHTML(feature))
+      .addTo(state.map);
+    state.popup = popup;
+    const scrollEl = popup.getElement().querySelector(".popup-scroll");
+    if (scrollEl) {
+      scrollEl.scrollTop = 0;
+    }
+  }
+
+  function closePointPopup() {
+    if (state.popup) {
+      state.popup.remove();
+      state.popup = null;
+    }
   }
 
   function renderFeatureDetails() {
@@ -965,12 +1477,91 @@
     }
   }
 
+  /* ---- Sidebar panel toggling ---- */
+
+  let activePanel = null;
+
+  function openPanel(panelName) {
+    if (!viewerElementVisible(`panel-${panelName}`)) {
+      return;
+    }
+    if (activePanel === panelName) {
+      closePanel();
+      return;
+    }
+    closePanel();
+    activePanel = panelName;
+    const panel = document.getElementById(`panel-${panelName}`);
+    if (panel) {
+      panel.hidden = false;
+    }
+    document.querySelector(".viewer-shell").classList.add("panel-open");
+    updateActiveButton(panelName);
+    if (state.map) {
+      state.map.resize();
+    }
+  }
+
+  function closePanel() {
+    if (activePanel) {
+      const panel = document.getElementById(`panel-${activePanel}`);
+      if (panel) {
+        panel.hidden = true;
+      }
+      activePanel = null;
+    }
+    document.querySelector(".viewer-shell").classList.remove("panel-open");
+    updateActiveButton(null);
+    if (state.map) {
+      state.map.resize();
+    }
+  }
+
+  function updateActiveButton(panelName) {
+    for (const btn of document.querySelectorAll(".ctrl-btn")) {
+      btn.classList.toggle("active", btn.dataset.panel === panelName);
+    }
+  }
+
+  function initPanelToggles() {
+    for (const btn of document.querySelectorAll(".ctrl-btn")) {
+      btn.addEventListener("click", () => {
+        openPanel(btn.dataset.panel);
+      });
+    }
+  }
+
+  /* ---- Bottom panel toggling ---- */
+
+  function initBottomToggle() {
+    const bottomPanels = document.getElementById("bottom-panels");
+    const toggleBtn = document.getElementById("bottom-toggle");
+    if (!bottomPanels || !toggleBtn) {
+      return;
+    }
+    toggleBtn.addEventListener("click", () => {
+      setBottomCollapsed(
+        bottomPanels,
+        toggleBtn,
+        !bottomPanels.classList.contains("collapsed")
+      );
+      if (state.map) {
+        setTimeout(() => state.map.resize(), 260);
+      }
+    });
+  }
+
   async function boot() {
     try {
+      initPanelToggles();
+      initBottomToggle();
+      initAppDescriptionDialog();
       const manifestUrl = manifestUrlFromLocation();
       state.bundleRoot = new URL(".", manifestUrl);
       state.manifest = await fetchJson(manifestUrl);
       requireSupportedVersions(state.manifest);
+      applyManifestVisibility();
+      renderAppHeader();
       requireMetadataFile(SOURCE_METADATA_PATH);
       requireMetadataFile(PROCESSING_METADATA_PATH);
       state.sourceMetadata = await fetchJson(urlForBundlePath(SOURCE_METADATA_PATH));
@@ -1011,6 +1602,10 @@
     qualityFlagTokens,
     hasQualityFlags,
     matchesFilters,
+    viewerMapTitle,
+    viewerAppDescription,
+    sanitizeAppDescription,
+    APP_DESCRIPTION_ALLOWED_TAGS,
     NO_MAP_LAYER_MESSAGE,
   };
 

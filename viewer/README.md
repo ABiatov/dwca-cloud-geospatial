@@ -10,6 +10,25 @@ layer is available, it loads `data/occurrences.fgb` in the browser. Declared
 GeoPackage and GeoParquet files are shown as generated artifacts; they are not
 loaded as MVP browser map layers.
 
+## Manifest visibility controls
+
+`manifest.viewer.visibility` is optional presentation configuration for this
+static viewer. New converter output writes the complete all-visible tree;
+older or partial manifests keep unspecified elements visible. Only the JSON
+boolean `false` at an `is_visible` node hides the target.
+
+It can independently hide sidebar panels and their launcher buttons, Info
+blocks and named provenance rows, filter groups, the five named download
+artifacts, bottom-panel content/sections, and point popups. The artifact keys
+are `occurrences.fgb`, `occurrences.gpkg`, `occurrences.parquet`,
+`source.json` and `processing.json`; they map only to the corresponding
+standard bundle paths. Unlisted inventory artifacts retain normal display.
+
+`bottom-toggle-bar` is not a visibility key. Use `bottom-panels`,
+`bottom-panels-content`, `feature_details` and `processing` for footer
+presentation. Visibility changes only the interface: it never removes files
+from `manifest.json`, changes data or provenance, or introduces a backend.
+
 ## Local Launch
 
 Create a bundle with the documented converter workflow, then serve a directory

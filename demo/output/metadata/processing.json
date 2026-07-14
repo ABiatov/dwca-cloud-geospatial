@@ -18,11 +18,11 @@
     "geoparquet": {
       "compression": "zstd",
       "covering_bbox_column": {
-        "enabled": false,
-        "strategy": null,
+        "enabled": true,
+        "strategy": "point_bbox_struct",
         "threshold": null
       },
-      "large_output_mode": false,
+      "large_output_mode": true,
       "partitioned_dataset": {
         "enabled": false,
         "partition_key": null,
@@ -31,8 +31,8 @@
       "relative_path": "data/occurrences.parquet",
       "row_group_size": 100000,
       "spatial_sorting": {
-        "enabled": false,
-        "strategy": null,
+        "enabled": true,
+        "strategy": "grid",
         "threshold": null
       }
     },
@@ -41,6 +41,7 @@
       "geoparquet": true
     },
     "user": {
+      "chunk_size": 10000,
       "formats": [
         "flatgeobuf",
         "geoparquet"
@@ -58,7 +59,7 @@
       }
     }
   },
-  "configuration_hash": "41926449963c29b58b2e028efc7305427a21c3f0d48bb868053bcb86340463cd",
+  "configuration_hash": "a6ff284a65c2c3cc0076b48545c6092e3be729c32fba4f831e38d23c6a4ae49b",
   "counts": {
     "accepted_records": 1168,
     "flatgeobuf_records": 1168,
@@ -69,7 +70,7 @@
     "source_records": 1168,
     "warning_count": 0
   },
-  "created_at": "2026-06-21T19:28:34Z",
+  "created_at": "2026-07-14T19:14:59Z",
   "field_mapping": {
     "normalized_fields": {
       "basis_of_record": [

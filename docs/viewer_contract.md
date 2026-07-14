@@ -2,7 +2,7 @@
 
 Status: Accepted MVP contract
 
-Last updated: 2026-06-19
+Last updated: 2026-07-12
 
 ## Purpose
 
@@ -38,7 +38,7 @@ The viewer uses these manifest fields:
 | `source` | Startup source summary before `metadata/source.json` is loaded. |
 | `files` | Authoritative inventory for metadata, reports and downloadable artifacts. |
 | `layers` | Authoritative geospatial layer declarations. |
-| `viewer` | Default layer, initial bounds, display fields and filter fields. |
+| `viewer` | Default layer, initial bounds, optional map title, display fields and filter fields. |
 | `counts` | High-level source, accepted and rejected counts. |
 
 `manifest.files` lists only generated files. A file absent from the inventory
@@ -72,6 +72,120 @@ are declared in `manifest.files`:
 Missing optional fields inside metadata objects must be displayed as absent or
 unknown. Missing DOI, citation, GBIF keys, OBIS identifiers, publisher,
 license, validation warnings or rejected-report files are not load errors.
+
+## Map Header And App Description
+
+The viewer may render a Header above the map from optional `manifest.viewer`
+fields. `manifest.viewer.map_title` is publisher-facing viewer title text, and
+`manifest.viewer.appDescription` is publisher-authored app-level description
+HTML. Neither field is dataset provenance.
+
+Header behavior:
+
+- Read title text only from `manifest.viewer.map_title`.
+- Read App Description popup content only from
+  `manifest.viewer.appDescription`.
+- Trim whitespace before deciding whether either value is visible.
+- Show the Header title text only when the trimmed map title is non-empty.
+- Show the App Description button only when the trimmed app description is
+  non-empty.
+- Show the Header container when either the title or App Description button is
+  visible, including when `appDescription` exists and `map_title` is absent.
+- Hide the Header container, with no reserved layout space, only when both
+  fields are missing, null, empty or whitespace only.
+- Do not fall back to `metadata/source.json.dataset.title`, `manifest.title`,
+  `manifest.source.title`, layer titles or file names.
+
+When hidden, the Header must leave no reserved layout space so older manifests
+without `viewer.map_title` or `viewer.appDescription` keep the current full
+map layout. Newly generated converter manifests default `viewer.map_title` to
+`Custom map title, edit it in manifest.json`, which publishers can edit or
+override during conversion. Blank conversion-time map-title values are omitted
+from generated manifests. Newly generated converter manifests also default
+`viewer.appDescription` to this editable HTML so publishers can immediately see
+the popup feature:
+
+```html
+<center><h2>About this map</h2></center><p>Publisher-authored HTML.</p><p>Supported HTML Tags: p, b, i, h2, h3, h4, a, img, br, ol, ul, li, table, tr, td, iframe, center, small</p>
+```
+
+Publishers can edit that value, override it during Python conversion or pass a
+blank conversion-time value to omit `viewer.appDescription`.
+
+Clicking the Header App Description button opens a modal dialog above the
+viewer. The modal must be independent from map feature popups: opening or
+closing it must not select, clear or otherwise change occurrence feature
+selection. The modal should include a clear close button, close on backdrop
+click and `Escape` where practical, expose accessible dialog labeling, move
+focus into the dialog on open and return focus to the opener on close.
+
+The app description renderer must sanitize HTML before rendering and must not
+append unsanitized publisher HTML directly to the live document. Rendering is
+restricted to this exact allowlist:
+
+```text
+p, b, i, h2, h3, h4, a, img, br, ol, ul, li, table, tr, td, iframe, center, small
+```
+
+Unsupported wrapper tags should be dropped while preserving safe child text and
+allowed child elements where practical. `script`, `style`, inline event-handler
+attributes and unsafe URL schemes must not render. Allowed attributes are:
+
+| Tag | Allowed attributes |
+| --- | --- |
+| `a` | Safe `href`, optional `title`; external links open with `target="_blank"` and `rel="noopener"`. |
+| `img` | Safe `src`, `alt`, optional `title`, `width`, `height`, `loading`. |
+| `iframe` | Safe `src`, optional `title`, `width`, `height`, `allow`, `allowfullscreen`, `loading`. |
+
+Bundle-relative URLs and `http:`/`https:` URLs are allowed for `href`, `src`
+and iframe sources. Executable or ambiguous schemes such as `javascript:`,
+`data:` and protocol-relative URLs are rejected. Long text, tables, images and
+iframes must scroll within the modal instead of pushing controls off screen.
+
+## Manifest-driven visibility controls
+
+`manifest.viewer.visibility` is optional static presentation configuration.
+Only the boolean value `false` at an `is_visible` node is hidden; missing,
+`null`, non-boolean and `true` values are visible. This permits older bundles
+with no visibility object and partial hand-authored trees. A false parent
+always hides its descendants.
+
+New converter output writes the complete all-true tree below. It is compatible
+with the existing viewer-contract version because visibility is optional for
+readers:
+
+```json
+{
+  "panel-info": {"is_visible": true, "header": {"is_visible": true}, "counts": {"is_visible": true}, "provenance": {"is_visible": true, "dataset_title": {"is_visible": true}, "description": {"is_visible": true}, "publisher": {"is_visible": true}, "doi": {"is_visible": true}, "citation": {"is_visible": true}, "license": {"is_visible": true}, "rights_holder": {"is_visible": true}, "source_archive": {"is_visible": true}, "archive_sha256": {"is_visible": true}, "gbif_dataset_key": {"is_visible": true}, "gbif_download_key": {"is_visible": true}, "generated": {"is_visible": true}, "converter": {"is_visible": true}, "validation": {"is_visible": true}}},
+  "panel-filters": {"is_visible": true, "filter_groups": {"scientific_name": {"is_visible": true}, "kingdom": {"is_visible": true}, "iucn_red_list_category": {"is_visible": true}, "event_year": {"is_visible": true}, "basis_of_record": {"is_visible": true}, "quality_flags": {"is_visible": true}}},
+  "panel-records": {"is_visible": true}, "panel-download": {"is_visible": true, "artifacts": {"occurrences.fgb": {"is_visible": true}, "occurrences.gpkg": {"is_visible": true}, "occurrences.parquet": {"is_visible": true}, "source.json": {"is_visible": true}, "processing.json": {"is_visible": true}}},
+  "bottom-panels": {"is_visible": true, "bottom-panels-content": {"is_visible": true, "feature_details": {"is_visible": true}, "processing": {"is_visible": true}}}, "popup": {"is_visible": true}
+}
+```
+
+Hiding a sidebar panel hides only that panel and its launcher, closes it if it
+was open and leaves other launchers usable. Named Info provenance rows hide
+individually; unlisted Homepage and OBIS dataset id rows are unchanged. Each
+visible filter group still requires both a declared `filter_fields` value and
+a field present on the loaded FlatGeobuf layer; hidden groups never retain a
+stale filter. The Download artifact mapping is:
+
+| Visibility key | Path |
+| --- | --- |
+| `occurrences.fgb` | `data/occurrences.fgb` |
+| `occurrences.gpkg` | `data/occurrences.gpkg` |
+| `occurrences.parquet` | `data/occurrences.parquet` |
+| `source.json` | `metadata/source.json` |
+| `processing.json` | `metadata/processing.json` |
+
+A hidden mapped artifact removes both its link and Copy URL button, but does
+not change `manifest.files`; unknown artifact paths retain normal display.
+Hiding `bottom-panels` removes the complete container. Its toggle bar is not a
+visibility-schema key; `bottom-panels-content` and its two sections provide
+the supported footer controls. Hiding `popup` closes/prevents only MapLibre point popups,
+not point rendering, selection, sidebar records, bottom details or selected
+point highlighting. All behavior remains static and manifest-driven, with no
+backend, database, or live GBIF/OBIS service.
 
 ## Geospatial Layers
 
